@@ -1,0 +1,13 @@
+name = "JuliaShipMMG"
+uuid = "37f2b0bf-0c13-4883-8808-e75eb56597e7"
+authors = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
