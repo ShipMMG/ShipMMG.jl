@@ -1,1 +1,1 @@
-# JuliaShipMMG
+# ShipMMG

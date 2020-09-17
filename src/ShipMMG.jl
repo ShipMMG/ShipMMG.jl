@@ -1,4 +1,4 @@
-module JuliaShipMMG
+module ShipMMG
 
     using DifferentialEquations
     using ParameterizedFunctions

@@ -1,7 +1,7 @@
-using JuliaShipMMG
+using ShipMMG
 using Test
 
-@testset "JuliaShipMMG.jl" begin
+@testset "ShipMMG.jl" begin
 
     @testset "kt.jl" begin
         K_log = 0.155  # [1/s]
