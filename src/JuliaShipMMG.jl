@@ -1,5 +1,12 @@
 module JuliaShipMMG
 
-# Write your package code here.
+    using DifferentialEquations
+    using ParameterizedFunctions
+    using Dierckx
+    using LinearAlgebra
+    using Sundials
 
+    include("kt.jl")
+    export kt_simulate
+    
 end

@@ -1,7 +1,14 @@
 name = "JuliaShipMMG"
 uuid = "37f2b0bf-0c13-4883-8808-e75eb56597e7"
 authors = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
-version = "0.1.0"
+version = "0.0.1"
+
+[deps]
+Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
+DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+ParameterizedFunctions = "65888b18-ceab-5e60-b2b9-181511a3b968"
+Sundials = "c3572dad-4567-51f8-b174-8c6c989267f4"
 
 [compat]
 julia = "1"
