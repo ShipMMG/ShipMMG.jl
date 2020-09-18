@@ -16,6 +16,15 @@ function kt_simulate(time_list, δ_list, K, T, u0, x0=0.0, y0=0.0, ψ0=0.0, r0=0
     X0 = [x0; y0; ψ0; u0; r0; δ_list[1]]
     KT = [K, T]
     prob = ODEProblem(kt_eom!, X0, (time_list[1], time_list[end]), KT)
-    sol = solve(prob, algorithm, reltol=reltol,abstol=abstol)
-    sol
+    sol = solve(prob, algorithm, reltol=reltol, abstol=abstol)
+    
+    results = hcat(sol.u...)
+    time = sol.t
+    x = results[1,:]
+    y = results[2,:]
+    ψ = results[3,:]
+    u = results[4,:]
+    r = results[5,:]
+    δ = results[6,:]
+    time, x, y, ψ, u, r, δ
 end
