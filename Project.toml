@@ -11,6 +11,7 @@ ParameterizedFunctions = "65888b18-ceab-5e60-b2b9-181511a3b968"
 Sundials = "c3572dad-4567-51f8-b174-8c6c989267f4"
 
 [compat]
+DifferentialEquations = "6.15"
 Dierckx = "0.5"
 Sundials = "4.3"
 ParameterizedFunctions = "5.6"
