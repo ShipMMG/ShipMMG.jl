@@ -11,10 +11,10 @@ module ShipMMG
     include("kt.jl")
     export kt_simulate, draw_gif_result, rotate_pos, square
 
-    function draw_gif_result(time, x, y, ψ, file_path, fps=10)
+    function draw_gif_result(time, x, y, ψ, shape, file_path, fps=10)
         anim = @animate for i in 1:length(time)
             plot(x, y, label="", xlabel=L"x \textrm{[m]}", ylabel=L"y \textrm{[m]}", linestyle = :dot, aspect_ratio=:equal)
-            ship = square(x[i], y[i], [20,5], ψ[i])
+            ship = square(x[i], y[i], shape, ψ[i])
             plot!(Shape(ship[1], ship[2]), label="")
             scatter!([x[i]], [y[i]], seriestype = :scatter, title="time = $(time[i])", label="")
         end

@@ -28,7 +28,8 @@ using Test
             time, x, y, ψ, u, r, δ = kt_results
 
             test_result_file_name = "test_kt.gif"
-            draw_gif_result(time, x, y, ψ,test_result_file_name)
+            shape = [20,5]
+            draw_gif_result(time, x, y, ψ, shape, test_result_file_name)
             rm(test_result_file_name)
         end
         
