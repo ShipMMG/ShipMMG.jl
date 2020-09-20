@@ -23,6 +23,9 @@ docs/site/
 # environment.
 Manifest.toml
 
-# For my own environments
+# For vscode developers environments
 .vscode/
+
+# For example codes
+example/*.gif
 .ipynb_checkpoints
