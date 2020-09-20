@@ -21,7 +21,7 @@ module ShipMMG
         gif(anim, file_path, fps=fps)
     end
 
-    function rotate_pos(pos, angle)label=""
+    function rotate_pos(pos, angle)
         rotate_matrix = [cos(angle) -sin(angle) ; sin(angle) cos(angle)]
         rotate_matrix * pos
     end
