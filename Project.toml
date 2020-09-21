@@ -17,6 +17,7 @@ Dierckx = "0.5"
 DifferentialEquations = "6.15"
 LaTeXStrings = "1.2"
 ParameterizedFunctions = "5.6"
+Plots = "1.6"
 Sundials = "4.3"
 julia = "1"
 
