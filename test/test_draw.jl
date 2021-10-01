@@ -1,3 +1,14 @@
+@testset "calc_position func" begin
+    time_vec = [0.0, 2.0]
+    u_vec = [1.0, 1.0]
+    v_vec = [0.0, 0.0]
+    r_vec = [0.0, 0.0]
+    x, y, ψ = calc_position(time_vec, u_vec, v_vec, r_vec, x0 = 1.0, y0 = 1.0, ψ0 = 0.0)
+    @test x[2] ≈ 3.0
+    @test y[2] ≈ 1.0
+    @test ψ[2] ≈ 0.0
+end
+
 @testset "rotate_pos func" begin
     @test rotate_pos([4, 0], deg2rad(90)) ≈ [0, 4]
     @test rotate_pos([4, 0], deg2rad(-90)) ≈ [0, -4]
@@ -18,7 +29,8 @@ end
         Ts = 50.0
         δ_list = 10.0 * pi / 180.0 * sin.(2.0 * pi / Ts * time_list) # [rad]
         kt_results = kt_simulate(time_list, δ_list, K_log, T_log, u0)
-        time, x, y, ψ, u, r, δ = kt_results
+        time, u, r, δ = kt_results
+        x, y, ψ = calc_position(time, u, r, δ)
 
         test_result_file_name = "test_kt.gif"
         shape = [20, 5]
