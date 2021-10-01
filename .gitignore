@@ -29,3 +29,6 @@ Manifest.toml
 # For example codes
 example/*.gif
 .ipynb_checkpoints
+
+# For mac develop
+.DS_Store
