@@ -9,7 +9,8 @@
         Ts = 50.0
         δ_list = 10.0 * pi / 180.0 * sin.(2.0 * pi / Ts * time_list) # [rad]
         kt_results = kt_simulate(time_list, δ_list, K_log, T_log, u0)
-        time, x, y, ψ, u, r, δ = kt_results
+        time, u, r, δ = kt_results
+        x, y, ψ = calc_position(time, u, r, δ)
 
         test_result_file_name = "test_kt.gif"
         shape = [20, 5]
