@@ -1,0 +1,4 @@
+[submodule "docs/build"]
+	path = docs/build
+	url = git@github.com:ShipMMG/ShipMMG.jl.git
+	branch = gh-pages
