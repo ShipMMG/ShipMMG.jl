@@ -1,3 +1,32 @@
+"""
+Basic parameters of target ship for MMG 3DOF simulation.
+
+# Arguments
+- `L_pp::Float64`: L_pp
+- `B::Float64`: 
+- `d::Float64`:
+- `x_G::Float64`: 
+- `D_p::Float64`: 
+- `m::Float64`: 
+- `I_zG::Float64`: 
+- `A_R::Float64`: 
+- `η::Float64`: 
+- `m_x::Float64`: 
+- `m_y::Float64`: 
+- `J_z::Float64`: 
+- `f_α::Float64`: 
+- `ϵ::Float64`: 
+- `t_R::Float64`: 
+- `a_H::Float64`: 
+- `x_H::Float64`: 
+- `γ_R_minus::Float64`: 
+- `γ_R_plus::Float64`: 
+- `l_R::Float64`: 
+- `κ::Float64`: 
+- `t_P::Float64`: 
+- `w_P0::Float64`: 
+- `x_P::Float64`: 
+"""
 mutable struct Mmg3DofBasicParams
     L_pp::Float64
     B::Float64
@@ -26,6 +55,31 @@ mutable struct Mmg3DofBasicParams
     Mmg3DofBasicParams() = new()
 end
 
+"""
+Maneuvering parameters of target ship for MMG 3DOF simulation.
+
+# Arguments
+- `k_0::Float64`
+- `k_1::Float64`
+- `k_2::Float64`
+- `R_0_dash::Float64`
+- `X_vv_dash::Float64`
+- `X_vr_dash::Float64`
+- `X_rr_dash::Float64`
+- `X_vvvv_dash::Float64`
+- `Y_v_dash::Float64`
+- `Y_r_dash::Float64`
+- `Y_vvv_dash::Float64`
+- `Y_vvr_dash::Float64`
+- `Y_vrr_dash::Float64`
+- `Y_rrr_dash::Float64`
+- `N_v_dash::Float64`
+- `N_r_dash::Float64`
+- `N_vvv_dash::Float64`
+- `N_vvr_dash::Float64`
+- `N_vrr_dash::Float64`
+- `N_rrr_dash::Float64`
+"""
 mutable struct Mmg3DofManeuveringParams
     k_0::Float64
     k_1::Float64
@@ -50,6 +104,120 @@ mutable struct Mmg3DofManeuveringParams
     Mmg3DofManeuveringParams() = new()
 end
 
+"""
+    mmg_3dof_simulate(time_list, npm_list, δ_list, basic_params, maneuvering_params, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> time, u, v, r, δ, npm
+
+Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, npm.
+This function has the same logic of `ShipMMG.simulate()`.
+
+# Arguments
+- `time_list`: the list of simulatino time.
+- `npm_list`: the list of propeller rpm.
+- `δ_list`: the list of rudder angle [rad].
+- `basic_params::Mmg3DofBasicParams`: the basic parameters of target ship.
+- `maneuvering_params::Mmg3DofManeuveringParams`: the maneuvering parameters of target ship.
+- `u0::Float64=0.0`: the initial x (surge) velocity.
+- `v0::Float64=0.0`: the initial y (sway) velocity.
+- `r0::Float64=0.0`: the initial rate of turn [rad/s].
+- `ρ::Float64=1.025`: the seawater density [g/cm^3].
+- `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
+- `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
+- `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
+
+# Examples
+KVLCC2_L7 turning test.
+
+```julia-rep1
+julia> ρ = 1.025;
+julia> L_pp = 7.00;
+julia> B = 1.27;
+julia> d = 0.46;
+julia> nabla = 3.27;
+julia> x_G = 0.25;
+julia> # C_b = 0.810;
+julia> D_p = 0.216;
+julia> H_R = 0.345;
+julia> A_R = 0.0539;
+julia> t_P = 0.220;
+julia> w_P0 = 0.40;
+julia> m_x_dash = 0.022;
+julia> m_y_dash = 0.223;
+julia> J_z_dash = 0.011;
+julia> t_R = 0.387;
+julia> a_H = 0.312;
+julia> x_H_dash = -0.464;
+julia> γ_R_minus = 0.395;
+julia> γ_R_plus = 0.640;
+julia> l_r_dash = -0.710;
+julia> x_P_dash = -0.690;
+julia> ϵ = 1.09;
+julia> κ = 0.50;
+julia> f_α = 2.747;
+julia> basic_params = Mmg3DofBasicParams();
+julia> basic_params.L_pp = L_pp;  # 船長Lpp[m]
+julia> basic_params.B = B;  # 船幅[m]
+julia> basic_params.d = d;  # 喫水[m]
+julia> basic_params.x_G = x_G;  # 重心位置[]
+julia> basic_params.D_p = D_p;  # プロペラ直径[m]
+julia> basic_params.m = ρ * nabla;  # 質量(無次元化)[kg]
+julia> basic_params.I_zG = ρ * nabla * ((0.25 * L_pp)^2);  # 慣性モーメント[-]
+julia> basic_params.A_R = A_R;  # 船の断面に対する舵面積比[-]
+julia> basic_params.η = D_p / H_R;  # プロペラ直径に対する舵高さ(Dp/H)
+julia> basic_params.m_x = (0.5 * ρ * (L_pp^2) * d) * m_x_dash;  # 付加質量x(無次元)
+julia> basic_params.m_y = (0.5 * ρ * (L_pp^2) * d) * m_y_dash;  # 付加質量y(無次元)
+julia> basic_params.J_z = (0.5 * ρ * (L_pp^4) * d) * J_z_dash;  # 付加質量Izz(無次元)
+julia> basic_params.f_α = f_α; # 直圧力勾配係数
+julia> basic_params.ϵ = ϵ;  # プロペラ・舵位置伴流係数比
+julia> basic_params.t_R = t_R;  # 操縦抵抗減少率
+julia> basic_params.a_H = a_H;  # 舵力増加係数
+julia> basic_params.x_H = x_H_dash * L_pp;  # 舵力増分作用位置
+julia> basic_params.γ_R_minus = γ_R_minus;  # 整流係数
+julia> basic_params.γ_R_plus = γ_R_plus;  # 整流係数
+julia> basic_params.l_R = l_r_dash;  # 船長に対する舵位置
+julia> basic_params.κ = κ;  # 修正係数
+julia> basic_params.t_P = t_P;  # 推力減少率
+julia> basic_params.w_P0 = w_P0;  # 有効伴流率
+julia> basic_params.x_P = x_P_dash;  # 船長に対するプロペラ位置
+julia> maneuvering_params = Mmg3DofManeuveringParams();
+julia> maneuvering_params.k_0 = 0.2931;
+julia> maneuvering_params.k_1 = -0.2753;
+julia> maneuvering_params.k_2 = -0.1385;
+julia> maneuvering_params.R_0_dash = 0.022;
+julia> maneuvering_params.X_vv_dash = -0.040;
+julia> maneuvering_params.X_vr_dash = 0.002;
+julia> maneuvering_params.X_rr_dash = 0.011;
+julia> maneuvering_params.X_vvvv_dash = 0.771;
+julia> maneuvering_params.Y_v_dash = -0.315;
+julia> maneuvering_params.Y_r_dash = 0.083;
+julia> maneuvering_params.Y_vvv_dash = -1.607;
+julia> maneuvering_params.Y_vvr_dash = 0.379;
+julia> maneuvering_params.Y_vrr_dash = -0.391;
+julia> maneuvering_params.Y_rrr_dash = 0.008;
+julia> maneuvering_params.N_v_dash = -0.137;
+julia> maneuvering_params.N_r_dash = -0.049;
+julia> maneuvering_params.N_vvv_dash = -0.030;
+julia> maneuvering_params.N_vvr_dash = -0.294;
+julia> maneuvering_params.N_vrr_dash = 0.055;
+julia> maneuvering_params.N_rrr_dash = -0.013;
+julia> duration = 200; # [s]
+julia> max_δ_rad = 35 * pi / 180.0;  # [rad]
+julia> n_const = 17.95;  # [rpm]
+julia> sampling = duration * 10;
+julia> time_list = range(0.00, stop = duration, length = sampling);
+julia> δ_rad_list = max_δ_rad .* ones(Float64, sampling);
+julia> npm_list = n_const .* ones(Float64, sampling);
+julia> mmg_results = mmg_3dof_simulate(
+    time_list,
+    npm_list,
+    δ_rad_list,
+    basic_params,
+    maneuvering_params,
+    u0 = 2.29 * 0.512,
+    v0 = 0.0,
+    r0 = 0.0,
+);
+```
+"""
 function mmg_3dof_simulate(
     time_list,
     npm_list,
@@ -122,6 +290,68 @@ function mmg_3dof_simulate(
     )
 end
 
+"""
+    mmg_3dof_simulate(time_list, npm_list, δ_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> time, u, v, r, δ, npm
+
+Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, npm.
+This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
+
+# Arguments
+- `time_list`: the list of simulatino time.
+- `npm_list`: the list of propeller rpm.
+- `δ_list`: the list of rudder angle [rad].
+- `L_pp::Float64`: L_pp
+- `B::Float64`: 
+- `d::Float64`:
+- `x_G::Float64`: 
+- `D_p::Float64`: 
+- `m::Float64`: 
+- `I_zG::Float64`: 
+- `A_R::Float64`: 
+- `η::Float64`: 
+- `m_x::Float64`: 
+- `m_y::Float64`: 
+- `J_z::Float64`: 
+- `f_α::Float64`: 
+- `ϵ::Float64`: 
+- `t_R::Float64`: 
+- `a_H::Float64`: 
+- `x_H::Float64`: 
+- `γ_R_minus::Float64`: 
+- `γ_R_plus::Float64`: 
+- `l_R::Float64`: 
+- `κ::Float64`: 
+- `t_P::Float64`: 
+- `w_P0::Float64`: 
+- `x_P::Float64`: 
+- `k_0::Float64`
+- `k_1::Float64`
+- `k_2::Float64`
+- `R_0_dash::Float64`
+- `X_vv_dash::Float64`
+- `X_vr_dash::Float64`
+- `X_rr_dash::Float64`
+- `X_vvvv_dash::Float64`
+- `Y_v_dash::Float64`
+- `Y_r_dash::Float64`
+- `Y_vvv_dash::Float64`
+- `Y_vvr_dash::Float64`
+- `Y_vrr_dash::Float64`
+- `Y_rrr_dash::Float64`
+- `N_v_dash::Float64`
+- `N_r_dash::Float64`
+- `N_vvv_dash::Float64`
+- `N_vvr_dash::Float64`
+- `N_vrr_dash::Float64`
+- `N_rrr_dash::Float64`
+- `u0::Float64=0.0`: the initial x (surge) velocity.
+- `v0::Float64=0.0`: the initial y (sway) velocity.
+- `r0::Float64=0.0`: the initial rate of turn [rad/s].
+- `ρ::Float64=1.025`: the seawater density [g/cm^3].
+- `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
+- `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
+- `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
+"""
 function simulate(
     time_list,
     npm_list,

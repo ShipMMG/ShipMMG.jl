@@ -1,3 +1,8 @@
+"""
+    draw_gif_result(time, x, y, ψ, shape, file_path, [, fps]) -> gif
+
+Draw the gif animation from simulation result.
+"""
 function draw_gif_result(time, x, y, ψ, shape, file_path, fps = 10)
     anim = @animate for i = 1:length(time)
         plot(
