@@ -15,6 +15,6 @@ include("mmg.jl")
 export Mmg3DofBasicParams, Mmg3DofManeuveringParams, mmg_3dof_simulate
 
 include("draw.jl")
-export draw_gif_result
+export draw_gif_result, calc_position
 
 end
