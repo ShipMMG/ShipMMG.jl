@@ -32,3 +32,6 @@ example/*.gif
 
 # For mac develop
 .DS_Store
+
+# Jupyter notebook
+*.ipynb
