@@ -1,4 +1,41 @@
 """
+    kt_model!(dX, X, p, t)
+
+KT model on DifferentialEquations.ODEProblem. Update `dX`.
+
+# Arguments
+- `dX`: [du, dr, dδ]
+- `X`: the initial state values. [`u`, `r`, `δ`].
+- `p`: the parameters and δ spline info. [`K`, `T`, `spl_δ`].
+- `t`: the time.
+
+# Examples
+
+```julia-rep1
+julia> K_log = 0.155  # [1/s]
+julia> T_log = 80.5  # [s]
+julia> u0 = 20 * (1852.0 / 3600)  # [m/s] (knot * 1852/3600)
+julia> duration = 50  # [s]
+julia> sampling = 1001
+julia> time_list = range(0.0,stop=duration,length=sampling)
+julia> Ts = 50.0
+julia> δ_list = 10.0 * pi / 180.0  * sin.(2.0 * pi / Ts * time_list) # [rad]
+julia> spl_δ = Spline1D(time_list, δ_list)
+julia> X0 = [u0; 0.0; δ_list[1]]
+julia> p = [K_log, T_log, spl_δ]
+julia> prob = ODEProblem(kt_model!, X0, (time_list[1], time_list[end]), p)
+julia> sol = solve(prob, Tsit5(), saveat=time_list[2] - time_list[1])
+```
+"""
+function kt_model!(dX, X, p, t)
+    u, r, δ = X
+    K, T, spl_δ = p
+    dX[1] = du = 0.0 # du = 
+    dX[2] = dr = 1.0 / T * (-r + K * δ) # dr = 
+    dX[3] = dδ = derivative(spl_δ, t) # dδ = 
+end
+
+"""
     kt_simulate(time_list, δ_list, K, T, u0, [, r0, algorithm, reltol, abstol])
 
 Returns the KT simulation results.
@@ -21,8 +58,8 @@ KT simulation.
 julia> K_log = 0.155  # [1/s]
 julia> T_log = 80.5  # [s]
 julia> u0 = 20 * (1852.0 / 3600)  # [m/s] (knot * 1852/3600)
-julia> duration = 500  # [s]
-julia> sampling = 10000
+julia> duration = 50  # [s]
+julia> sampling = 1001
 julia> time_list = range(0.0,stop=duration,length=sampling)
 julia> Ts = 50.0
 julia> δ_list = 10.0 * pi / 180.0  * sin.(2.0 * pi / Ts * time_list) # [rad]
@@ -43,17 +80,9 @@ function kt_simulate(
 
     spl_δ = Spline1D(time_list, δ_list)
 
-    function kt_eom!(dX, X, KT, t)
-        u, r, δ = X
-        K, T = KT
-        dX[1] = du = 0.0
-        dX[2] = dr = 1.0 / T * (-r + K * δ)
-        dX[3] = dδ = derivative(spl_δ, t)
-    end
-
     X0 = [u0; r0; δ_list[1]]
-    KT = [K, T]
-    prob = ODEProblem(kt_eom!, X0, (time_list[1], time_list[end]), KT)
+    p = [K, T, spl_δ]
+    prob = ODEProblem(kt_model!, X0, (time_list[1], time_list[end]), p)
     sol = solve(prob, algorithm, reltol = reltol, abstol = abstol)
 
     results = hcat(sol.u...)
