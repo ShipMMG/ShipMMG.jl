@@ -83,7 +83,13 @@ function kt_simulate(
     X0 = [u0; r0; δ_list[1]]
     p = [K, T, spl_δ]
     prob = ODEProblem(kt_model!, X0, (time_list[1], time_list[end]), p)
-    sol = solve(prob, algorithm, reltol = reltol, abstol = abstol)
+    sol = solve(
+        prob,
+        algorithm,
+        reltol = reltol,
+        abstol = abstol,
+        saveat = time_list[2] - time_list[1],
+    )
 
     results = hcat(sol.u...)
     time = sol.t
