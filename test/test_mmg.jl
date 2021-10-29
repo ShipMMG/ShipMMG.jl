@@ -98,8 +98,4 @@ maneuvering_params.N_rrr_dash = -0.013
     )
     time, u, v, r, δ, npm = mmg_results
     x, y, ψ = calc_position(time, u, v, r)
-    test_result_file_name = "test_mmg_turning.gif"
-    shape = [basic_params.L_pp, basic_params.B]
-    draw_gif_result(time, x, y, ψ, shape, test_result_file_name)
-    rm(test_result_file_name)
 end

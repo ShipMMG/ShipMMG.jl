@@ -4,8 +4,8 @@
     u0 = 20 * (1852.0 / 3600)  # [m/s] (knot * 1852/3600)
     duration = 500  # [s]
     sampling = 10000
-    time_list = range(0.0,stop=duration,length=sampling)
+    time_list = range(0.0, stop = duration, length = sampling)
     Ts = 50.0
-    δ_list = 10.0 * pi / 180.0  * sin.(2.0 * pi / Ts * time_list) # [rad]
-    @time kt_results=kt_simulate(time_list, δ_list, K_log, T_log, u0)
+    δ_list = 10.0 * pi / 180.0 * sin.(2.0 * pi / Ts * time_list) # [rad]
+    kt_results = kt_simulate(time_list, δ_list, K_log, T_log, u0)
 end
