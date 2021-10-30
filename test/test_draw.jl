@@ -19,7 +19,7 @@ end
         time_list = range(0.0, stop = duration, length = sampling)
         Ts = 50.0
         δ_list = 10.0 * pi / 180.0 * sin.(2.0 * pi / Ts * time_list) # [rad]
-        kt_results = kt_simulate(time_list, δ_list, K_log, T_log, u0)
+        kt_results = kt_simulate(time_list, δ_list, K_log, T_log, u0 = u0)
         time, u, r, δ = kt_results
         x, y, ψ = calc_position(time, u, r, δ)
 
