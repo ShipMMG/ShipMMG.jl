@@ -9,7 +9,7 @@ using Plots
 using LaTeXStrings
 
 include("kt.jl")
-export kt_simulate, kt_model!
+export kt_simulate, kt_model!, kt_zigzag_test
 
 include("mmg.jl")
 export Mmg3DofBasicParams, Mmg3DofManeuveringParams, mmg_3dof_simulate, mmg_3dof_model!

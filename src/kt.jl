@@ -98,3 +98,91 @@ function kt_simulate(
     δ = results[3, :]
     time, u, r, δ
 end
+
+function kt_zigzag_test(
+    K::Float64,
+    T::Float64,
+    target_δ_rad::Float64,
+    target_ψ_rad_deviation::Float64,
+    time_second_interval::Float64,
+    end_time_second::Float64,
+    u0::Float64,
+    δ0::Float64 = 0.0,
+    δ_rad_rate::Float64 = 10.0 * π / 180,
+    r0::Float64 = 0.0,
+    ψ0::Float64 = 0.0,
+    start_time_second::Float64 = 0.0,
+    algorithm = Tsit5(),
+    reltol = 1e-8,
+    abstol = 1e-8,
+)
+    target_ψ_rad_deviation = abs(target_ψ_rad_deviation)
+
+    time_list = start_time_second:time_second_interval:end_time_second
+    final_δ_list = zeros(length(time_list))
+    final_r_list = zeros(length(time_list))
+    final_ψ_list = zeros(length(time_list))
+
+    next_stage_index = 1
+    target_δ_rad = -target_δ_rad  # for changing in while loop
+    ψ = ψ0
+
+    while next_stage_index < length(time_list)
+        target_δ_rad = -target_δ_rad
+        start_index = next_stage_index
+
+        # Make delta list
+        δ_list = zeros(length(time_list) - start_index + 1)
+        if start_index == 1
+            δ_list[1] = δ0
+            r0 = r0
+        else
+            δ_list[1] = final_δ_list[start_index-1]
+            r0 = final_r_list[start_index-1]
+        end
+
+        for i = (start_index+1):length(time_list)
+            Δt = time_list[i] - time_list[i-1]
+            if target_δ_rad > 0
+                δ = δ_list[i-start_index] + δ_rad_rate * Δt
+                if δ >= target_δ_rad
+                    δ = target_δ_rad
+                end
+                δ_list[i-start_index+1] = δ
+            elseif target_δ_rad <= 0
+                δ = δ_list[i-start_index] - δ_rad_rate * Δt
+                if δ <= target_δ_rad
+                    δ = target_δ_rad
+                end
+                δ_list[i-start_index+1] = δ
+            end
+        end
+
+        time, u, r, δ = kt_simulate(time_list[start_index:end], δ_list, K, T, u0, r0)
+        v = zeros(length(u))
+        x, y, ψ_list = calc_position(time, u, v, r, x0 = 0.0, y0 = 0.0, ψ0 = ψ)
+        # get finish index
+        target_ψ_rad = ψ0 + target_ψ_rad_deviation
+        if target_δ_rad < 0
+            target_ψ_rad = ψ0 - target_ψ_rad_deviation
+        end
+        over_index = findfirst(e -> e >= target_ψ_rad, ψ_list)
+        if target_δ_rad < 0
+            over_index = findfirst(e -> e <= target_ψ_rad, ψ_list)
+        end
+        next_stage_index = length(time_list)
+        if isnothing(over_index)
+            final_δ_list[start_index:next_stage_index] = δ_list
+            final_r_list[start_index:next_stage_index] = r
+            final_ψ_list[start_index:next_stage_index] = ψ_list
+        else
+            ψ = ψ_list[over_index]
+            next_stage_index = over_index + start_index - 1
+            final_δ_list[start_index:next_stage_index] = δ_list[begin:over_index]
+            final_r_list[start_index:next_stage_index] = r[begin:over_index]
+            final_ψ_list[start_index:next_stage_index] = ψ_list[begin:over_index]
+        end
+    end
+    final_δ_list, final_r_list, final_ψ_list
+end
+
