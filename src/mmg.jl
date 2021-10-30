@@ -704,3 +704,229 @@ function simulate(
     npm = results[5, :]
     time, u, v, r, δ, npm
 end
+
+"""
+    mmg_3dof_zigzag_test(basic_params, maneuvering_params, npm_list, target_δ_rad, target_ψ_rad_deviation, time_second_interval, end_time_second, [, u0, v0, r0, ψ0, δ0, δ_rad_rate, start_time_second, algorithm, reltol, abstol]) -> final_δ_list, final_u_list, final_v_list, final_r_list, final_ψ_list
+
+Returns the MMG 3DOF zigzag simulation results.
+
+# Arguments
+- `basic_params::Mmg3DofBasicParams`: the basic parameters of target ship.
+- `maneuvering_params::Mmg3DofManeuveringParams`: the maneuvering parameters of target ship.
+- `npm_list`: the list of propeller rpm.
+- `target_δ_rad::Float64`: target rudder angle of zigzag test.
+- `target_ψ_rad_deviation::Float64`: target azimuth deviation of zigzag test.
+- `time_second_interval::Float64`: time interval of output result.
+- `end_time_second::Float64`: the end time of simulation.
+- `u0::Float64=0.0`: the initial x (surge) velocity.
+- `v0::Float64=0.0`: the initial y (sway) velocity.
+- `r0::Float64=0.0`: the initial rate of turn [rad/s].
+- `δ0::Float64=0.0`: the initial rudder angle.
+- `δ_rad_rate::Float64=10.0*π/180`: the change rate of rudder angle [rad/s]. 
+- `ρ::Float64=1.025`: the seawater density [g/cm^3].
+- `start_time_second::Float64=0.0`: the start time of simulation.
+- `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
+- `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
+- `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
+
+# Examples
+KVLCC2_L7 zigzag test.
+
+```julia-rep1
+julia> ρ = 1.025;
+julia> L_pp = 7.00;
+julia> B = 1.27;
+julia> d = 0.46;
+julia> nabla = 3.27;
+julia> x_G = 0.25;
+julia> # C_b = 0.810;
+julia> D_p = 0.216;
+julia> H_R = 0.345;
+julia> A_R = 0.0539;
+julia> t_P = 0.220;
+julia> w_P0 = 0.40;
+julia> m_x_dash = 0.022;
+julia> m_y_dash = 0.223;
+julia> J_z_dash = 0.011;
+julia> t_R = 0.387;
+julia> a_H = 0.312;
+julia> x_H_dash = -0.464;
+julia> γ_R_minus = 0.395;
+julia> γ_R_plus = 0.640;
+julia> l_r_dash = -0.710;
+julia> x_P_dash = -0.690;
+julia> ϵ = 1.09;
+julia> κ = 0.50;
+julia> f_α = 2.747;
+julia> basic_params = Mmg3DofBasicParams();
+julia> basic_params.L_pp = L_pp;  # 船長Lpp[m]
+julia> basic_params.B = B;  # 船幅[m]
+julia> basic_params.d = d;  # 喫水[m]
+julia> basic_params.x_G = x_G;  # 重心位置[]
+julia> basic_params.D_p = D_p;  # プロペラ直径[m]
+julia> basic_params.m = ρ * nabla;  # 質量(無次元化)[kg]
+julia> basic_params.I_zG = ρ * nabla * ((0.25 * L_pp)^2);  # 慣性モーメント[-]
+julia> basic_params.A_R = A_R;  # 船の断面に対する舵面積比[-]
+julia> basic_params.η = D_p / H_R;  # プロペラ直径に対する舵高さ(Dp/H)
+julia> basic_params.m_x = (0.5 * ρ * (L_pp^2) * d) * m_x_dash;  # 付加質量x(無次元)
+julia> basic_params.m_y = (0.5 * ρ * (L_pp^2) * d) * m_y_dash;  # 付加質量y(無次元)
+julia> basic_params.J_z = (0.5 * ρ * (L_pp^4) * d) * J_z_dash;  # 付加質量Izz(無次元)
+julia> basic_params.f_α = f_α; # 直圧力勾配係数
+julia> basic_params.ϵ = ϵ;  # プロペラ・舵位置伴流係数比
+julia> basic_params.t_R = t_R;  # 操縦抵抗減少率
+julia> basic_params.a_H = a_H;  # 舵力増加係数
+julia> basic_params.x_H = x_H_dash * L_pp;  # 舵力増分作用位置
+julia> basic_params.γ_R_minus = γ_R_minus;  # 整流係数
+julia> basic_params.γ_R_plus = γ_R_plus;  # 整流係数
+julia> basic_params.l_R = l_r_dash;  # 船長に対する舵位置
+julia> basic_params.κ = κ;  # 修正係数
+julia> basic_params.t_P = t_P;  # 推力減少率
+julia> basic_params.w_P0 = w_P0;  # 有効伴流率
+julia> basic_params.x_P = x_P_dash;  # 船長に対するプロペラ位置
+julia> maneuvering_params = Mmg3DofManeuveringParams();
+julia> maneuvering_params.k_0 = 0.2931;
+julia> maneuvering_params.k_1 = -0.2753;
+julia> maneuvering_params.k_2 = -0.1385;
+julia> maneuvering_params.R_0_dash = 0.022;
+julia> maneuvering_params.X_vv_dash = -0.040;
+julia> maneuvering_params.X_vr_dash = 0.002;
+julia> maneuvering_params.X_rr_dash = 0.011;
+julia> maneuvering_params.X_vvvv_dash = 0.771;
+julia> maneuvering_params.Y_v_dash = -0.315;
+julia> maneuvering_params.Y_r_dash = 0.083;
+julia> maneuvering_params.Y_vvv_dash = -1.607;
+julia> maneuvering_params.Y_vvr_dash = 0.379;
+julia> maneuvering_params.Y_vrr_dash = -0.391;
+julia> maneuvering_params.Y_rrr_dash = 0.008;
+julia> maneuvering_params.N_v_dash = -0.137;
+julia> maneuvering_params.N_r_dash = -0.049;
+julia> maneuvering_params.N_vvv_dash = -0.030;
+julia> maneuvering_params.N_vvr_dash = -0.294;
+julia> maneuvering_params.N_vrr_dash = 0.055;
+julia> maneuvering_params.N_rrr_dash = -0.013;
+julia> target_δ_rad = 20.0 * π / 180.0
+julia> target_ψ_rad_deviation = 20.0 * π / 180.0
+julia> start_time_second = 0.00
+julia> time_second_interval = 0.01
+julia> end_time_second = 80.00
+julia> time_list = start_time_second:time_second_interval:end_time_second
+julia> n_const = 17.95  # [rpm]
+julia> npm_list = n_const * ones(Float64, length(time_list))
+julia> δ_list, u_list, v_list, r_list, ψ_list = mmg_3dof_zigzag_test(
+    basic_params,
+    maneuvering_params,
+    npm_list,
+    target_δ_rad,
+    target_ψ_rad_deviation,
+    time_second_interval,
+    end_time_second,
+);
+```
+"""
+function mmg_3dof_zigzag_test(
+    basic_params::Mmg3DofBasicParams,
+    maneuvering_params::Mmg3DofManeuveringParams,
+    npm_list,
+    target_δ_rad::Float64,
+    target_ψ_rad_deviation::Float64,
+    time_second_interval::Float64,
+    end_time_second::Float64;
+    u0::Float64 = 0.0,
+    v0::Float64 = 0.0,
+    r0::Float64 = 0.0,
+    ψ0::Float64 = 0.0,
+    δ0::Float64 = 0.0,
+    δ_rad_rate::Float64 = 10.0 * π / 180,
+    ρ::Float64 = 1.025,
+    start_time_second::Float64 = 0.0,
+    algorithm = Tsit5(),
+    reltol = 1e-8,
+    abstol = 1e-8,
+)
+    target_ψ_rad_deviation = abs(target_ψ_rad_deviation)
+
+    time_list = start_time_second:time_second_interval:end_time_second
+    final_δ_list = zeros(length(time_list))
+    final_u_list = zeros(length(time_list))
+    final_v_list = zeros(length(time_list))
+    final_r_list = zeros(length(time_list))
+    final_ψ_list = zeros(length(time_list))
+
+    next_stage_index = 1
+    target_δ_rad = -target_δ_rad  # for changing in while loop
+    ψ = ψ0
+    while next_stage_index < length(time_list)
+        target_δ_rad = -target_δ_rad
+        start_index = next_stage_index
+
+        # Make delta list
+        δ_list = zeros(length(time_list) - start_index + 1)
+        if start_index == 1
+            δ_list[1] = δ0
+            u0 = u0
+            v0 = v0
+            r0 = r0
+        else
+            δ_list[1] = final_δ_list[start_index-1]
+            u0 = final_u_list[start_index-1]
+            v0 = final_v_list[start_index-1]
+            r0 = final_r_list[start_index-1]
+        end
+
+        for i = (start_index+1):length(time_list)
+            Δt = time_list[i] - time_list[i-1]
+            if target_δ_rad > 0
+                δ = δ_list[i-start_index] + δ_rad_rate * Δt
+                if δ >= target_δ_rad
+                    δ = target_δ_rad
+                end
+                δ_list[i-start_index+1] = δ
+            elseif target_δ_rad <= 0
+                δ = δ_list[i-start_index] - δ_rad_rate * Δt
+                if δ <= target_δ_rad
+                    δ = target_δ_rad
+                end
+                δ_list[i-start_index+1] = δ
+            end
+        end
+
+        time, u, v, r, δ, npm = mmg_3dof_simulate(
+            time_list[start_index:end],
+            npm_list[start_index:end],
+            δ_list,
+            basic_params,
+            maneuvering_params,
+            u0 = u0,
+            v0 = v0,
+            r0 = r0,
+            ρ = ρ,
+        )
+        x, y, ψ_list = calc_position(time, u, v, r, x0 = 0.0, y0 = 0.0, ψ0 = ψ)
+        # get finish index
+        target_ψ_rad = ψ0 + target_ψ_rad_deviation
+        if target_δ_rad < 0
+            target_ψ_rad = ψ0 - target_ψ_rad_deviation
+        end
+        over_index = findfirst(e -> e >= target_ψ_rad, ψ_list)
+        if target_δ_rad < 0
+            over_index = findfirst(e -> e <= target_ψ_rad, ψ_list)
+        end
+        next_stage_index = length(time_list)
+        if isnothing(over_index)
+            final_δ_list[start_index:next_stage_index] = δ_list
+            final_u_list[start_index:next_stage_index] = u
+            final_v_list[start_index:next_stage_index] = v
+            final_r_list[start_index:next_stage_index] = r
+            final_ψ_list[start_index:next_stage_index] = ψ_list
+        else
+            ψ = ψ_list[over_index]
+            next_stage_index = over_index + start_index - 1
+            final_δ_list[start_index:next_stage_index] = δ_list[begin:over_index]
+            final_u_list[start_index:next_stage_index] = u[begin:over_index]
+            final_v_list[start_index:next_stage_index] = v[begin:over_index]
+            final_r_list[start_index:next_stage_index] = r[begin:over_index]
+            final_ψ_list[start_index:next_stage_index] = ψ_list[begin:over_index]
+        end
+    end
+    final_δ_list, final_u_list, final_v_list, final_r_list, final_ψ_list
+end
