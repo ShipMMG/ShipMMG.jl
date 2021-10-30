@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Home · ShipMMG.jl</title><script data-outdated-warner src="assets/warner.js"></script><link rel="canonical" href="https://ShipMMG.github.io/ShipMMG.jl/index.html"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">ShipMMG.jl</a></span></div><form class="docs-search" action="search.html"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li class="is-active"><a class="tocitem" href="index.html">Home</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href="index.html">Home</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="index.html">Home</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/ShipMMG/ShipMMG.jl/blob/master/docs/src/index.md#" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="ShipMMG"><a class="docs-heading-anchor" href="#ShipMMG">ShipMMG</a><a id="ShipMMG-1"></a><a class="docs-heading-anchor-permalink" href="#ShipMMG" title="Permalink"></a></h1><p>Documentation for <a href="https://github.com/ShipMMG/ShipMMG.jl">ShipMMG</a>.</p><ul><li><a href="index.html#ShipMMG.Mmg3DofBasicParams"><code>ShipMMG.Mmg3DofBasicParams</code></a></li><li><a href="index.html#ShipMMG.Mmg3DofManeuveringParams"><code>ShipMMG.Mmg3DofManeuveringParams</code></a></li><li><a href="index.html#ShipMMG.draw_gif_result"><code>ShipMMG.draw_gif_result</code></a></li><li><a href="index.html#ShipMMG.kt_model!-NTuple{4, Any}"><code>ShipMMG.kt_model!</code></a></li><li><a href="index.html#ShipMMG.kt_simulate-Tuple{Any, Any, Float64, Float64}"><code>ShipMMG.kt_simulate</code></a></li><li><a href="index.html#ShipMMG.kt_zigzag_test-NTuple{6, Float64}"><code>ShipMMG.kt_zigzag_test</code></a></li><li><a href="index.html#ShipMMG.mmg_3dof_model!-NTuple{4, Any}"><code>ShipMMG.mmg_3dof_model!</code></a></li><li><a href="index.html#ShipMMG.mmg_3dof_simulate-Tuple{Any, Any, Any, Mmg3DofBasicParams, Mmg3DofManeuveringParams}"><code>ShipMMG.mmg_3dof_simulate</code></a></li><li><a href="index.html#ShipMMG.mmg_3dof_zigzag_test-Tuple{Mmg3DofBasicParams, Mmg3DofManeuveringParams, Any, Float64, Float64, Float64, Float64}"><code>ShipMMG.mmg_3dof_zigzag_test</code></a></li><li><a href="index.html#ShipMMG.simulate-Tuple{Any, Any, Any, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64}"><code>ShipMMG.simulate</code></a></li></ul><article class="docstring"><header><a class="docstring-binding" id="ShipMMG.Mmg3DofBasicParams" href="#ShipMMG.Mmg3DofBasicParams"><code>ShipMMG.Mmg3DofBasicParams</code></a> — <span class="docstring-category">Type</span></header><section><div><p>Basic parameters of target ship for MMG 3DOF simulation.</p><p><strong>Arguments</strong></p><ul><li><code>L_pp::Float64</code>: L_pp</li><li><code>B::Float64</code>: </li><li><code>d::Float64</code>:</li><li><code>x_G::Float64</code>: </li><li><code>D_p::Float64</code>: </li><li><code>m::Float64</code>: </li><li><code>I_zG::Float64</code>: </li><li><code>A_R::Float64</code>: </li><li><code>η::Float64</code>: </li><li><code>m_x::Float64</code>: </li><li><code>m_y::Float64</code>: </li><li><code>J_z::Float64</code>: </li><li><code>f_α::Float64</code>: </li><li><code>ϵ::Float64</code>: </li><li><code>t_R::Float64</code>: </li><li><code>a_H::Float64</code>: </li><li><code>x_H::Float64</code>: </li><li><code>γ_R_minus::Float64</code>: </li><li><code>γ_R_plus::Float64</code>: </li><li><code>l_R::Float64</code>: </li><li><code>κ::Float64</code>: </li><li><code>t_P::Float64</code>: </li><li><code>w_P0::Float64</code>: </li><li><code>x_P::Float64</code>: </li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ShipMMG/ShipMMG.jl/blob/13afec69c9615c259165ad91b223e2ffb394e3d5/src/mmg.jl#L227-L255">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ShipMMG.Mmg3DofManeuveringParams" href="#ShipMMG.Mmg3DofManeuveringParams"><code>ShipMMG.Mmg3DofManeuveringParams</code></a> — <span class="docstring-category">Type</span></header><section><div><p>Maneuvering parameters of target ship for MMG 3DOF simulation.</p><p><strong>Arguments</strong></p><ul><li><code>k_0::Float64</code></li><li><code>k_1::Float64</code></li><li><code>k_2::Float64</code></li><li><code>R_0_dash::Float64</code></li><li><code>X_vv_dash::Float64</code></li><li><code>X_vr_dash::Float64</code></li><li><code>X_rr_dash::Float64</code></li><li><code>X_vvvv_dash::Float64</code></li><li><code>Y_v_dash::Float64</code></li><li><code>Y_r_dash::Float64</code></li><li><code>Y_vvv_dash::Float64</code></li><li><code>Y_vvr_dash::Float64</code></li><li><code>Y_vrr_dash::Float64</code></li><li><code>Y_rrr_dash::Float64</code></li><li><code>N_v_dash::Float64</code></li><li><code>N_r_dash::Float64</code></li><li><code>N_vvv_dash::Float64</code></li><li><code>N_vvr_dash::Float64</code></li><li><code>N_vrr_dash::Float64</code></li><li><code>N_rrr_dash::Float64</code></li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ShipMMG/ShipMMG.jl/blob/13afec69c9615c259165ad91b223e2ffb394e3d5/src/mmg.jl#L284-L308">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ShipMMG.draw_gif_result" href="#ShipMMG.draw_gif_result"><code>ShipMMG.draw_gif_result</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">draw_gif_result(time, x, y, ψ, shape, file_path, [, fps]) -&gt; gif</code></pre><p>Draw the gif animation from simulation result.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ShipMMG/ShipMMG.jl/blob/13afec69c9615c259165ad91b223e2ffb394e3d5/src/draw.jl#L26-L30">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ShipMMG.kt_model!-NTuple{4, Any}" href="#ShipMMG.kt_model!-NTuple{4, Any}"><code>ShipMMG.kt_model!</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">kt_model!(dX, X, p, t)</code></pre><p>KT model on DifferentialEquations.ODEProblem. Update <code>dX</code>.</p><p><strong>Arguments</strong></p><ul><li><code>dX</code>: [du, dr, dδ]</li><li><code>X</code>: the initial state values. [<code>u</code>, <code>r</code>, <code>δ</code>].</li><li><code>p</code>: the parameters and δ spline info. [<code>K</code>, <code>T</code>, <code>spl_δ</code>].</li><li><code>t</code>: the time.</li></ul><p><strong>Examples</strong></p><pre><code class="language-julia-rep1 hljs">julia&gt; K_log = 0.155  # [1/s]
+julia&gt; T_log = 80.5  # [s]
+julia&gt; u0 = 20 * (1852.0 / 3600)  # [m/s] (knot * 1852/3600)
+julia&gt; duration = 50  # [s]
+julia&gt; sampling = 1001
+julia&gt; time_list = range(0.0,stop=duration,length=sampling)
+julia&gt; Ts = 50.0
+julia&gt; δ_list = 10.0 * pi / 180.0  * sin.(2.0 * pi / Ts * time_list) # [rad]
+julia&gt; spl_δ = Spline1D(time_list, δ_list)
+julia&gt; X0 = [u0; 0.0; δ_list[1]]
+julia&gt; p = [K_log, T_log, spl_δ]
+julia&gt; prob = ODEProblem(kt_model!, X0, (time_list[1], time_list[end]), p)
+julia&gt; sol = solve(prob, Tsit5(), saveat=time_list[2] - time_list[1])</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ShipMMG/ShipMMG.jl/blob/13afec69c9615c259165ad91b223e2ffb394e3d5/src/kt.jl#L1-L29">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ShipMMG.kt_simulate-Tuple{Any, Any, Float64, Float64}" href="#ShipMMG.kt_simulate-Tuple{Any, Any, Float64, Float64}"><code>ShipMMG.kt_simulate</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">kt_simulate(time_list, δ_list, K, T, [, u0, r0, algorithm, reltol, abstol])</code></pre><p>Returns the KT simulation results.</p><p><strong>Arguments</strong></p><ul><li><code>time_list</code>: the list of simulatino time.</li><li><code>δ_list</code>: the list of rudder angle [rad].</li><li><code>K::Float64</code>: the K Parameter.</li><li><code>T::Float64</code>: the T Parameter.</li><li><code>u0::Float64=0.0</code>: the constant surge velocity.</li><li><code>r0::Float64=0.0</code>: the inital rate of turn [rad/s].</li><li><code>algorithm=Tsit5()</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li><li><code>reltol=1e-8</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li><li><code>abstol=1e-8</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li></ul><p><strong>Examples</strong></p><p>KT simulation.</p><pre><code class="language-julia-rep1 hljs">julia&gt; K_log = 0.155  # [1/s]
+julia&gt; T_log = 80.5  # [s]
+julia&gt; u0 = 20 * (1852.0 / 3600)  # [m/s] (knot * 1852/3600)
+julia&gt; duration = 50  # [s]
+julia&gt; sampling = 1001
+julia&gt; time_list = range(0.0,stop=duration,length=sampling)
+julia&gt; Ts = 50.0
+julia&gt; δ_list = 10.0 * pi / 180.0  * sin.(2.0 * pi / Ts * time_list) # [rad]
+julia&gt; time, u, r, δ = kt_simulate(time_list, δ_list, K_log, T_log, u0=u0)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ShipMMG/ShipMMG.jl/blob/13afec69c9615c259165ad91b223e2ffb394e3d5/src/kt.jl#L38-L68">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ShipMMG.kt_zigzag_test-NTuple{6, Float64}" href="#ShipMMG.kt_zigzag_test-NTuple{6, Float64}"><code>ShipMMG.kt_zigzag_test</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">kt_zigzag_test(K, T, target_δ_rad, target_ψ_rad_deviation, time_second_interval, end_time_second, [, u0, r0, ψ0, δ0, δ_rad_rate, start_time_second, algorithm, reltol, abstol])</code></pre><p>Returns the KT simulation results.</p><p><strong>Arguments</strong></p><ul><li><code>K::Float64</code>: the K Parameter.</li><li><code>T::Float64</code>: the T Parameter.</li><li><code>target_δ_rad::Float64</code>: target rudder angle of zigzag test.</li><li><code>target_ψ_rad_deviation::Float64</code>: target azimuth deviation of zigzag test.</li><li><code>time_second_interval::Float64</code>: time interval of output result.</li><li><code>end_time_second::Float64</code>: the end time of simulation.</li><li><code>u0::Float64=0.0</code>: the initial &amp; constant surge velocity.</li><li><code>r0::Float64=0.0</code>: the initial rate of turn [rad/s].</li><li><code>ψ0::Float64=0.0</code>: the initial azimuth.</li><li><code>δ0::Float64=0.0</code>: the initial rudder angle.</li><li><code>δ_rad_rate::Float64=10.0*π/180</code>: the change rate of rudder angle [rad/s]. </li><li><code>start_time_second::Float64=0.0</code>: the start time of simulation.</li><li><code>algorithm=Tsit5()</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li><li><code>reltol=1e-8</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li><li><code>abstol=1e-8</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li></ul><p><strong>Examples</strong></p><p>KT simulation.</p><pre><code class="language-julia-rep1 hljs">julia&gt; K = 0.155
+julia&gt; T = 80.5
+julia&gt; target_δ_rad = 30.0 * π / 180.0
+julia&gt; target_ψ_rad_deviation = 10.0 * π / 180.0
+julia&gt; time_second_interval = 0.01
+julia&gt; end_time_second = 500.0
+julia&gt; u0 = 20 * (1852.0 / 3600) # [knot]
+julia&gt; δ_list, r_list, ψ_list = kt_zigzag_test(
+        K,
+        T,
+        target_δ_rad,
+        target_ψ_rad_deviation,
+        time_second_interval,
+        end_time_second,
+        u0 = u0,
+    )</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ShipMMG/ShipMMG.jl/blob/13afec69c9615c259165ad91b223e2ffb394e3d5/src/kt.jl#L102-L145">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ShipMMG.mmg_3dof_model!-NTuple{4, Any}" href="#ShipMMG.mmg_3dof_model!-NTuple{4, Any}"><code>ShipMMG.mmg_3dof_model!</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">mmg_3dof_model!(dX, X, p, t)</code></pre><p>MMG 3DOF model on DifferentialEquations.ODEProblem. Update <code>dX</code>.</p><p><strong>Arguments</strong></p><ul><li><code>dX</code>: [du, dv, dr, dδ, dnpm]</li><li><code>X</code>: the initial state values. [<code>u</code>, <code>v</code>, <code>r</code>, <code>δ</code>, <code>npm</code>].</li><li><code>p</code>: ρ and the basic &amp; maneuvering parameters and δ &amp; npm spline info.<ul><li>ρ</li><li>L_pp</li><li>B</li><li>d</li><li>x_G</li><li>D_p</li><li>m</li><li>I_zG</li><li>A_R</li><li>η</li><li>m_x</li><li>m_y</li><li>J_z</li><li>f_α</li><li>ϵ</li><li>t_R</li><li>a_H</li><li>x_H</li><li>γ<em>R</em>minus</li><li>γ<em>R</em>plus</li><li>l_R</li><li>κ</li><li>t_P</li><li>w_P0</li><li>x_P</li><li>k_0</li><li>k_1</li><li>k_2</li><li>R<em>0</em>dash</li><li>X<em>vv</em>dash</li><li>X<em>vr</em>dash</li><li>X<em>rr</em>dash</li><li>X<em>vvvv</em>dash</li><li>Y<em>v</em>dash</li><li>Y<em>r</em>dash</li><li>Y<em>vvv</em>dash</li><li>Y<em>vvr</em>dash</li><li>Y<em>vrr</em>dash</li><li>Y<em>rrr</em>dash</li><li>N<em>v</em>dash</li><li>N<em>r</em>dash</li><li>N<em>vvv</em>dash</li><li>N<em>vvr</em>dash</li><li>N<em>vrr</em>dash</li><li>N<em>rrr</em>dash</li><li>spl_δ</li><li>spl_npm</li></ul></li><li><code>t</code>: the time.</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ShipMMG/ShipMMG.jl/blob/13afec69c9615c259165ad91b223e2ffb394e3d5/src/mmg.jl#L1-L58">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ShipMMG.mmg_3dof_simulate-Tuple{Any, Any, Any, Mmg3DofBasicParams, Mmg3DofManeuveringParams}" href="#ShipMMG.mmg_3dof_simulate-Tuple{Any, Any, Any, Mmg3DofBasicParams, Mmg3DofManeuveringParams}"><code>ShipMMG.mmg_3dof_simulate</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">mmg_3dof_simulate(time_list, npm_list, δ_list, basic_params, maneuvering_params, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -&gt; time, u, v, r, δ, npm</code></pre><p>Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, npm. This function has the same logic of <code>ShipMMG.simulate()</code>.</p><p><strong>Arguments</strong></p><ul><li><code>time_list</code>: the list of simulatino time.</li><li><code>npm_list</code>: the list of propeller rpm.</li><li><code>δ_list</code>: the list of rudder angle [rad].</li><li><code>basic_params::Mmg3DofBasicParams</code>: the basic parameters of target ship.</li><li><code>maneuvering_params::Mmg3DofManeuveringParams</code>: the maneuvering parameters of target ship.</li><li><code>u0::Float64=0.0</code>: the initial x (surge) velocity.</li><li><code>v0::Float64=0.0</code>: the initial y (sway) velocity.</li><li><code>r0::Float64=0.0</code>: the initial rate of turn [rad/s].</li><li><code>ρ::Float64=1.025</code>: the seawater density [g/cm^3].</li><li><code>algorithm=Tsit5()</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li><li><code>reltol=1e-8</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li><li><code>abstol=1e-8</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li></ul><p><strong>Examples</strong></p><p>KVLCC2_L7 turning test.</p><pre><code class="language-julia-rep1 hljs">julia&gt; ρ = 1.025;
+julia&gt; L_pp = 7.00;
+julia&gt; B = 1.27;
+julia&gt; d = 0.46;
+julia&gt; nabla = 3.27;
+julia&gt; x_G = 0.25;
+julia&gt; # C_b = 0.810;
+julia&gt; D_p = 0.216;
+julia&gt; H_R = 0.345;
+julia&gt; A_R = 0.0539;
+julia&gt; t_P = 0.220;
+julia&gt; w_P0 = 0.40;
+julia&gt; m_x_dash = 0.022;
+julia&gt; m_y_dash = 0.223;
+julia&gt; J_z_dash = 0.011;
+julia&gt; t_R = 0.387;
+julia&gt; a_H = 0.312;
+julia&gt; x_H_dash = -0.464;
+julia&gt; γ_R_minus = 0.395;
+julia&gt; γ_R_plus = 0.640;
+julia&gt; l_r_dash = -0.710;
+julia&gt; x_P_dash = -0.690;
+julia&gt; ϵ = 1.09;
+julia&gt; κ = 0.50;
+julia&gt; f_α = 2.747;
+julia&gt; basic_params = Mmg3DofBasicParams();
+julia&gt; basic_params.L_pp = L_pp;  # 船長Lpp[m]
+julia&gt; basic_params.B = B;  # 船幅[m]
+julia&gt; basic_params.d = d;  # 喫水[m]
+julia&gt; basic_params.x_G = x_G;  # 重心位置[]
+julia&gt; basic_params.D_p = D_p;  # プロペラ直径[m]
+julia&gt; basic_params.m = ρ * nabla;  # 質量(無次元化)[kg]
+julia&gt; basic_params.I_zG = ρ * nabla * ((0.25 * L_pp)^2);  # 慣性モーメント[-]
+julia&gt; basic_params.A_R = A_R;  # 船の断面に対する舵面積比[-]
+julia&gt; basic_params.η = D_p / H_R;  # プロペラ直径に対する舵高さ(Dp/H)
+julia&gt; basic_params.m_x = (0.5 * ρ * (L_pp^2) * d) * m_x_dash;  # 付加質量x(無次元)
+julia&gt; basic_params.m_y = (0.5 * ρ * (L_pp^2) * d) * m_y_dash;  # 付加質量y(無次元)
+julia&gt; basic_params.J_z = (0.5 * ρ * (L_pp^4) * d) * J_z_dash;  # 付加質量Izz(無次元)
+julia&gt; basic_params.f_α = f_α; # 直圧力勾配係数
+julia&gt; basic_params.ϵ = ϵ;  # プロペラ・舵位置伴流係数比
+julia&gt; basic_params.t_R = t_R;  # 操縦抵抗減少率
+julia&gt; basic_params.a_H = a_H;  # 舵力増加係数
+julia&gt; basic_params.x_H = x_H_dash * L_pp;  # 舵力増分作用位置
+julia&gt; basic_params.γ_R_minus = γ_R_minus;  # 整流係数
+julia&gt; basic_params.γ_R_plus = γ_R_plus;  # 整流係数
+julia&gt; basic_params.l_R = l_r_dash;  # 船長に対する舵位置
+julia&gt; basic_params.κ = κ;  # 修正係数
+julia&gt; basic_params.t_P = t_P;  # 推力減少率
+julia&gt; basic_params.w_P0 = w_P0;  # 有効伴流率
+julia&gt; basic_params.x_P = x_P_dash;  # 船長に対するプロペラ位置
+julia&gt; maneuvering_params = Mmg3DofManeuveringParams();
+julia&gt; maneuvering_params.k_0 = 0.2931;
+julia&gt; maneuvering_params.k_1 = -0.2753;
+julia&gt; maneuvering_params.k_2 = -0.1385;
+julia&gt; maneuvering_params.R_0_dash = 0.022;
+julia&gt; maneuvering_params.X_vv_dash = -0.040;
+julia&gt; maneuvering_params.X_vr_dash = 0.002;
+julia&gt; maneuvering_params.X_rr_dash = 0.011;
+julia&gt; maneuvering_params.X_vvvv_dash = 0.771;
+julia&gt; maneuvering_params.Y_v_dash = -0.315;
+julia&gt; maneuvering_params.Y_r_dash = 0.083;
+julia&gt; maneuvering_params.Y_vvv_dash = -1.607;
+julia&gt; maneuvering_params.Y_vvr_dash = 0.379;
+julia&gt; maneuvering_params.Y_vrr_dash = -0.391;
+julia&gt; maneuvering_params.Y_rrr_dash = 0.008;
+julia&gt; maneuvering_params.N_v_dash = -0.137;
+julia&gt; maneuvering_params.N_r_dash = -0.049;
+julia&gt; maneuvering_params.N_vvv_dash = -0.030;
+julia&gt; maneuvering_params.N_vvr_dash = -0.294;
+julia&gt; maneuvering_params.N_vrr_dash = 0.055;
+julia&gt; maneuvering_params.N_rrr_dash = -0.013;
+julia&gt; duration = 200; # [s]
+julia&gt; max_δ_rad = 35 * pi / 180.0;  # [rad]
+julia&gt; n_const = 17.95;  # [rpm]
+julia&gt; sampling = duration * 10;
+julia&gt; time_list = range(0.00, stop = duration, length = sampling);
+julia&gt; δ_rad_list = max_δ_rad .* ones(Float64, sampling);
+julia&gt; npm_list = n_const .* ones(Float64, sampling);
+julia&gt; mmg_results = mmg_3dof_simulate(
+    time_list,
+    npm_list,
+    δ_rad_list,
+    basic_params,
+    maneuvering_params,
+    u0 = 2.29 * 0.512,
+    v0 = 0.0,
+    r0 = 0.0,
+);</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ShipMMG/ShipMMG.jl/blob/13afec69c9615c259165ad91b223e2ffb394e3d5/src/mmg.jl#L333-L446">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ShipMMG.mmg_3dof_zigzag_test-Tuple{Mmg3DofBasicParams, Mmg3DofManeuveringParams, Any, Float64, Float64, Float64, Float64}" href="#ShipMMG.mmg_3dof_zigzag_test-Tuple{Mmg3DofBasicParams, Mmg3DofManeuveringParams, Any, Float64, Float64, Float64, Float64}"><code>ShipMMG.mmg_3dof_zigzag_test</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">mmg_3dof_zigzag_test(basic_params, maneuvering_params, npm_list, target_δ_rad, target_ψ_rad_deviation, time_second_interval, end_time_second, [, u0, v0, r0, ψ0, δ0, δ_rad_rate, start_time_second, algorithm, reltol, abstol]) -&gt; final_δ_list, final_u_list, final_v_list, final_r_list, final_ψ_list</code></pre><p>Returns the MMG 3DOF zigzag simulation results.</p><p><strong>Arguments</strong></p><ul><li><code>basic_params::Mmg3DofBasicParams</code>: the basic parameters of target ship.</li><li><code>maneuvering_params::Mmg3DofManeuveringParams</code>: the maneuvering parameters of target ship.</li><li><code>npm_list</code>: the list of propeller rpm.</li><li><code>target_δ_rad::Float64</code>: target rudder angle of zigzag test.</li><li><code>target_ψ_rad_deviation::Float64</code>: target azimuth deviation of zigzag test.</li><li><code>time_second_interval::Float64</code>: time interval of output result.</li><li><code>end_time_second::Float64</code>: the end time of simulation.</li><li><code>u0::Float64=0.0</code>: the initial x (surge) velocity.</li><li><code>v0::Float64=0.0</code>: the initial y (sway) velocity.</li><li><code>r0::Float64=0.0</code>: the initial rate of turn [rad/s].</li><li><code>δ0::Float64=0.0</code>: the initial rudder angle.</li><li><code>δ_rad_rate::Float64=10.0*π/180</code>: the change rate of rudder angle [rad/s]. </li><li><code>ρ::Float64=1.025</code>: the seawater density [g/cm^3].</li><li><code>start_time_second::Float64=0.0</code>: the start time of simulation.</li><li><code>algorithm=Tsit5()</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li><li><code>reltol=1e-8</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li><li><code>abstol=1e-8</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li></ul><p><strong>Examples</strong></p><p>KVLCC2_L7 zigzag test.</p><pre><code class="language-julia-rep1 hljs">julia&gt; ρ = 1.025;
+julia&gt; L_pp = 7.00;
+julia&gt; B = 1.27;
+julia&gt; d = 0.46;
+julia&gt; nabla = 3.27;
+julia&gt; x_G = 0.25;
+julia&gt; # C_b = 0.810;
+julia&gt; D_p = 0.216;
+julia&gt; H_R = 0.345;
+julia&gt; A_R = 0.0539;
+julia&gt; t_P = 0.220;
+julia&gt; w_P0 = 0.40;
+julia&gt; m_x_dash = 0.022;
+julia&gt; m_y_dash = 0.223;
+julia&gt; J_z_dash = 0.011;
+julia&gt; t_R = 0.387;
+julia&gt; a_H = 0.312;
+julia&gt; x_H_dash = -0.464;
+julia&gt; γ_R_minus = 0.395;
+julia&gt; γ_R_plus = 0.640;
+julia&gt; l_r_dash = -0.710;
+julia&gt; x_P_dash = -0.690;
+julia&gt; ϵ = 1.09;
+julia&gt; κ = 0.50;
+julia&gt; f_α = 2.747;
+julia&gt; basic_params = Mmg3DofBasicParams();
+julia&gt; basic_params.L_pp = L_pp;  # 船長Lpp[m]
+julia&gt; basic_params.B = B;  # 船幅[m]
+julia&gt; basic_params.d = d;  # 喫水[m]
+julia&gt; basic_params.x_G = x_G;  # 重心位置[]
+julia&gt; basic_params.D_p = D_p;  # プロペラ直径[m]
+julia&gt; basic_params.m = ρ * nabla;  # 質量(無次元化)[kg]
+julia&gt; basic_params.I_zG = ρ * nabla * ((0.25 * L_pp)^2);  # 慣性モーメント[-]
+julia&gt; basic_params.A_R = A_R;  # 船の断面に対する舵面積比[-]
+julia&gt; basic_params.η = D_p / H_R;  # プロペラ直径に対する舵高さ(Dp/H)
+julia&gt; basic_params.m_x = (0.5 * ρ * (L_pp^2) * d) * m_x_dash;  # 付加質量x(無次元)
+julia&gt; basic_params.m_y = (0.5 * ρ * (L_pp^2) * d) * m_y_dash;  # 付加質量y(無次元)
+julia&gt; basic_params.J_z = (0.5 * ρ * (L_pp^4) * d) * J_z_dash;  # 付加質量Izz(無次元)
+julia&gt; basic_params.f_α = f_α; # 直圧力勾配係数
+julia&gt; basic_params.ϵ = ϵ;  # プロペラ・舵位置伴流係数比
+julia&gt; basic_params.t_R = t_R;  # 操縦抵抗減少率
+julia&gt; basic_params.a_H = a_H;  # 舵力増加係数
+julia&gt; basic_params.x_H = x_H_dash * L_pp;  # 舵力増分作用位置
+julia&gt; basic_params.γ_R_minus = γ_R_minus;  # 整流係数
+julia&gt; basic_params.γ_R_plus = γ_R_plus;  # 整流係数
+julia&gt; basic_params.l_R = l_r_dash;  # 船長に対する舵位置
+julia&gt; basic_params.κ = κ;  # 修正係数
+julia&gt; basic_params.t_P = t_P;  # 推力減少率
+julia&gt; basic_params.w_P0 = w_P0;  # 有効伴流率
+julia&gt; basic_params.x_P = x_P_dash;  # 船長に対するプロペラ位置
+julia&gt; maneuvering_params = Mmg3DofManeuveringParams();
+julia&gt; maneuvering_params.k_0 = 0.2931;
+julia&gt; maneuvering_params.k_1 = -0.2753;
+julia&gt; maneuvering_params.k_2 = -0.1385;
+julia&gt; maneuvering_params.R_0_dash = 0.022;
+julia&gt; maneuvering_params.X_vv_dash = -0.040;
+julia&gt; maneuvering_params.X_vr_dash = 0.002;
+julia&gt; maneuvering_params.X_rr_dash = 0.011;
+julia&gt; maneuvering_params.X_vvvv_dash = 0.771;
+julia&gt; maneuvering_params.Y_v_dash = -0.315;
+julia&gt; maneuvering_params.Y_r_dash = 0.083;
+julia&gt; maneuvering_params.Y_vvv_dash = -1.607;
+julia&gt; maneuvering_params.Y_vvr_dash = 0.379;
+julia&gt; maneuvering_params.Y_vrr_dash = -0.391;
+julia&gt; maneuvering_params.Y_rrr_dash = 0.008;
+julia&gt; maneuvering_params.N_v_dash = -0.137;
+julia&gt; maneuvering_params.N_r_dash = -0.049;
+julia&gt; maneuvering_params.N_vvv_dash = -0.030;
+julia&gt; maneuvering_params.N_vvr_dash = -0.294;
+julia&gt; maneuvering_params.N_vrr_dash = 0.055;
+julia&gt; maneuvering_params.N_rrr_dash = -0.013;
+julia&gt; target_δ_rad = 20.0 * π / 180.0
+julia&gt; target_ψ_rad_deviation = 20.0 * π / 180.0
+julia&gt; start_time_second = 0.00
+julia&gt; time_second_interval = 0.01
+julia&gt; end_time_second = 80.00
+julia&gt; time_list = start_time_second:time_second_interval:end_time_second
+julia&gt; n_const = 17.95  # [rpm]
+julia&gt; npm_list = n_const * ones(Float64, length(time_list))
+julia&gt; δ_list, u_list, v_list, r_list, ψ_list = mmg_3dof_zigzag_test(
+    basic_params,
+    maneuvering_params,
+    npm_list,
+    target_δ_rad,
+    target_ψ_rad_deviation,
+    time_second_interval,
+    end_time_second,
+);</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ShipMMG/ShipMMG.jl/blob/13afec69c9615c259165ad91b223e2ffb394e3d5/src/mmg.jl#L708-L825">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ShipMMG.simulate-Tuple{Any, Any, Any, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64}" href="#ShipMMG.simulate-Tuple{Any, Any, Any, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64}"><code>ShipMMG.simulate</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">mmg_3dof_simulate(time_list, npm_list, δ_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -&gt; time, u, v, r, δ, npm</code></pre><p>Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, npm. This function has the same logic of <code>ShipMMG.mmg_3dof_simulate()</code>.</p><p><strong>Arguments</strong></p><ul><li><code>time_list</code>: the list of simulatino time.</li><li><code>npm_list</code>: the list of propeller rpm.</li><li><code>δ_list</code>: the list of rudder angle [rad].</li><li><code>L_pp::Float64</code>: L_pp</li><li><code>B::Float64</code>: </li><li><code>d::Float64</code>:</li><li><code>x_G::Float64</code>: </li><li><code>D_p::Float64</code>: </li><li><code>m::Float64</code>: </li><li><code>I_zG::Float64</code>: </li><li><code>A_R::Float64</code>: </li><li><code>η::Float64</code>: </li><li><code>m_x::Float64</code>: </li><li><code>m_y::Float64</code>: </li><li><code>J_z::Float64</code>: </li><li><code>f_α::Float64</code>: </li><li><code>ϵ::Float64</code>: </li><li><code>t_R::Float64</code>: </li><li><code>a_H::Float64</code>: </li><li><code>x_H::Float64</code>: </li><li><code>γ_R_minus::Float64</code>: </li><li><code>γ_R_plus::Float64</code>: </li><li><code>l_R::Float64</code>: </li><li><code>κ::Float64</code>: </li><li><code>t_P::Float64</code>: </li><li><code>w_P0::Float64</code>: </li><li><code>x_P::Float64</code>: </li><li><code>k_0::Float64</code></li><li><code>k_1::Float64</code></li><li><code>k_2::Float64</code></li><li><code>R_0_dash::Float64</code></li><li><code>X_vv_dash::Float64</code></li><li><code>X_vr_dash::Float64</code></li><li><code>X_rr_dash::Float64</code></li><li><code>X_vvvv_dash::Float64</code></li><li><code>Y_v_dash::Float64</code></li><li><code>Y_r_dash::Float64</code></li><li><code>Y_vvv_dash::Float64</code></li><li><code>Y_vvr_dash::Float64</code></li><li><code>Y_vrr_dash::Float64</code></li><li><code>Y_rrr_dash::Float64</code></li><li><code>N_v_dash::Float64</code></li><li><code>N_r_dash::Float64</code></li><li><code>N_vvv_dash::Float64</code></li><li><code>N_vvr_dash::Float64</code></li><li><code>N_vrr_dash::Float64</code></li><li><code>N_rrr_dash::Float64</code></li><li><code>u0::Float64=0.0</code>: the initial x (surge) velocity.</li><li><code>v0::Float64=0.0</code>: the initial y (sway) velocity.</li><li><code>r0::Float64=0.0</code>: the initial rate of turn [rad/s].</li><li><code>ρ::Float64=1.025</code>: the seawater density [g/cm^3].</li><li><code>algorithm=Tsit5()</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li><li><code>reltol=1e-8</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li><li><code>abstol=1e-8</code>: the parameter of DifferentialEquations.ODEProblem.solve()</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ShipMMG/ShipMMG.jl/blob/13afec69c9615c259165ad91b223e2ffb394e3d5/src/mmg.jl#L519-L580">source</a></section></article></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.10 on <span class="colophon-date" title="Saturday 30 October 2021 16:38">Saturday 30 October 2021</span>. Using Julia version 1.6.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
