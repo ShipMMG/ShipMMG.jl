@@ -98,8 +98,25 @@ maneuvering_params.N_rrr_dash = -0.013
     )
     time, u, v, r, δ, npm = mmg_results
     x, y, ψ = calc_position(time, u, v, r)
-    test_result_file_name = "test_mmg_turning.gif"
-    shape = [basic_params.L_pp, basic_params.B]
-    draw_gif_result(time, x, y, ψ, shape, test_result_file_name)
-    rm(test_result_file_name)
 end
+
+@testset "mmg_zigzag_test" begin
+    target_δ_rad = 20.0 * π / 180.0
+    target_ψ_rad_deviation = 20.0 * π / 180.0
+    start_time_second = 0.00
+    time_second_interval = 0.01
+    end_time_second = 80.00
+    time_list = start_time_second:time_second_interval:end_time_second
+    n_const = 17.95  # [rpm]
+    npm_list = n_const * ones(Float64, length(time_list))
+    δ_list, u_list, v_list, r_list, ψ_list = mmg_3dof_zigzag_test(
+        basic_params,
+        maneuvering_params,
+        npm_list,
+        target_δ_rad,
+        target_ψ_rad_deviation,
+        time_second_interval,
+        end_time_second,
+    )
+end
+
