@@ -337,11 +337,11 @@ Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ
 This function has the same logic of `ShipMMG.simulate()`.
 
 # Arguments
-- `time_list`: the list of simulatino time.
-- `npm_list`: the list of propeller rpm.
-- `δ_list`: the list of rudder angle [rad].
 - `basic_params::Mmg3DofBasicParams`: the basic parameters of target ship.
 - `maneuvering_params::Mmg3DofManeuveringParams`: the maneuvering parameters of target ship.
+- `time_list`: the list of simulatino time.
+- `δ_list`: the list of rudder angle [rad].
+- `npm_list`: the list of propeller rpm.
 - `u0::Float64=0.0`: the initial x (surge) velocity.
 - `v0::Float64=0.0`: the initial y (sway) velocity.
 - `r0::Float64=0.0`: the initial rate of turn [rad/s].
@@ -433,11 +433,11 @@ julia> time_list = range(0.00, stop = duration, length = sampling);
 julia> δ_rad_list = max_δ_rad .* ones(Float64, sampling);
 julia> npm_list = n_const .* ones(Float64, sampling);
 julia> mmg_results = mmg_3dof_simulate(
-    time_list,
-    npm_list,
-    δ_rad_list,
     basic_params,
     maneuvering_params,
+    time_list,
+    δ_rad_list,
+    npm_list,
     u0 = 2.29 * 0.512,
     v0 = 0.0,
     r0 = 0.0,
@@ -445,11 +445,11 @@ julia> mmg_results = mmg_3dof_simulate(
 ```
 """
 function mmg_3dof_simulate(
-    time_list,
-    npm_list,
-    δ_list,
     basic_params::Mmg3DofBasicParams,
-    maneuvering_params::Mmg3DofManeuveringParams;
+    maneuvering_params::Mmg3DofManeuveringParams,
+    time_list,
+    δ_list,
+    npm_list;
     u0::Float64 = 0.0,
     v0::Float64 = 0.0,
     r0::Float64 = 0.0,
@@ -459,9 +459,6 @@ function mmg_3dof_simulate(
     abstol = 1e-8,
 )
     simulate(
-        time_list,
-        npm_list,
-        δ_list,
         basic_params.L_pp,
         basic_params.B,
         basic_params.d,
@@ -506,6 +503,9 @@ function mmg_3dof_simulate(
         maneuvering_params.N_vvr_dash,
         maneuvering_params.N_vrr_dash,
         maneuvering_params.N_rrr_dash,
+        time_list,
+        δ_list,
+        npm_list,
         u0 = u0,
         v0 = v0,
         r0 = r0,
@@ -523,9 +523,6 @@ Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ
 This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 
 # Arguments
-- `time_list`: the list of simulatino time.
-- `npm_list`: the list of propeller rpm.
-- `δ_list`: the list of rudder angle [rad].
 - `L_pp::Float64`: L_pp
 - `B::Float64`: 
 - `d::Float64`:
@@ -570,6 +567,9 @@ This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 - `N_vvr_dash::Float64`
 - `N_vrr_dash::Float64`
 - `N_rrr_dash::Float64`
+- `time_list`: the list of simulatino time.
+- `δ_list`: the list of rudder angle [rad].
+- `npm_list`: the list of propeller rpm.
 - `u0::Float64=0.0`: the initial x (surge) velocity.
 - `v0::Float64=0.0`: the initial y (sway) velocity.
 - `r0::Float64=0.0`: the initial rate of turn [rad/s].
@@ -579,9 +579,6 @@ This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 """
 function simulate(
-    time_list,
-    npm_list,
-    δ_list,
     L_pp::Float64,
     B::Float64,
     d::Float64,
@@ -625,7 +622,10 @@ function simulate(
     N_vvv_dash::Float64,
     N_vvr_dash::Float64,
     N_vrr_dash::Float64,
-    N_rrr_dash::Float64;
+    N_rrr_dash::Float64,
+    time_list,
+    δ_list,
+    npm_list;
     u0::Float64 = 0.0,
     v0::Float64 = 0.0,
     r0::Float64 = 0.0,
@@ -706,25 +706,23 @@ function simulate(
 end
 
 """
-    mmg_3dof_zigzag_test(basic_params, maneuvering_params, npm_list, target_δ_rad, target_ψ_rad_deviation, time_second_interval, end_time_second, [, u0, v0, r0, ψ0, δ0, δ_rad_rate, start_time_second, algorithm, reltol, abstol]) -> final_δ_list, final_u_list, final_v_list, final_r_list, final_ψ_list
+    mmg_3dof_zigzag_test(basic_params, maneuvering_params, time_list, npm_list, target_δ_rad, target_ψ_rad_deviation, [, u0, v0, r0, ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> final_time_list, final_u_list, final_v_list, final_r_list, final_ψ_list, final_δ_list
 
 Returns the MMG 3DOF zigzag simulation results.
 
 # Arguments
 - `basic_params::Mmg3DofBasicParams`: the basic parameters of target ship.
 - `maneuvering_params::Mmg3DofManeuveringParams`: the maneuvering parameters of target ship.
+- `time_list`: the list of simulatino time.
 - `npm_list`: the list of propeller rpm.
 - `target_δ_rad::Float64`: target rudder angle of zigzag test.
 - `target_ψ_rad_deviation::Float64`: target azimuth deviation of zigzag test.
-- `time_second_interval::Float64`: time interval of output result.
-- `end_time_second::Float64`: the end time of simulation.
 - `u0::Float64=0.0`: the initial x (surge) velocity.
 - `v0::Float64=0.0`: the initial y (sway) velocity.
 - `r0::Float64=0.0`: the initial rate of turn [rad/s].
 - `δ0::Float64=0.0`: the initial rudder angle.
 - `δ_rad_rate::Float64=10.0*π/180`: the change rate of rudder angle [rad/s]. 
 - `ρ::Float64=1.025`: the seawater density [g/cm^3].
-- `start_time_second::Float64=0.0`: the start time of simulation.
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -812,25 +810,23 @@ julia> end_time_second = 80.00
 julia> time_list = start_time_second:time_second_interval:end_time_second
 julia> n_const = 17.95  # [rpm]
 julia> npm_list = n_const * ones(Float64, length(time_list))
-julia> δ_list, u_list, v_list, r_list, ψ_list = mmg_3dof_zigzag_test(
+julia> time_list, δ_list, u_list, v_list, r_list, ψ_list = mmg_3dof_zigzag_test(
     basic_params,
     maneuvering_params,
+    time_list
     npm_list,
     target_δ_rad,
     target_ψ_rad_deviation,
-    time_second_interval,
-    end_time_second,
 );
 ```
 """
 function mmg_3dof_zigzag_test(
     basic_params::Mmg3DofBasicParams,
     maneuvering_params::Mmg3DofManeuveringParams,
+    time_list,
     npm_list,
     target_δ_rad::Float64,
-    target_ψ_rad_deviation::Float64,
-    time_second_interval::Float64,
-    end_time_second::Float64;
+    target_ψ_rad_deviation::Float64;
     u0::Float64 = 0.0,
     v0::Float64 = 0.0,
     r0::Float64 = 0.0,
@@ -838,14 +834,14 @@ function mmg_3dof_zigzag_test(
     δ0::Float64 = 0.0,
     δ_rad_rate::Float64 = 10.0 * π / 180,
     ρ::Float64 = 1.025,
-    start_time_second::Float64 = 0.0,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
 )
     target_ψ_rad_deviation = abs(target_ψ_rad_deviation)
 
-    time_list = start_time_second:time_second_interval:end_time_second
+    # time_list = start_time_second:time_second_interval:end_time_second
+    final_time_list = zeros(length(time_list))
     final_δ_list = zeros(length(time_list))
     final_u_list = zeros(length(time_list))
     final_v_list = zeros(length(time_list))
@@ -891,15 +887,18 @@ function mmg_3dof_zigzag_test(
         end
 
         time, u, v, r, δ, npm = mmg_3dof_simulate(
-            time_list[start_index:end],
-            npm_list[start_index:end],
-            δ_list,
             basic_params,
             maneuvering_params,
+            time_list[start_index:end],
+            δ_list,
+            npm_list[start_index:end],
             u0 = u0,
             v0 = v0,
             r0 = r0,
             ρ = ρ,
+            algorithm = algorithm,
+            reltol = reltol,
+            abstol = abstol,
         )
         x, y, ψ_list = calc_position(time, u, v, r, x0 = 0.0, y0 = 0.0, ψ0 = ψ)
         # get finish index
@@ -913,6 +912,7 @@ function mmg_3dof_zigzag_test(
         end
         next_stage_index = length(time_list)
         if isnothing(over_index)
+            final_time_list[start_index:next_stage_index] = time
             final_δ_list[start_index:next_stage_index] = δ_list
             final_u_list[start_index:next_stage_index] = u
             final_v_list[start_index:next_stage_index] = v
@@ -921,6 +921,7 @@ function mmg_3dof_zigzag_test(
         else
             ψ = ψ_list[over_index]
             next_stage_index = over_index + start_index - 1
+            final_time_list[start_index:next_stage_index] = time[begin:over_index]
             final_δ_list[start_index:next_stage_index] = δ_list[begin:over_index]
             final_u_list[start_index:next_stage_index] = u[begin:over_index]
             final_v_list[start_index:next_stage_index] = v[begin:over_index]
@@ -928,5 +929,5 @@ function mmg_3dof_zigzag_test(
             final_ψ_list[start_index:next_stage_index] = ψ_list[begin:over_index]
         end
     end
-    final_δ_list, final_u_list, final_v_list, final_r_list, final_ψ_list
+    final_time_list, final_u_list, final_v_list, final_r_list, final_ψ_list, final_δ_list
 end
