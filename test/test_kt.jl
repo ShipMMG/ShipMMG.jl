@@ -18,6 +18,6 @@ end
     time_second_interval = 0.01
     end_time_second = 500.0
     time_list = start_time_second:time_second_interval:end_time_second
-    time_list, δ_list, r_list, ψ_list =
+    time_list, r_list, ψ_list, δ_list =
         kt_zigzag_test(K, T, time_list, target_δ_rad, target_ψ_rad_deviation)
 end

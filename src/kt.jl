@@ -225,6 +225,6 @@ function kt_zigzag_test(
             final_ψ_list[start_index:next_stage_index] = ψ_list[begin:over_index]
         end
     end
-    final_time_list, final_δ_list, final_r_list, final_ψ_list
+    final_time_list, final_r_list, final_ψ_list, final_δ_list
 end
 
