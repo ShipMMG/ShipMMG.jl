@@ -13,15 +13,17 @@ end
     @testset "using KT" begin
         K_log = 0.155  # [1/s]
         T_log = 80.5  # [s]
-        u0 = 20 * (1852.0 / 3600)  # [m/s] (knot * 1852/3600)
+        u0 = 10 * (1852.0 / 3600)  # [m/s] (knot * 1852/3600)
         duration = 50  # [s]
         sampling = 1000
         time_list = range(0.0, stop = duration, length = sampling)
         Ts = 50.0
         δ_list = 10.0 * pi / 180.0 * sin.(2.0 * pi / Ts * time_list) # [rad]
-        kt_results = kt_simulate(time_list, δ_list, K_log, T_log, u0 = u0)
-        time, u, r, δ = kt_results
-        x, y, ψ = calc_position(time, u, r, δ)
+        kt_results = kt_simulate(K_log, T_log, time_list, δ_list)
+        time, r, δ = kt_results
+        u = u0 * ones(Float64, length(time))
+        v = zeros(Float64, length(time))
+        x, y, ψ = calc_position(time, u, v, r)
 
         test_result_file_name = "test_kt.gif"
         shape = [20, 5]
