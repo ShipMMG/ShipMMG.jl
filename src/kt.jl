@@ -34,7 +34,7 @@ function kt_model!(dX, X, p, t)
 end
 
 """
-    kt_simulate(time_list, δ_list, K, T, [, r0, algorithm, reltol, abstol]) -> time, r, δ
+    kt_simulate(time_list, δ_list, K, T, [, r0, algorithm, reltol, abstol]) -> r, δ
 
 Returns the KT simulation results.
 
@@ -59,7 +59,7 @@ julia> sampling = 1001
 julia> time_list = range(0.0,stop=duration,length=sampling)
 julia> Ts = 50.0
 julia> δ_list = 10.0 * pi / 180.0  * sin.(2.0 * pi / Ts * time_list) # [rad]
-julia> time, r, δ = kt_simulate(time_list, δ_list, K_log, T_log)
+julia> r, δ = kt_simulate(time_list, δ_list, K_log, T_log)
 ```
 """
 function kt_simulate(
@@ -78,23 +78,16 @@ function kt_simulate(
     X0 = [r0; δ_list[1]]
     p = [K, T, spl_δ]
     prob = ODEProblem(kt_model!, X0, (time_list[1], time_list[end]), p)
-    sol = solve(
-        prob,
-        algorithm,
-        reltol = reltol,
-        abstol = abstol,
-        saveat = time_list[2] - time_list[1],
-    )
-
-    results = hcat(sol.u...)
-    time = sol.t
+    sol = solve(prob, algorithm, reltol = reltol, abstol = abstol)
+    sol_timelist = sol(time_list)
+    results = hcat(sol_timelist.u...)
     r = results[1, :]
     δ = results[2, :]
-    time, r, δ
+    r, δ
 end
 
 """
-    kt_zigzag_test(K, T, target_δ_rad, target_ψ_rad_deviation, time_second_interval, end_time_second, [, r0, ψ0, δ0, δ_rad_rate, start_time_second, algorithm, reltol, abstol]) -> time, r, δ, ψ
+    kt_zigzag_test(K, T, target_δ_rad, target_ψ_rad_deviation, time_second_interval, end_time_second, [, r0, ψ0, δ0, δ_rad_rate, start_time_second, algorithm, reltol, abstol]) -> r, δ, ψ
 
 Returns the KT simulation results.
 
@@ -122,7 +115,8 @@ julia> target_δ_rad = 30.0 * π / 180.0
 julia> target_ψ_rad_deviation = 10.0 * π / 180.0
 julia> time_second_interval = 0.01
 julia> end_time_second = 500.0
-julia> time_list, r_list, δ_list, ψ_list = kt_zigzag_test(
+julia> time_list = start_time_second:time_second_interval:end_time_second
+julia> r_list, δ_list, ψ_list = kt_zigzag_test(
         K,
         T,
         time_list,
@@ -136,7 +130,7 @@ function kt_zigzag_test(
     T::Float64,
     time_list,
     target_δ_rad::Float64,
-    target_ψ_rad_deviation::Float64,
+    target_ψ_rad_deviation::Float64;
     r0::Float64 = 0.0,
     ψ0::Float64 = 0.0,
     δ0::Float64 = 0.0,
@@ -148,7 +142,7 @@ function kt_zigzag_test(
     target_ψ_rad_deviation = abs(target_ψ_rad_deviation)
 
     # time_list = start_time_second:time_second_interval:end_time_second
-    final_time_list = zeros(length(time_list))
+    # final_time_list = zeros(length(time_list))
     final_δ_list = zeros(length(time_list))
     final_r_list = zeros(length(time_list))
     final_ψ_list = zeros(length(time_list))
@@ -188,7 +182,7 @@ function kt_zigzag_test(
             end
         end
 
-        time, r, δ = kt_simulate(
+        r, δ = kt_simulate(
             K,
             T,
             time_list[start_index:end],
@@ -198,33 +192,34 @@ function kt_zigzag_test(
             reltol = reltol,
             abstol = abstol,
         )
-        u = zeros(length(time))
-        v = zeros(length(time))
-        x_dummy, y_dummy, ψ_list = calc_position(time, u, v, r, x0 = 0.0, y0 = 0.0, ψ0 = ψ)
+        u = zeros(length(r))
+        v = zeros(length(r))
+        x_dummy, y_dummy, ψ_list =
+            calc_position(time_list[start_index:end], u, v, r, x0 = 0.0, y0 = 0.0, ψ0 = ψ)
         # get finish index
         target_ψ_rad = ψ0 + target_ψ_rad_deviation
         if target_δ_rad < 0
             target_ψ_rad = ψ0 - target_ψ_rad_deviation
         end
-        over_index = findfirst(e -> e >= target_ψ_rad, ψ_list)
+        over_index = findfirst(e -> e > target_ψ_rad, ψ_list)
         if target_δ_rad < 0
-            over_index = findfirst(e -> e <= target_ψ_rad, ψ_list)
+            over_index = findfirst(e -> e < target_ψ_rad, ψ_list)
         end
-        next_stage_index = length(time_list)
         if isnothing(over_index)
-            final_time_list[start_index:next_stage_index] = time
-            final_δ_list[start_index:next_stage_index] = δ_list
-            final_r_list[start_index:next_stage_index] = r
-            final_ψ_list[start_index:next_stage_index] = ψ_list
+            # final_time_list[start_index:end] = time
+            final_δ_list[start_index:end] = δ_list
+            final_r_list[start_index:end] = r
+            final_ψ_list[start_index:end] = ψ_list
+            next_stage_index = length(time_list) # break
         else
             ψ = ψ_list[over_index]
             next_stage_index = over_index + start_index - 1
-            final_time_list[start_index:next_stage_index] = time[begin:over_index]
-            final_δ_list[start_index:next_stage_index] = δ_list[begin:over_index]
-            final_r_list[start_index:next_stage_index] = r[begin:over_index]
-            final_ψ_list[start_index:next_stage_index] = ψ_list[begin:over_index]
+            # final_time_list[start_index:next_stage_index-1] = time[begin:over_index-1]
+            final_δ_list[start_index:next_stage_index-1] = δ_list[begin:over_index-1]
+            final_r_list[start_index:next_stage_index-1] = r[begin:over_index-1]
+            final_ψ_list[start_index:next_stage_index-1] = ψ_list[begin:over_index-1]
         end
     end
-    final_time_list, final_r_list, final_ψ_list, final_δ_list
+    final_r_list, final_ψ_list, final_δ_list
 end
 

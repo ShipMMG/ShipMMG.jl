@@ -331,7 +331,7 @@ mutable struct Mmg3DofManeuveringParams
 end
 
 """
-    mmg_3dof_simulate(time_list, npm_list, δ_list, basic_params, maneuvering_params, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> time, u, v, r, δ, npm
+    mmg_3dof_simulate(time_list, npm_list, δ_list, basic_params, maneuvering_params, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, δ, npm
 
 Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, npm.
 This function has the same logic of `ShipMMG.simulate()`.
@@ -517,7 +517,7 @@ function mmg_3dof_simulate(
 end
 
 """
-    mmg_3dof_simulate(time_list, npm_list, δ_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> time, u, v, r, δ, npm
+    mmg_3dof_simulate(time_list, npm_list, δ_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, δ, npm
 
 Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, npm.
 This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
@@ -688,25 +688,19 @@ function simulate(
         spl_npm,
     ]
     prob = ODEProblem(mmg_3dof_model!, X0, (time_list[1], time_list[end]), p)
-    sol = solve(
-        prob,
-        algorithm,
-        reltol = reltol,
-        abstol = abstol,
-        saveat = time_list[2] - time_list[1],
-    )
-    results = hcat(sol.u...)
-    time = sol.t
+    sol = solve(prob, algorithm, reltol = reltol, abstol = abstol)
+    sol_timelist = sol(time_list)
+    results = hcat(sol_timelist.u...)
     u = results[1, :]
     v = results[2, :]
     r = results[3, :]
     δ = results[4, :]
     npm = results[5, :]
-    time, u, v, r, δ, npm
+    u, v, r, δ, npm
 end
 
 """
-    mmg_3dof_zigzag_test(basic_params, maneuvering_params, time_list, npm_list, target_δ_rad, target_ψ_rad_deviation, [, u0, v0, r0, ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> final_time_list, final_u_list, final_v_list, final_r_list, final_ψ_list, final_δ_list
+    mmg_3dof_zigzag_test(basic_params, maneuvering_params, time_list, npm_list, target_δ_rad, target_ψ_rad_deviation, [, u0, v0, r0, ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> final_u_list, final_v_list, final_r_list, final_ψ_list, final_δ_list
 
 Returns the MMG 3DOF zigzag simulation results.
 
@@ -810,7 +804,7 @@ julia> end_time_second = 80.00
 julia> time_list = start_time_second:time_second_interval:end_time_second
 julia> n_const = 17.95  # [rpm]
 julia> npm_list = n_const * ones(Float64, length(time_list))
-julia> time_list, δ_list, u_list, v_list, r_list, ψ_list = mmg_3dof_zigzag_test(
+julia> δ_list, u_list, v_list, r_list, ψ_list = mmg_3dof_zigzag_test(
     basic_params,
     maneuvering_params,
     time_list
@@ -841,7 +835,7 @@ function mmg_3dof_zigzag_test(
     target_ψ_rad_deviation = abs(target_ψ_rad_deviation)
 
     # time_list = start_time_second:time_second_interval:end_time_second
-    final_time_list = zeros(length(time_list))
+    # final_time_list = zeros(length(time_list))
     final_δ_list = zeros(length(time_list))
     final_u_list = zeros(length(time_list))
     final_v_list = zeros(length(time_list))
@@ -886,7 +880,7 @@ function mmg_3dof_zigzag_test(
             end
         end
 
-        time, u, v, r, δ, npm = mmg_3dof_simulate(
+        u, v, r, δ, npm = mmg_3dof_simulate(
             basic_params,
             maneuvering_params,
             time_list[start_index:end],
@@ -900,19 +894,20 @@ function mmg_3dof_zigzag_test(
             reltol = reltol,
             abstol = abstol,
         )
-        x, y, ψ_list = calc_position(time, u, v, r, x0 = 0.0, y0 = 0.0, ψ0 = ψ)
+        x_dummy, y_dummy, ψ_list =
+            calc_position(time_list[start_index:end], u, v, r, x0 = 0.0, y0 = 0.0, ψ0 = ψ)
         # get finish index
         target_ψ_rad = ψ0 + target_ψ_rad_deviation
         if target_δ_rad < 0
             target_ψ_rad = ψ0 - target_ψ_rad_deviation
         end
-        over_index = findfirst(e -> e >= target_ψ_rad, ψ_list)
+        over_index = findfirst(e -> e > target_ψ_rad, ψ_list)
         if target_δ_rad < 0
-            over_index = findfirst(e -> e <= target_ψ_rad, ψ_list)
+            over_index = findfirst(e -> e < target_ψ_rad, ψ_list)
         end
         next_stage_index = length(time_list)
         if isnothing(over_index)
-            final_time_list[start_index:next_stage_index] = time
+            # final_time_list[start_index:next_stage_index] = time
             final_δ_list[start_index:next_stage_index] = δ_list
             final_u_list[start_index:next_stage_index] = u
             final_v_list[start_index:next_stage_index] = v
@@ -921,13 +916,13 @@ function mmg_3dof_zigzag_test(
         else
             ψ = ψ_list[over_index]
             next_stage_index = over_index + start_index - 1
-            final_time_list[start_index:next_stage_index] = time[begin:over_index]
-            final_δ_list[start_index:next_stage_index] = δ_list[begin:over_index]
-            final_u_list[start_index:next_stage_index] = u[begin:over_index]
-            final_v_list[start_index:next_stage_index] = v[begin:over_index]
-            final_r_list[start_index:next_stage_index] = r[begin:over_index]
-            final_ψ_list[start_index:next_stage_index] = ψ_list[begin:over_index]
+            # final_time_list[start_index:next_stage_index] = time[begin:over_index]
+            final_δ_list[start_index:next_stage_index-1] = δ_list[begin:over_index-1]
+            final_u_list[start_index:next_stage_index-1] = u[begin:over_index-1]
+            final_v_list[start_index:next_stage_index-1] = v[begin:over_index-1]
+            final_r_list[start_index:next_stage_index-1] = r[begin:over_index-1]
+            final_ψ_list[start_index:next_stage_index-1] = ψ_list[begin:over_index-1]
         end
     end
-    final_time_list, final_u_list, final_v_list, final_r_list, final_ψ_list, final_δ_list
+    final_u_list, final_v_list, final_r_list, final_ψ_list, final_δ_list
 end

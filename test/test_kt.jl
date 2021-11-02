@@ -12,12 +12,12 @@ end
 @testset "kt_zigzag_test" begin
     K = 0.155
     T = 80.5
-    target_δ_rad = 30.0 * π / 180.0
+    target_δ_rad = 10.0 * π / 180.0
     target_ψ_rad_deviation = 10.0 * π / 180.0
     start_time_second = 0.0
     time_second_interval = 0.01
-    end_time_second = 500.0
+    end_time_second = 200.0
     time_list = start_time_second:time_second_interval:end_time_second
-    time_list, r_list, ψ_list, δ_list =
+    r_list, ψ_list, δ_list =
         kt_zigzag_test(K, T, time_list, target_δ_rad, target_ψ_rad_deviation)
 end
