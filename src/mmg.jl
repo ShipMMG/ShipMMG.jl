@@ -834,8 +834,6 @@ function mmg_3dof_zigzag_test(
 )
     target_ψ_rad_deviation = abs(target_ψ_rad_deviation)
 
-    # time_list = start_time_second:time_second_interval:end_time_second
-    # final_time_list = zeros(length(time_list))
     final_δ_list = zeros(length(time_list))
     final_u_list = zeros(length(time_list))
     final_v_list = zeros(length(time_list))
@@ -907,7 +905,6 @@ function mmg_3dof_zigzag_test(
         end
         next_stage_index = length(time_list)
         if isnothing(over_index)
-            # final_time_list[start_index:next_stage_index] = time
             final_δ_list[start_index:next_stage_index] = δ_list
             final_u_list[start_index:next_stage_index] = u
             final_v_list[start_index:next_stage_index] = v
@@ -916,7 +913,6 @@ function mmg_3dof_zigzag_test(
         else
             ψ = ψ_list[over_index]
             next_stage_index = over_index + start_index - 1
-            # final_time_list[start_index:next_stage_index] = time[begin:over_index]
             final_δ_list[start_index:next_stage_index-1] = δ_list[begin:over_index-1]
             final_u_list[start_index:next_stage_index-1] = u[begin:over_index-1]
             final_v_list[start_index:next_stage_index-1] = v[begin:over_index-1]

@@ -27,7 +27,7 @@ end
 
         test_result_file_name = "test_kt.gif"
         shape = [20, 5]
-        draw_gif_result(time_list, x, y, ψ, shape, test_result_file_name)
+        draw_gif_result(time_list, x, y, ψ, shape, test_result_file_name, fps = 5000)
         rm(test_result_file_name)
     end
 

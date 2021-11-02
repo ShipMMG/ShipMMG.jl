@@ -24,12 +24,12 @@ function calc_position(
 end
 
 """
-    draw_gif_result(time, x, y, ψ, shape, file_path, [, fps]) -> gif
+    draw_gif_result(time, x, y, ψ, shape, file_path, [, interval, fps]) -> gif
 
 Draw the gif animation from simulation result.
 """
-function draw_gif_result(time, x, y, ψ, shape, file_path, fps = 10)
-    anim = @animate for i = 1:length(time)
+function draw_gif_result(time, x, y, ψ, shape, file_path; interval = 10, fps = 100)
+    anim = @animate for i = 1:interval:length(time)
         plot(
             x,
             y,

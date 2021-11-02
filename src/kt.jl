@@ -141,8 +141,6 @@ function kt_zigzag_test(
 )
     target_ψ_rad_deviation = abs(target_ψ_rad_deviation)
 
-    # time_list = start_time_second:time_second_interval:end_time_second
-    # final_time_list = zeros(length(time_list))
     final_δ_list = zeros(length(time_list))
     final_r_list = zeros(length(time_list))
     final_ψ_list = zeros(length(time_list))
@@ -206,7 +204,6 @@ function kt_zigzag_test(
             over_index = findfirst(e -> e < target_ψ_rad, ψ_list)
         end
         if isnothing(over_index)
-            # final_time_list[start_index:end] = time
             final_δ_list[start_index:end] = δ_list
             final_r_list[start_index:end] = r
             final_ψ_list[start_index:end] = ψ_list
@@ -214,7 +211,6 @@ function kt_zigzag_test(
         else
             ψ = ψ_list[over_index]
             next_stage_index = over_index + start_index - 1
-            # final_time_list[start_index:next_stage_index-1] = time[begin:over_index-1]
             final_δ_list[start_index:next_stage_index-1] = δ_list[begin:over_index-1]
             final_r_list[start_index:next_stage_index-1] = r[begin:over_index-1]
             final_ψ_list[start_index:next_stage_index-1] = ψ_list[begin:over_index-1]
