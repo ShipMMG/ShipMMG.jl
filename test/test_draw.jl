@@ -20,14 +20,14 @@ end
         Ts = 50.0
         δ_list = 10.0 * pi / 180.0 * sin.(2.0 * pi / Ts * time_list) # [rad]
         kt_results = kt_simulate(K_log, T_log, time_list, δ_list)
-        time, r, δ = kt_results
-        u = u0 * ones(Float64, length(time))
-        v = zeros(Float64, length(time))
-        x, y, ψ = calc_position(time, u, v, r)
+        r, δ = kt_results
+        u = u0 * ones(Float64, length(time_list))
+        v = zeros(Float64, length(time_list))
+        x, y, ψ = calc_position(time_list, u, v, r)
 
         test_result_file_name = "test_kt.gif"
         shape = [20, 5]
-        draw_gif_result(time, x, y, ψ, shape, test_result_file_name)
+        draw_gif_result(time_list, x, y, ψ, shape, test_result_file_name)
         rm(test_result_file_name)
     end
 

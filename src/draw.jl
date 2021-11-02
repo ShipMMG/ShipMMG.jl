@@ -1,8 +1,8 @@
 function calc_position(
-    time_vec::Vector{Float64},
-    u_vec::Vector{Float64},
-    v_vec::Vector{Float64},
-    r_vec::Vector{Float64};
+    time_vec,
+    u_vec,
+    v_vec,
+    r_vec;
     x0::Float64 = 0.0,
     y0::Float64 = 0.0,
     ψ0::Float64 = 0.0,
