@@ -6,11 +6,17 @@
 
 **ShipMMG.jl** is the project of Julia transportation of [ShipMMG](https://github.com/ShipMMG/shipmmg).
 
+## Example
+
+- [ShipMMG.jl example gist](https://gist.github.com/taiga4112/960c174b876790962e18f29e031c02dc)
+
 ## License
+
 [MIT](https://github.com/ShipMMG/shipmmg/blob/master/LICENSE)
 
 ## Contribution
-1. Fork it ( http://github.com/ShipMMG/ShipMMG.jl/fork )
+
+1. Fork it ([http://github.com/ShipMMG/ShipMMG.jl/fork](http://github.com/ShipMMG/ShipMMG.jl/fork))
 2. Create your feature branch (git checkout -b my-new-feature)
 3. Commit your changes (git commit -am 'Add some feature')
 4. Push to the branch (git push origin my-new-feature)
