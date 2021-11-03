@@ -3,10 +3,7 @@ module ShipMMG
 using DifferentialEquations
 using ParameterizedFunctions
 using Dierckx
-using LinearAlgebra
-using Sundials
 using Plots
-using LaTeXStrings
 using Parameters
 
 include("kt.jl")
