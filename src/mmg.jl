@@ -228,106 +228,106 @@ end
 Basic parameters of target ship for MMG 3DOF simulation.
 
 # Arguments
-- `L_pp::Float64`: L_pp
-- `B::Float64`: 
-- `d::Float64`:
-- `x_G::Float64`: 
-- `D_p::Float64`: 
-- `m::Float64`: 
-- `I_zG::Float64`: 
-- `A_R::Float64`: 
-- `η::Float64`: 
-- `m_x::Float64`: 
-- `m_y::Float64`: 
-- `J_z::Float64`: 
-- `f_α::Float64`: 
-- `ϵ::Float64`: 
-- `t_R::Float64`: 
-- `a_H::Float64`: 
-- `x_H::Float64`: 
-- `γ_R_minus::Float64`: 
-- `γ_R_plus::Float64`: 
-- `l_R::Float64`: 
-- `κ::Float64`: 
-- `t_P::Float64`: 
-- `w_P0::Float64`: 
-- `x_P::Float64`: 
+- `L_pp`: L_pp
+- `B`: 
+- `d`:
+- `x_G`: 
+- `D_p`: 
+- `m`: 
+- `I_zG`: 
+- `A_R`: 
+- `η`: 
+- `m_x`: 
+- `m_y`: 
+- `J_z`: 
+- `f_α`: 
+- `ϵ`: 
+- `t_R`: 
+- `a_H`: 
+- `x_H`: 
+- `γ_R_minus`: 
+- `γ_R_plus`: 
+- `l_R`: 
+- `κ`: 
+- `t_P`: 
+- `w_P0`: 
+- `x_P`: 
 """
-mutable struct Mmg3DofBasicParams
-    L_pp::Float64
-    B::Float64
-    d::Float64
-    x_G::Float64
-    D_p::Float64
-    m::Float64
-    I_zG::Float64
-    A_R::Float64
-    η::Float64
-    m_x::Float64
-    m_y::Float64
-    J_z::Float64
-    f_α::Float64
-    ϵ::Float64
-    t_R::Float64
-    a_H::Float64
-    x_H::Float64
-    γ_R_minus::Float64
-    γ_R_plus::Float64
-    l_R::Float64
-    κ::Float64
-    t_P::Float64
-    w_P0::Float64
-    x_P::Float64
-    Mmg3DofBasicParams() = new()
+mutable struct Mmg3DofBasicParams{T}
+    L_pp::T
+    B::T
+    d::T
+    x_G::T
+    D_p::T
+    m::T
+    I_zG::T
+    A_R::T
+    η::T
+    m_x::T
+    m_y::T
+    J_z::T
+    f_α::T
+    ϵ::T
+    t_R::T
+    a_H::T
+    x_H::T
+    γ_R_minus::T
+    γ_R_plus::T
+    l_R::T
+    κ::T
+    t_P::T
+    w_P0::T
+    x_P::T
+    # Mmg3DofBasicParams() = new()
 end
 
 """
 Maneuvering parameters of target ship for MMG 3DOF simulation.
 
 # Arguments
-- `k_0::Float64`
-- `k_1::Float64`
-- `k_2::Float64`
-- `R_0_dash::Float64`
-- `X_vv_dash::Float64`
-- `X_vr_dash::Float64`
-- `X_rr_dash::Float64`
-- `X_vvvv_dash::Float64`
-- `Y_v_dash::Float64`
-- `Y_r_dash::Float64`
-- `Y_vvv_dash::Float64`
-- `Y_vvr_dash::Float64`
-- `Y_vrr_dash::Float64`
-- `Y_rrr_dash::Float64`
-- `N_v_dash::Float64`
-- `N_r_dash::Float64`
-- `N_vvv_dash::Float64`
-- `N_vvr_dash::Float64`
-- `N_vrr_dash::Float64`
-- `N_rrr_dash::Float64`
+- `k_0::T`
+- `k_1::T`
+- `k_2::T`
+- `R_0_dash::T`
+- `X_vv_dash::T`
+- `X_vr_dash::T`
+- `X_rr_dash::T`
+- `X_vvvv_dash::T`
+- `Y_v_dash::T`
+- `Y_r_dash::T`
+- `Y_vvv_dash::T`
+- `Y_vvr_dash::T`
+- `Y_vrr_dash::T`
+- `Y_rrr_dash::T`
+- `N_v_dash::T`
+- `N_r_dash::T`
+- `N_vvv_dash::T`
+- `N_vvr_dash::T`
+- `N_vrr_dash::T`
+- `N_rrr_dash::T`
 """
-mutable struct Mmg3DofManeuveringParams
-    k_0::Float64
-    k_1::Float64
-    k_2::Float64
-    R_0_dash::Float64
-    X_vv_dash::Float64
-    X_vr_dash::Float64
-    X_rr_dash::Float64
-    X_vvvv_dash::Float64
-    Y_v_dash::Float64
-    Y_r_dash::Float64
-    Y_vvv_dash::Float64
-    Y_vvr_dash::Float64
-    Y_vrr_dash::Float64
-    Y_rrr_dash::Float64
-    N_v_dash::Float64
-    N_r_dash::Float64
-    N_vvv_dash::Float64
-    N_vvr_dash::Float64
-    N_vrr_dash::Float64
-    N_rrr_dash::Float64
-    Mmg3DofManeuveringParams() = new()
+mutable struct Mmg3DofManeuveringParams{T}
+    k_0::T
+    k_1::T
+    k_2::T
+    R_0_dash::T
+    X_vv_dash::T
+    X_vr_dash::T
+    X_rr_dash::T
+    X_vvvv_dash::T
+    Y_v_dash::T
+    Y_r_dash::T
+    Y_vvv_dash::T
+    Y_vvr_dash::T
+    Y_vrr_dash::T
+    Y_rrr_dash::T
+    N_v_dash::T
+    N_r_dash::T
+    N_vvv_dash::T
+    N_vvr_dash::T
+    N_vrr_dash::T
+    N_rrr_dash::T
+    # Mmg3DofManeuveringParams() = new()
 end
 
 """
@@ -342,10 +342,10 @@ This function has the same logic of `ShipMMG.simulate()`.
 - `time_list`: the list of simulatino time.
 - `δ_list`: the list of rudder angle [rad].
 - `npm_list`: the list of propeller rpm.
-- `u0::Float64=0.0`: the initial x (surge) velocity.
-- `v0::Float64=0.0`: the initial y (sway) velocity.
-- `r0::Float64=0.0`: the initial rate of turn [rad/s].
-- `ρ::Float64=1.025`: the seawater density [g/cm^3].
+- `u0=0.0`: the initial x (surge) velocity.
+- `v0=0.0`: the initial y (sway) velocity.
+- `r0=0.0`: the initial rate of turn [rad/s].
+- `ρ=1.025`: the seawater density [g/cm^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -450,10 +450,10 @@ function mmg_3dof_simulate(
     time_list,
     δ_list,
     npm_list;
-    u0::Float64 = 0.0,
-    v0::Float64 = 0.0,
-    r0::Float64 = 0.0,
-    ρ::Float64 = 1.025,
+    u0 = 0.0,
+    v0 = 0.0,
+    r0 = 0.0,
+    ρ = 1.025,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
@@ -523,113 +523,113 @@ Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ
 This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 
 # Arguments
-- `L_pp::Float64`: L_pp
-- `B::Float64`: 
-- `d::Float64`:
-- `x_G::Float64`: 
-- `D_p::Float64`: 
-- `m::Float64`: 
-- `I_zG::Float64`: 
-- `A_R::Float64`: 
-- `η::Float64`: 
-- `m_x::Float64`: 
-- `m_y::Float64`: 
-- `J_z::Float64`: 
-- `f_α::Float64`: 
-- `ϵ::Float64`: 
-- `t_R::Float64`: 
-- `a_H::Float64`: 
-- `x_H::Float64`: 
-- `γ_R_minus::Float64`: 
-- `γ_R_plus::Float64`: 
-- `l_R::Float64`: 
-- `κ::Float64`: 
-- `t_P::Float64`: 
-- `w_P0::Float64`: 
-- `x_P::Float64`: 
-- `k_0::Float64`
-- `k_1::Float64`
-- `k_2::Float64`
-- `R_0_dash::Float64`
-- `X_vv_dash::Float64`
-- `X_vr_dash::Float64`
-- `X_rr_dash::Float64`
-- `X_vvvv_dash::Float64`
-- `Y_v_dash::Float64`
-- `Y_r_dash::Float64`
-- `Y_vvv_dash::Float64`
-- `Y_vvr_dash::Float64`
-- `Y_vrr_dash::Float64`
-- `Y_rrr_dash::Float64`
-- `N_v_dash::Float64`
-- `N_r_dash::Float64`
-- `N_vvv_dash::Float64`
-- `N_vvr_dash::Float64`
-- `N_vrr_dash::Float64`
-- `N_rrr_dash::Float64`
+- `L_pp`: L_pp
+- `B`: 
+- `d`:
+- `x_G`: 
+- `D_p`: 
+- `m`: 
+- `I_zG`: 
+- `A_R`: 
+- `η`: 
+- `m_x`: 
+- `m_y`: 
+- `J_z`: 
+- `f_α`: 
+- `ϵ`: 
+- `t_R`: 
+- `a_H`: 
+- `x_H`: 
+- `γ_R_minus`: 
+- `γ_R_plus`: 
+- `l_R`: 
+- `κ`: 
+- `t_P`: 
+- `w_P0`: 
+- `x_P`: 
+- `k_0`
+- `k_1`
+- `k_2`
+- `R_0_dash`
+- `X_vv_dash`
+- `X_vr_dash`
+- `X_rr_dash`
+- `X_vvvv_dash`
+- `Y_v_dash`
+- `Y_r_dash`
+- `Y_vvv_dash`
+- `Y_vvr_dash`
+- `Y_vrr_dash`
+- `Y_rrr_dash`
+- `N_v_dash`
+- `N_r_dash`
+- `N_vvv_dash`
+- `N_vvr_dash`
+- `N_vrr_dash`
+- `N_rrr_dash`
 - `time_list`: the list of simulatino time.
 - `δ_list`: the list of rudder angle [rad].
 - `npm_list`: the list of propeller rpm.
-- `u0::Float64=0.0`: the initial x (surge) velocity.
-- `v0::Float64=0.0`: the initial y (sway) velocity.
-- `r0::Float64=0.0`: the initial rate of turn [rad/s].
-- `ρ::Float64=1.025`: the seawater density [g/cm^3].
+- `u0=0.0`: the initial x (surge) velocity.
+- `v0=0.0`: the initial y (sway) velocity.
+- `r0=0.0`: the initial rate of turn [rad/s].
+- `ρ=1.025`: the seawater density [g/cm^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 """
 function simulate(
-    L_pp::Float64,
-    B::Float64,
-    d::Float64,
-    x_G::Float64,
-    D_p::Float64,
-    m::Float64,
-    I_zG::Float64,
-    A_R::Float64,
-    η::Float64,
-    m_x::Float64,
-    m_y::Float64,
-    J_z::Float64,
-    f_α::Float64,
-    ϵ::Float64,
-    t_R::Float64,
-    a_H::Float64,
-    x_H::Float64,
-    γ_R_minus::Float64,
-    γ_R_plus::Float64,
-    l_R::Float64,
-    κ::Float64,
-    t_P::Float64,
-    w_P0::Float64,
-    x_P::Float64,
-    k_0::Float64,
-    k_1::Float64,
-    k_2::Float64,
-    R_0_dash::Float64,
-    X_vv_dash::Float64,
-    X_vr_dash::Float64,
-    X_rr_dash::Float64,
-    X_vvvv_dash::Float64,
-    Y_v_dash::Float64,
-    Y_r_dash::Float64,
-    Y_vvv_dash::Float64,
-    Y_vvr_dash::Float64,
-    Y_vrr_dash::Float64,
-    Y_rrr_dash::Float64,
-    N_v_dash::Float64,
-    N_r_dash::Float64,
-    N_vvv_dash::Float64,
-    N_vvr_dash::Float64,
-    N_vrr_dash::Float64,
-    N_rrr_dash::Float64,
+    L_pp,
+    B,
+    d,
+    x_G,
+    D_p,
+    m,
+    I_zG,
+    A_R,
+    η,
+    m_x,
+    m_y,
+    J_z,
+    f_α,
+    ϵ,
+    t_R,
+    a_H,
+    x_H,
+    γ_R_minus,
+    γ_R_plus,
+    l_R,
+    κ,
+    t_P,
+    w_P0,
+    x_P,
+    k_0,
+    k_1,
+    k_2,
+    R_0_dash,
+    X_vv_dash,
+    X_vr_dash,
+    X_rr_dash,
+    X_vvvv_dash,
+    Y_v_dash,
+    Y_r_dash,
+    Y_vvv_dash,
+    Y_vvr_dash,
+    Y_vrr_dash,
+    Y_rrr_dash,
+    N_v_dash,
+    N_r_dash,
+    N_vvv_dash,
+    N_vvr_dash,
+    N_vrr_dash,
+    N_rrr_dash,
     time_list,
     δ_list,
     npm_list;
-    u0::Float64 = 0.0,
-    v0::Float64 = 0.0,
-    r0::Float64 = 0.0,
-    ρ::Float64 = 1.025,
+    u0 = 0.0,
+    v0 = 0.0,
+    r0 = 0.0,
+    ρ = 1.025,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
@@ -709,14 +709,14 @@ Returns the MMG 3DOF zigzag simulation results.
 - `maneuvering_params::Mmg3DofManeuveringParams`: the maneuvering parameters of target ship.
 - `time_list`: the list of simulatino time.
 - `npm_list`: the list of propeller rpm.
-- `target_δ_rad::Float64`: target rudder angle of zigzag test.
-- `target_ψ_rad_deviation::Float64`: target azimuth deviation of zigzag test.
-- `u0::Float64=0.0`: the initial x (surge) velocity.
-- `v0::Float64=0.0`: the initial y (sway) velocity.
-- `r0::Float64=0.0`: the initial rate of turn [rad/s].
-- `δ0::Float64=0.0`: the initial rudder angle.
-- `δ_rad_rate::Float64=10.0*π/180`: the change rate of rudder angle [rad/s]. 
-- `ρ::Float64=1.025`: the seawater density [g/cm^3].
+- `target_δ_rad`: target rudder angle of zigzag test.
+- `target_ψ_rad_deviation`: target azimuth deviation of zigzag test.
+- `u0=0.0`: the initial x (surge) velocity.
+- `v0=0.0`: the initial y (sway) velocity.
+- `r0=0.0`: the initial rate of turn [rad/s].
+- `δ0=0.0`: the initial rudder angle.
+- `δ_rad_rate=10.0*π/180`: the change rate of rudder angle [rad/s]. 
+- `ρ=1.025`: the seawater density [g/cm^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -819,15 +819,15 @@ function mmg_3dof_zigzag_test(
     maneuvering_params::Mmg3DofManeuveringParams,
     time_list,
     npm_list,
-    target_δ_rad::Float64,
-    target_ψ_rad_deviation::Float64;
-    u0::Float64 = 0.0,
-    v0::Float64 = 0.0,
-    r0::Float64 = 0.0,
-    ψ0::Float64 = 0.0,
-    δ0::Float64 = 0.0,
-    δ_rad_rate::Float64 = 10.0 * π / 180,
-    ρ::Float64 = 1.025,
+    target_δ_rad,
+    target_ψ_rad_deviation;
+    u0 = 0.0,
+    v0 = 0.0,
+    r0 = 0.0,
+    ψ0 = 0.0,
+    δ0 = 0.0,
+    δ_rad_rate = 10.0 * π / 180,
+    ρ = 1.025,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
