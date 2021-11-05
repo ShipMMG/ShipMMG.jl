@@ -6,6 +6,9 @@ using Dierckx
 using Plots
 using Parameters
 
+include("data.jl")
+export calc_position, ShipData
+
 include("kt.jl")
 export kt_simulate, kt_model!, kt_zigzag_test
 
