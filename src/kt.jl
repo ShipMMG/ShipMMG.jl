@@ -39,11 +39,11 @@ end
 Returns the KT simulation results.
 
 # Arguments
-- `K::Float64`: the K Parameter.
-- `T::Float64`: the T Parameter.
+- `K`: the K Parameter.
+- `T`: the T Parameter.
 - `time_list`: the list of simulatino time.
 - `δ_list`: the list of rudder angle [rad].
-- `r0::Float64=0.0`: the inital rate of turn [rad/s].
+- `r0=0.0`: the inital rate of turn [rad/s].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -63,11 +63,11 @@ julia> r, δ = kt_simulate(time_list, δ_list, K_log, T_log)
 ```
 """
 function kt_simulate(
-    K::Float64,
-    T::Float64,
+    K,
+    T,
     time_list,
     δ_list;
-    r0::Float64 = 0.0,
+    r0 = 0.0,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
@@ -92,15 +92,15 @@ end
 Returns the KT simulation results.
 
 # Arguments
-- `K::Float64`: the K Parameter.
-- `T::Float64`: the T Parameter.
+- `K`: the K Parameter.
+- `T`: the T Parameter.
 - `time_list`: the list of simulatino time.
-- `target_δ_rad::Float64`: target rudder angle of zigzag test.
-- `target_ψ_rad_deviation::Float64`: target azimuth deviation of zigzag test.
-- `r0::Float64=0.0`: the initial rate of turn [rad/s].
-- `ψ0::Float64=0.0`: the initial azimuth.
-- `δ0::Float64=0.0`: the initial rudder angle.
-- `δ_rad_rate::Float64=10.0*π/180`: the change rate of rudder angle [rad/s]. 
+- `target_δ_rad`: target rudder angle of zigzag test.
+- `target_ψ_rad_deviation`: target azimuth deviation of zigzag test.
+- `r0=0.0`: the initial rate of turn [rad/s].
+- `ψ0=0.0`: the initial azimuth.
+- `δ0=0.0`: the initial rudder angle.
+- `δ_rad_rate=10.0*π/180`: the change rate of rudder angle [rad/s]. 
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -126,15 +126,15 @@ julia> r_list, δ_list, ψ_list = kt_zigzag_test(
 ```
 """
 function kt_zigzag_test(
-    K::Float64,
-    T::Float64,
+    K,
+    T,
     time_list,
-    target_δ_rad::Float64,
-    target_ψ_rad_deviation::Float64;
-    r0::Float64 = 0.0,
-    ψ0::Float64 = 0.0,
-    δ0::Float64 = 0.0,
-    δ_rad_rate::Float64 = 10.0 * π / 180,
+    target_δ_rad,
+    target_ψ_rad_deviation;
+    r0 = 0.0,
+    ψ0 = 0.0,
+    δ0 = 0.0,
+    δ_rad_rate = 10.0 * π / 180,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,

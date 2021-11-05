@@ -34,8 +34,8 @@ function draw_gif_result(time, x, y, ψ, shape, file_path; interval = 10, fps = 
             x,
             y,
             label = "",
-            xlabel = L"x \textrm{[m]}",
-            ylabel = L"y \textrm{[m]}",
+            xlabel = "x [m]",
+            ylabel = "y [m]",
             linestyle = :dot,
             aspect_ratio = :equal,
         )
