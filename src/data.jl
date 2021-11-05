@@ -1,13 +1,13 @@
-@with_kw struct ShipData{T}
-    time::T
-    u::T
-    v::T
-    r::T
-    x::T
-    y::T
-    ψ::T
-    δ::T
-    npm::T
+@with_kw struct ShipData{Tt,Tu,Tv,Tr,Tx,Ty,Tψ,Tδ,Tnpm}
+    time::Tt
+    u::Tu
+    v::Tv
+    r::Tr
+    x::Tx
+    y::Ty
+    ψ::Tψ
+    δ::Tδ
+    npm::Tnpm
 end
 
 function calc_position(
@@ -33,4 +33,19 @@ function calc_position(
         y_vec[i] = y_vec[i-1] + (u_vec[i] * sin(ψ_vec[i]) + v_vec[i] * cos(ψ_vec[i])) * Δt
     end
     x_vec, y_vec, ψ_vec
+end
+
+function estimate_KT_LSM(data::ShipData)
+    time_vec = data.time
+    r_vec = data.r
+    δ_vec = data.δ
+
+    spl_r = Spline1D(time_vec, r_vec)
+    f = (spl, x) -> derivative(spl, x)
+    r_dot = f(spl_r, time_vec)
+    A = hcat(δ_vec, r_vec)
+    Θ = A \ r_dot
+    T = -1.0 / Θ[2]
+    K = Θ[1] * T
+    K, T
 end

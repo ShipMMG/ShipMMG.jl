@@ -7,7 +7,7 @@ using Plots
 using Parameters
 
 include("data.jl")
-export calc_position, ShipData
+export calc_position, ShipData, estimate_KT_LSM
 
 include("kt.jl")
 export kt_simulate, kt_model!, kt_zigzag_test
