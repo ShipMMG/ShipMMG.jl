@@ -20,7 +20,7 @@ end
     r, δ = kt_simulate(K, T, time_list, δ_list)
 
     data = ShipData(time_list, 0, 0, r, 0, 0, 0, δ, 0)
-    K_est, T_est = estimate_KT_LSM(data)
+    K_est, T_est = estimate_kt_lsm(data)
     @test abs(K - K_est) < 1.0
     @test abs(T - T_est) < 10.0
 end

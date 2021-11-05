@@ -35,7 +35,7 @@ function calc_position(
     x_vec, y_vec, ψ_vec
 end
 
-function estimate_KT_LSM(data::ShipData)
+function estimate_kt_lsm(data::ShipData)
     time_vec = data.time
     r_vec = data.r
     δ_vec = data.δ
