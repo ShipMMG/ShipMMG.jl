@@ -314,3 +314,92 @@ function estimate_mmg_approx_lsm_time_window_sampling(
     N_vrr_dash_samples,
     N_rrr_dash_samples
 end
+
+function create_model_for_mcmc_sample_kt(
+    data::ShipData;
+    σ_r_prior_dist = Chi(5),
+    K_prior_dist = Uniform(0.01, 10.0),
+    T_prior_dist = truncated(Normal(100.0, 50.0), 10.0, 200.0),
+)
+    time_obs = data.time
+    r_obs = data.r
+    δ_obs = data.δ
+
+    # create sytem model
+    spl_δ = Spline1D(time_obs, δ_obs)
+    function KT!(dX, X, p, t)
+        r, δ = X
+        K, T = p
+        dX[1] = dr = 1.0 / T * (-r + K * δ) # dr = 
+        dX[2] = dδ = derivative(spl_δ, t) # dδ = 
+    end
+    u0 = [r_obs[1]; δ_obs[1]]
+    K_start = 0.10
+    T_start = 60.0
+    p = [K_start, T_start]
+    prob1 = ODEProblem(KT!, u0, (time_obs[1], time_obs[end]), p)
+
+    # create probabilistic model
+    @model function fitKT(time_obs, r_obs, prob1)
+        σ_r ~ σ_r_prior_dist
+        K ~ K_prior_dist
+        T ~ T_prior_dist
+
+        p = [K, T]
+        prob = remake(prob1, p = p)
+        sol = solve(prob, Tsit5())
+        predicted = sol(time_obs)
+        for i = 1:length(predicted)
+            r_obs[i] ~ Normal(predicted[i][1], σ_r) # index number of r is 1
+        end
+    end
+
+    return fitKT(time_obs, r_obs, prob1)
+end
+
+function mcmc_sample_kt(
+    data::ShipData,
+    n_samples::Int,
+    n_chains::Int;
+    σ_r_prior_dist = Chi(5),
+    K_prior_dist = Uniform(0.01, 10.0),
+    T_prior_dist = truncated(Normal(100.0, 50.0), 10.0, 200.0),
+    # sampler = NUTS(0.65),
+    progress = true,
+    # multi_threads = false,
+)
+
+    model = create_model_for_mcmc_sample_kt(
+        data,
+        σ_r_prior_dist = σ_r_prior_dist,
+        K_prior_dist = K_prior_dist,
+        T_prior_dist = T_prior_dist,
+    )
+
+    sampler = NUTS(0.65)
+    mapreduce(
+        c -> sample(model, sampler, n_samples, progress = progress),
+        chainscat,
+        1:n_chains,
+    )
+end
+
+function mcmc_sample_kt_using_multi_threads(
+    data::ShipData,
+    n_samples::Int,
+    n_chains::Int;
+    σ_r_prior_dist = Chi(5),
+    K_prior_dist = Uniform(0.01, 10.0),
+    T_prior_dist = truncated(Normal(100.0, 50.0), 10.0, 200.0),
+    # sampler = NUTS(0.65),
+    progress = false,
+)
+    model = create_model_for_mcmc_sample_kt(
+        data,
+        σ_r_prior_dist = σ_r_prior_dist,
+        K_prior_dist = K_prior_dist,
+        T_prior_dist = T_prior_dist,
+    )
+    sampler = NUTS(0.65)
+    sample(model, sampler, MCMCThreads(), n_samples, n_chains, progress = progress)
+end

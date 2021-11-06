@@ -42,6 +42,28 @@ end
         estimate_kt_lsm_time_window_sampling(data, one_sample_size)
 end
 
+@testset "kt mcmc sampling func" begin
+    K = 0.155  # [1/s]
+    T = 80.5  # [s]
+    duration = 500  # [s]
+    sampling = 1001
+    time_list = range(0.0, stop = duration, length = sampling)
+    Ts = 50.0
+    δ_list = 10.0 * pi / 180.0 * sin.(2.0 * pi / Ts * time_list) # [rad]
+    r, δ = kt_simulate(K, T, time_list, δ_list)
+    sampling_rate = 10
+    time_obs = time_list[1:sampling_rate:end]
+    noize_dist = Normal(0.0, 0.005)
+    r_w_noize = r + rand(noize_dist, size(r))
+    r_obs = r_w_noize[1:sampling_rate:end]
+    δ_obs = δ[1:sampling_rate:end]
+    data = ShipData(time_obs, 0, 0, r_obs, 0, 0, 0, δ_obs, 0)
+    n_samples = 10
+    n_chains = 1
+    # model = create_model_for_mcmc_sample_kt(data)
+    chain = mcmc_sample_kt(data, n_samples, n_chains)
+end
+
 @testset "mmg 3dof approx least square method func" begin
     # --- KVLCC2_L7 --
     ρ = 1.025  # 海水密度
