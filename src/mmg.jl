@@ -253,31 +253,56 @@ Basic parameters of target ship for MMG 3DOF simulation.
 - `w_P0`: 
 - `x_P`: 
 """
-@with_kw mutable struct Mmg3DofBasicParams{T}
-    L_pp::T
-    B::T
-    d::T
-    x_G::T
-    D_p::T
-    m::T
-    I_zG::T
-    A_R::T
-    η::T
-    m_x::T
-    m_y::T
-    J_z::T
-    f_α::T
-    ϵ::T
-    t_R::T
-    a_H::T
-    x_H::T
-    γ_R_minus::T
-    γ_R_plus::T
-    l_R::T
-    κ::T
-    t_P::T
-    w_P0::T
-    x_P::T
+@with_kw mutable struct Mmg3DofBasicParams{
+    Ta,
+    Tb,
+    Tc,
+    Td,
+    Te,
+    Tf,
+    Tg,
+    Th,
+    Ti,
+    Tj,
+    Tk,
+    Tl,
+    Tm,
+    Tn,
+    To,
+    Tp,
+    Tq,
+    Tr,
+    Ts,
+    Tt,
+    Tu,
+    Tv,
+    Tw,
+    Tx,
+}
+    L_pp::Ta
+    B::Tb
+    d::Tc
+    x_G::Td
+    D_p::Te
+    m::Tf
+    I_zG::Tg
+    A_R::Th
+    η::Ti
+    m_x::Tj
+    m_y::Tk
+    J_z::Tl
+    f_α::Tm
+    ϵ::Tn
+    t_R::To
+    a_H::Tp
+    x_H::Tq
+    γ_R_minus::Tr
+    γ_R_plus::Ts
+    l_R::Tt
+    κ::Tu
+    t_P::Tv
+    w_P0::Tw
+    x_P::Tx
     # Mmg3DofBasicParams() = new()
 end
 
@@ -306,27 +331,48 @@ Maneuvering parameters of target ship for MMG 3DOF simulation.
 - `N_vrr_dash::T`
 - `N_rrr_dash::T`
 """
-@with_kw mutable struct Mmg3DofManeuveringParams{T}
-    k_0::T
-    k_1::T
-    k_2::T
-    R_0_dash::T
-    X_vv_dash::T
-    X_vr_dash::T
-    X_rr_dash::T
-    X_vvvv_dash::T
-    Y_v_dash::T
-    Y_r_dash::T
-    Y_vvv_dash::T
-    Y_vvr_dash::T
-    Y_vrr_dash::T
-    Y_rrr_dash::T
-    N_v_dash::T
-    N_r_dash::T
-    N_vvv_dash::T
-    N_vvr_dash::T
-    N_vrr_dash::T
-    N_rrr_dash::T
+@with_kw mutable struct Mmg3DofManeuveringParams{
+    Ta,
+    Tb,
+    Tc,
+    Td,
+    Te,
+    Tf,
+    Tg,
+    Th,
+    Ti,
+    Tj,
+    Tk,
+    Tl,
+    Tm,
+    Tn,
+    To,
+    Tp,
+    Tq,
+    Tr,
+    Ts,
+    Tt,
+}
+    k_0::Ta
+    k_1::Tb
+    k_2::Tc
+    R_0_dash::Td
+    X_vv_dash::Te
+    X_vr_dash::Tf
+    X_rr_dash::Tg
+    X_vvvv_dash::Th
+    Y_v_dash::Ti
+    Y_r_dash::Tj
+    Y_vvv_dash::Tk
+    Y_vvr_dash::Tl
+    Y_vrr_dash::Tm
+    Y_rrr_dash::Tn
+    N_v_dash::To
+    N_r_dash::Tp
+    N_vvv_dash::Tq
+    N_vvr_dash::Tr
+    N_vrr_dash::Ts
+    N_rrr_dash::Tt
     # Mmg3DofManeuveringParams() = new()
 end
 
