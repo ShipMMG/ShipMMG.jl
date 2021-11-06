@@ -278,7 +278,6 @@ Basic parameters of target ship for MMG 3DOF simulation.
     t_P::T
     w_P0::T
     x_P::T
-    # Mmg3DofBasicParams() = new()
 end
 
 """
@@ -327,7 +326,6 @@ Maneuvering parameters of target ship for MMG 3DOF simulation.
     N_vvr_dash::T
     N_vrr_dash::T
     N_rrr_dash::T
-    # Mmg3DofManeuveringParams() = new()
 end
 
 """
