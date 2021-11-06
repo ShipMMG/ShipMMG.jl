@@ -5,7 +5,6 @@ using ParameterizedFunctions
 using Dierckx
 using Plots
 using Parameters
-using StatsBase
 using Distributions
 
 include("kt.jl")
