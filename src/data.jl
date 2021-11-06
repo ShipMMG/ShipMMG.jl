@@ -34,12 +34,33 @@ function estimate_kt_lsm(data::ShipData)
 
     spl_r = Spline1D(time_vec, r_vec)
     f = (spl, x) -> derivative(spl, x)
-    r_dot = f(spl_r, time_vec)
+    dr_vec = f(spl_r, time_vec)
+    estimate_kt_lsm(r_vec, dr_vec, δ_vec)
+end
+
+function estimate_kt_lsm(r_vec, dr_vec, δ_vec)
     A = hcat(δ_vec, r_vec)
-    Θ = A \ r_dot
+    Θ = A \ dr_vec
     T = -1.0 / Θ[2]
     K = Θ[1] * T
     K, T
+end
+
+function estimate_kt_lsm_time_window_sampling(data::ShipData, window_size::Int)
+    time_vec = data.time
+    r = data.r
+    spl_r = Spline1D(time_vec, r)
+    f = (spl, x) -> derivative(spl, x)
+    dr = f(spl_r, time_vec)
+    δ = data.δ
+    n_samples = length(time_vec) - window_size
+    K_samples = zeros(n_samples)
+    T_samples = zeros(n_samples)
+    for i = 1:n_samples
+        K_samples[i], T_samples[i] =
+            estimate_kt_lsm(r[i:i+window_size], dr[i:i+window_size], δ[i:i+window_size])
+    end
+    K_samples, T_samples
 end
 
 function estimate_mmg_approx_lsm(

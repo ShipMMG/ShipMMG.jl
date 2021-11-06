@@ -25,6 +25,23 @@ end
     @test abs(T - T_est) < 10.0
 end
 
+@testset "kt bootstrap least square method func" begin
+    K = 0.155  # [1/s]
+    T = 80.5  # [s]
+    duration = 500  # [s]
+    sampling = 10000
+    time_list = range(0.0, stop = duration, length = sampling)
+    Ts = 50.0
+    δ_list = 10.0 * pi / 180.0 * sin.(2.0 * pi / Ts * time_list) # [rad]
+    r, δ = kt_simulate(K, T, time_list, δ_list)
+    noize_dist = Normal(0.0, 0.0005)
+    r_obs = r + rand(noize_dist, size(r))
+    data = ShipData(time_list, 0, 0, r_obs, 0, 0, 0, δ, 0)
+    one_sample_size = 5000
+    K_est_samples, T_est_samples =
+        estimate_kt_lsm_time_window_sampling(data, one_sample_size)
+end
+
 @testset "mmg 3dof approx least square method func" begin
     # --- KVLCC2_L7 --
     ρ = 1.025  # 海水密度
