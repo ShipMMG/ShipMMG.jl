@@ -71,7 +71,7 @@ function estimate_mmg_approx_lsm(
     k_2;
     ρ = 1.025,
 )
-    @unpack time_vec, u, v, r, x, y, ψ, δ, npm = data
+    @unpack time, u, v, r, x, y, ψ, δ, npm = data
     @unpack L_pp,
     B,
     d,
@@ -102,21 +102,21 @@ function estimate_mmg_approx_lsm(
     U = sqrt.(u .^ 2 + (v - r .* x_G) .^ 2)
 
     β = U .^ 0
-    for i = 1:length(time_vec)
+    for i = 1:length(time)
         if isapprox(U[i], 0.0) == false
             β[i] = asin(-(v[i] - r[i] * x_G) / U[i])
         end
     end
 
     v_dash = U .^ 0
-    for i = 1:length(time_vec)
+    for i = 1:length(time)
         if isapprox(U[i], 0.0) == false
             v_dash[i] = v[i] / U[i]
         end
     end
 
     r_dash = U .^ 0
-    for i = 1:length(time_vec)
+    for i = 1:length(time)
         if isapprox(U[i], 0.0) == false
             r_dash[i] = r[i] * L_pp / U[i]
         end
@@ -125,7 +125,7 @@ function estimate_mmg_approx_lsm(
     w_P = w_P0 * exp.(.-4.0 * (β - r_dash .* x_P) .^ 2)
 
     J = U .^ 0
-    for i = 1:length(time_vec)
+    for i = 1:length(time)
         if isapprox(npm[i], 0.0) == false
             J[i] = (1.0 - w_P[i]) * u[i] / (npm[i] * D_p)
         end
@@ -135,7 +135,7 @@ function estimate_mmg_approx_lsm(
     β_R = β - r_dash .* l_R
 
     γ_R = U .^ 0
-    for i = 1:length(time_vec)
+    for i = 1:length(time)
         if β_R[i] < 0.0
             γ_R[i] = γ_R_minus
         else
@@ -146,7 +146,7 @@ function estimate_mmg_approx_lsm(
     v_R = U .* γ_R .* β_R
 
     u_R = U .^ 0
-    for i = 1:length(time_vec)
+    for i = 1:length(time)
         if J[i] == 0.0
             u_R[i] = sqrt(η * (κ * ϵ * 8.0 * k_0 * npm[i]^2 * D_p^4 / pi)^2)
         else
@@ -171,13 +171,13 @@ function estimate_mmg_approx_lsm(
     # -------------------------------------
 
     # -------------------------------------
-    spl_u = Spline1D(time_vec, u)
-    spl_v = Spline1D(time_vec, v)
-    spl_r = Spline1D(time_vec, r)
+    spl_u = Spline1D(time, u)
+    spl_v = Spline1D(time, v)
+    spl_r = Spline1D(time, r)
     f = (spl, x) -> derivative(spl, x)
-    du = f(spl_u, time_vec)
-    dv = f(spl_v, time_vec)
-    dr = f(spl_r, time_vec)
+    du = f(spl_u, time)
+    dv = f(spl_v, time)
+    dr = f(spl_r, time)
 
 
     # calculating parameters
@@ -236,4 +236,81 @@ function estimate_mmg_approx_lsm(
     N_vvr_dash,
     N_vrr_dash,
     N_rrr_dash
+end
+
+function estimate_mmg_approx_lsm_time_window_sampling(
+    data::ShipData,
+    window_size::Int,
+    basic_params::Mmg3DofBasicParams,
+    k_0,
+    k_1,
+    k_2;
+    ρ = 1.025,
+)
+    n_samples = length(data.time) - window_size
+    R_0_dash_samples = zeros(n_samples)
+    X_vv_dash_samples = zeros(n_samples)
+    X_vr_dash_samples = zeros(n_samples)
+    X_rr_dash_samples = zeros(n_samples)
+    X_vvvv_dash_samples = zeros(n_samples)
+    Y_v_dash_samples = zeros(n_samples)
+    Y_r_dash_samples = zeros(n_samples)
+    Y_vvv_dash_samples = zeros(n_samples)
+    Y_vvr_dash_samples = zeros(n_samples)
+    Y_vrr_dash_samples = zeros(n_samples)
+    Y_rrr_dash_samples = zeros(n_samples)
+    N_v_dash_samples = zeros(n_samples)
+    N_r_dash_samples = zeros(n_samples)
+    N_vvv_dash_samples = zeros(n_samples)
+    N_vvr_dash_samples = zeros(n_samples)
+    N_vrr_dash_samples = zeros(n_samples)
+    N_rrr_dash_samples = zeros(n_samples)
+    for i = 1:n_samples
+        sample_data = ShipData(
+            data.time[i:i+window_size],
+            data.u[i:i+window_size],
+            data.v[i:i+window_size],
+            data.r[i:i+window_size],
+            data.x[i:i+window_size],
+            data.y[i:i+window_size],
+            data.ψ[i:i+window_size],
+            data.δ[i:i+window_size],
+            data.npm[i:i+window_size],
+        )
+        R_0_dash_samples[i],
+        X_vv_dash_samples[i],
+        X_vr_dash_samples[i],
+        X_rr_dash_samples[i],
+        X_vvvv_dash_samples[i],
+        Y_v_dash_samples[i],
+        Y_r_dash_samples[i],
+        Y_vvv_dash_samples[i],
+        Y_vvr_dash_samples[i],
+        Y_vrr_dash_samples[i],
+        Y_rrr_dash_samples[i],
+        N_v_dash_samples[i],
+        N_r_dash_samples[i],
+        N_vvv_dash_samples[i],
+        N_vvr_dash_samples[i],
+        N_vrr_dash_samples[i],
+        N_rrr_dash_samples[i] =
+            estimate_mmg_approx_lsm(sample_data, basic_params, k_0, k_1, k_2, ρ = ρ)
+    end
+    R_0_dash_samples,
+    X_vv_dash_samples,
+    X_vr_dash_samples,
+    X_rr_dash_samples,
+    X_vvvv_dash_samples,
+    Y_v_dash_samples,
+    Y_r_dash_samples,
+    Y_vvv_dash_samples,
+    Y_vvr_dash_samples,
+    Y_vrr_dash_samples,
+    Y_rrr_dash_samples,
+    N_v_dash_samples,
+    N_r_dash_samples,
+    N_vvv_dash_samples,
+    N_vvr_dash_samples,
+    N_vrr_dash_samples,
+    N_rrr_dash_samples
 end

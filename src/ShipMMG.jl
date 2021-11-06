@@ -17,7 +17,11 @@ export Mmg3DofBasicParams,
 
 include("data.jl")
 export calc_position,
-    ShipData, estimate_kt_lsm, estimate_kt_lsm_time_window_sampling, estimate_mmg_approx_lsm
+    ShipData,
+    estimate_kt_lsm,
+    estimate_kt_lsm_time_window_sampling,
+    estimate_mmg_approx_lsm,
+    estimate_mmg_approx_lsm_time_window_sampling
 
 include("draw.jl")
 export draw_gif_result, calc_position
