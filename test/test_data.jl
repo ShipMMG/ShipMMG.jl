@@ -60,8 +60,8 @@ end
     data = ShipData(time_obs, 0, 0, r_obs, 0, 0, 0, δ_obs, 0)
     n_samples = 10
     n_chains = 1
-    # model = create_model_for_mcmc_sample_kt(data)
-    chain = mcmc_sample_kt(data, n_samples, n_chains)
+    model = create_model_for_mcmc_sample_kt(data)
+    chain = nuts_sampling_single_thread(model, n_samples, n_chains)
 end
 
 @testset "mmg 3dof approx least square method func" begin
@@ -361,7 +361,7 @@ end
     estimate_mmg_apporx_lsm_time_window_sampling(data, 5000)
 end
 
-@testset "kt mcmc sampling func" begin
+@testset "mmg mcmc sampling func" begin
     # --- KVLCC2_L7 --
     ρ = 1.025  # 海水密度
 
@@ -487,7 +487,7 @@ end
     max_δ_rad = 35 * pi / 180.0  # [rad]
     n_const = 17.95  # [rpm]
 
-    sampling = duration * 10
+    sampling = duration * 10 + 1
     time_list = range(0.00, stop = duration, length = sampling)
     δ_rad_list = max_δ_rad .* ones(Float64, sampling)
     npm_list = n_const .* ones(Float64, sampling)
@@ -502,14 +502,16 @@ end
         r0 = 0.0,
     )
     u, v, r, δ, npm = mmg_results
-    noize_dist = Normal(0.0, 0.0005)
+    sampling_rate = 10
+    time_obs = time_list[1:sampling_rate:end]
+    noize_dist = Normal(0.0, 0.01)
     u_obs = u + rand(noize_dist, size(u))
     v_obs = v + rand(noize_dist, size(v))
     r_obs = r + rand(noize_dist, size(r))
-    x, y, ψ = calc_position(time_list, u_obs, v_obs, r_obs)
-    data = ShipData(time_list, u_obs, v_obs, r_obs, x, y, ψ, δ, npm)
+    x, y, ψ = calc_position(time_obs, u_obs, v_obs, r_obs)
+    data = ShipData(time_obs, u_obs, v_obs, r_obs, x, y, ψ, δ[1:sampling_rate:end], npm[1:sampling_rate:end])
     n_samples = 10
     n_chains = 1
-    # model = create_model_for_mcmc_sample_kt(data)
-    chain = mcmc_sample_mmg(data,basic_params, k_0,k_1,k_2, n_samples, n_chains)
+    model = create_model_for_mcmc_sample_mmg(data, basic_params, k_0, k_1, k_2)
+    chain = nuts_sampling_single_thread(model, n_samples, n_chains)
 end

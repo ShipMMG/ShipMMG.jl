@@ -357,59 +357,13 @@ function create_model_for_mcmc_sample_kt(
     return fitKT(time_obs, r_obs, prob1)
 end
 
-function mcmc_sample_kt(
-    data::ShipData,
-    n_samples::Int,
-    n_chains::Int;
-    σ_r_prior_dist = Chi(5),
-    K_prior_dist = Uniform(0.01, 10.0),
-    T_prior_dist = truncated(Normal(100.0, 50.0), 10.0, 200.0),
-    # sampler = NUTS(0.65),
-    progress = true,
-    # multi_threads = false,
-)
-
-    model = create_model_for_mcmc_sample_kt(
-        data,
-        σ_r_prior_dist = σ_r_prior_dist,
-        K_prior_dist = K_prior_dist,
-        T_prior_dist = T_prior_dist,
-    )
-
-    sampler = NUTS(0.65)
-    mapreduce(
-        c -> sample(model, sampler, n_samples, progress = progress),
-        chainscat,
-        1:n_chains,
-    )
-end
-
-function mcmc_sample_kt_using_multi_threads(
-    data::ShipData,
-    n_samples::Int,
-    n_chains::Int;
-    σ_r_prior_dist = Chi(5),
-    K_prior_dist = Uniform(0.01, 10.0),
-    T_prior_dist = truncated(Normal(100.0, 50.0), 10.0, 200.0),
-    # sampler = NUTS(0.65),
-    progress = false,
-)
-    model = create_model_for_mcmc_sample_kt(
-        data,
-        σ_r_prior_dist = σ_r_prior_dist,
-        K_prior_dist = K_prior_dist,
-        T_prior_dist = T_prior_dist,
-    )
-    sampler = NUTS(0.65)
-    sample(model, sampler, MCMCThreads(), n_samples, n_chains, progress = progress)
-end
-
 function create_model_for_mcmc_sample_mmg(
     data::ShipData,
     basic_params::Mmg3DofBasicParams,
     k_0,
     k_1,
     k_2;
+    ρ = 1.025,
     σ_u_prior_dist = Uniform(0.00, 0.20),
     σ_v_prior_dist = Uniform(0.00, 0.20),
     σ_r_prior_dist = Uniform(0.00, 0.20),
@@ -430,7 +384,9 @@ function create_model_for_mcmc_sample_mmg(
     N_vvr_dash_prior_dist = Uniform(-2.0, 2.0),
     N_vrr_dash_prior_dist = Uniform(-2.0, 2.0),
     N_rrr_dash_prior_dist = Uniform(-2.0, 2.0),
-    ρ = 1.025,
+    solver = Tsit5(),
+    abstol = 1e-6,
+    reltol = 1e-3,
 )
     time_obs = data.time
     u_obs = data.u
@@ -692,7 +648,7 @@ function create_model_for_mcmc_sample_mmg(
             N_rrr_dash,
         ]
         prob = remake(prob1, p = p)
-        sol = solve(prob, Tsit5())
+        sol = solve(prob, solver, abstol = abstol, reltol = reltol)
         predicted = sol(time_obs)
         for i = 1:length(predicted)
             obs[1][i] ~ Normal(predicted[i][1], σ_u) # u
@@ -704,70 +660,14 @@ function create_model_for_mcmc_sample_mmg(
     return fitMMG(time_obs, [u_obs, v_obs, r_obs], prob1)
 end
 
-function mcmc_sample_mmg(
-    data::ShipData,
-    basic_params::Mmg3DofBasicParams,
-    k_0,
-    k_1,
-    k_2,
+function nuts_sampling_single_thread(
+    model,
     n_samples::Int,
     n_chains::Int;
-    σ_u_prior_dist = Uniform(0.00, 0.20),
-    σ_v_prior_dist = Uniform(0.00, 0.20),
-    σ_r_prior_dist = Uniform(0.00, 0.20),
-    R_0_dash_prior_dist = Uniform(-2.0, 2.0),
-    X_vv_dash_prior_dist = Uniform(-2.0, 2.0),
-    X_vr_dash_prior_dist = Uniform(-2.0, 2.0),
-    X_rr_dash_prior_dist = Uniform(-2.0, 2.0),
-    X_vvvv_dash_prior_dist = Uniform(-2.0, 2.0),
-    Y_v_dash_prior_dist = Uniform(-2.0, 2.0),
-    Y_r_dash_prior_dist = Uniform(-2.0, 2.0),
-    Y_vvv_dash_prior_dist = Uniform(-2.0, 2.0),
-    Y_vvr_dash_prior_dist = Uniform(-2.0, 2.0),
-    Y_vrr_dash_prior_dist = Uniform(-2.0, 2.0),
-    Y_rrr_dash_prior_dist = Uniform(-2.0, 2.0),
-    N_v_dash_prior_dist = Uniform(-2.0, 2.0),
-    N_r_dash_prior_dist = Uniform(-2.0, 2.0),
-    N_vvv_dash_prior_dist = Uniform(-2.0, 2.0),
-    N_vvr_dash_prior_dist = Uniform(-2.0, 2.0),
-    N_vrr_dash_prior_dist = Uniform(-2.0, 2.0),
-    N_rrr_dash_prior_dist = Uniform(-2.0, 2.0),
-    ρ = 1.025,
-    # sampler = NUTS(0.65),
+    target_acceptance::Float64 = 0.65,
     progress = true,
-    # multi_threads = false,
 )
-
-    model = create_model_for_mcmc_sample_mmg(
-        data,
-        basic_params,
-        k_0,
-        k_1,
-        k_2,
-        σ_u_prior_dist = σ_u_prior_dist,
-        σ_v_prior_dist = σ_v_prior_dist,
-        σ_r_prior_dist = σ_r_prior_dist,
-        R_0_dash_prior_dist = R_0_dash_prior_dist,
-        X_vv_dash_prior_dist = X_vv_dash_prior_dist,
-        X_vr_dash_prior_dist = X_vr_dash_prior_dist,
-        X_rr_dash_prior_dist = X_rr_dash_prior_dist,
-        X_vvvv_dash_prior_dist = X_vvvv_dash_prior_dist,
-        Y_v_dash_prior_dist = Y_v_dash_prior_dist,
-        Y_r_dash_prior_dist = Y_r_dash_prior_dist,
-        Y_vvv_dash_prior_dist = Y_vvv_dash_prior_dist,
-        Y_vvr_dash_prior_dist = Y_vvr_dash_prior_dist,
-        Y_vrr_dash_prior_dist = Y_vrr_dash_prior_dist,
-        Y_rrr_dash_prior_dist = Y_rrr_dash_prior_dist,
-        N_v_dash_prior_dist = N_v_dash_prior_dist,
-        N_r_dash_prior_dist = N_r_dash_prior_dist,
-        N_vvv_dash_prior_dist = N_vvv_dash_prior_dist,
-        N_vvr_dash_prior_dist = N_vvr_dash_prior_dist,
-        N_vrr_dash_prior_dist = N_vrr_dash_prior_dist,
-        N_rrr_dash_prior_dist = N_rrr_dash_prior_dist,
-        ρ = ρ,
-    )
-
-    sampler = NUTS(0.65)
+    sampler = NUTS(target_acceptance)
     mapreduce(
         c -> sample(model, sampler, n_samples, progress = progress),
         chainscat,
@@ -775,69 +675,13 @@ function mcmc_sample_mmg(
     )
 end
 
-function mcmc_sample_mmg_using_multi_threads(
-    data::ShipData,
-    basic_params::Mmg3DofBasicParams,
-    k_0,
-    k_1,
-    k_2,
+function nuts_sampling_multi_threads(
+    model,
     n_samples::Int,
     n_chains::Int;
-    σ_u_prior_dist = Uniform(0.00, 0.20),
-    σ_v_prior_dist = Uniform(0.00, 0.20),
-    σ_r_prior_dist = Uniform(0.00, 0.20),
-    R_0_dash_prior_dist = Uniform(-2.0, 2.0),
-    X_vv_dash_prior_dist = Uniform(-2.0, 2.0),
-    X_vr_dash_prior_dist = Uniform(-2.0, 2.0),
-    X_rr_dash_prior_dist = Uniform(-2.0, 2.0),
-    X_vvvv_dash_prior_dist = Uniform(-2.0, 2.0),
-    Y_v_dash_prior_dist = Uniform(-2.0, 2.0),
-    Y_r_dash_prior_dist = Uniform(-2.0, 2.0),
-    Y_vvv_dash_prior_dist = Uniform(-2.0, 2.0),
-    Y_vvr_dash_prior_dist = Uniform(-2.0, 2.0),
-    Y_vrr_dash_prior_dist = Uniform(-2.0, 2.0),
-    Y_rrr_dash_prior_dist = Uniform(-2.0, 2.0),
-    N_v_dash_prior_dist = Uniform(-2.0, 2.0),
-    N_r_dash_prior_dist = Uniform(-2.0, 2.0),
-    N_vvv_dash_prior_dist = Uniform(-2.0, 2.0),
-    N_vvr_dash_prior_dist = Uniform(-2.0, 2.0),
-    N_vrr_dash_prior_dist = Uniform(-2.0, 2.0),
-    N_rrr_dash_prior_dist = Uniform(-2.0, 2.0),
-    ρ = 1.025,
-    # sampler = NUTS(0.65),
+    target_acceptance::Float64 = 0.65,
     progress = false,
-    # multi_threads = false,
 )
-
-    model = create_model_for_mcmc_sample_mmg(
-        data,
-        basic_params,
-        k_0,
-        k_1,
-        k_2,
-        σ_u_prior_dist = σ_u_prior_dist,
-        σ_v_prior_dist = σ_v_prior_dist,
-        σ_r_prior_dist = σ_r_prior_dist,
-        R_0_dash_prior_dist = R_0_dash_prior_dist,
-        X_vv_dash_prior_dist = X_vv_dash_prior_dist,
-        X_vr_dash_prior_dist = X_vr_dash_prior_dist,
-        X_rr_dash_prior_dist = X_rr_dash_prior_dist,
-        X_vvvv_dash_prior_dist = X_vvvv_dash_prior_dist,
-        Y_v_dash_prior_dist = Y_v_dash_prior_dist,
-        Y_r_dash_prior_dist = Y_r_dash_prior_dist,
-        Y_vvv_dash_prior_dist = Y_vvv_dash_prior_dist,
-        Y_vvr_dash_prior_dist = Y_vvr_dash_prior_dist,
-        Y_vrr_dash_prior_dist = Y_vrr_dash_prior_dist,
-        Y_rrr_dash_prior_dist = Y_rrr_dash_prior_dist,
-        N_v_dash_prior_dist = N_v_dash_prior_dist,
-        N_r_dash_prior_dist = N_r_dash_prior_dist,
-        N_vvv_dash_prior_dist = N_vvv_dash_prior_dist,
-        N_vvr_dash_prior_dist = N_vvr_dash_prior_dist,
-        N_vrr_dash_prior_dist = N_vrr_dash_prior_dist,
-        N_rrr_dash_prior_dist = N_rrr_dash_prior_dist,
-        ρ = ρ,
-    )
-
-    sampler = NUTS(0.65)
+    sampler = NUTS(target_acceptance)
     sample(model, sampler, MCMCThreads(), n_samples, n_chains, progress = progress)
 end
