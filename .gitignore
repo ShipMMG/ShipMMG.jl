@@ -27,8 +27,12 @@ Manifest.toml
 .vscode/
 
 # For example codes
-example/*.gif
+*.gif
+*.png
 .ipynb_checkpoints
+
+# For jls save
+*.jls
 
 # For mac develop
 .DS_Store
