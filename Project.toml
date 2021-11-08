@@ -1,7 +1,7 @@
 name = "ShipMMG"
 uuid = "37f2b0bf-0c13-4883-8808-e75eb56597e7"
 authors = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
-version = "0.0.2"
+version = "0.0.3"
 
 [deps]
 Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
