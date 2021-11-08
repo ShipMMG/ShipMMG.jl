@@ -509,7 +509,17 @@ end
     v_obs = v + rand(noize_dist, size(v))
     r_obs = r + rand(noize_dist, size(r))
     x, y, ψ = calc_position(time_obs, u_obs, v_obs, r_obs)
-    data = ShipData(time_obs, u_obs, v_obs, r_obs, x, y, ψ, δ[1:sampling_rate:end], npm[1:sampling_rate:end])
+    data = ShipData(
+        time_obs,
+        u_obs,
+        v_obs,
+        r_obs,
+        x,
+        y,
+        ψ,
+        δ[1:sampling_rate:end],
+        npm[1:sampling_rate:end],
+    )
     n_samples = 10
     n_chains = 1
     model = create_model_for_mcmc_sample_mmg(data, basic_params, k_0, k_1, k_2)
