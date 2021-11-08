@@ -1,7 +1,7 @@
 name = "ShipMMG"
 uuid = "37f2b0bf-0c13-4883-8808-e75eb56597e7"
 authors = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
-version = "0.0.2"
+version = "0.0.3"
 
 [deps]
 Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
@@ -17,9 +17,11 @@ Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 Dierckx = "0.5"
 DifferentialEquations = "6.15"
 DynamicPPL = "0.16"
+Distributions = "0.25"
 ParameterizedFunctions = "5.6"
 Parameters = "0.12"
 Plots = "1.6"
+Turing = "0.19"
 julia = "1"
 
 [extras]
