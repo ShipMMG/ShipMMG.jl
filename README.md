@@ -9,6 +9,9 @@
 ## Example
 
 - [ShipMMG.jl example gist](https://gist.github.com/taiga4112/960c174b876790962e18f29e031c02dc)
+- Coefficients MCMC estimation example gist
+  - [KT](https://gist.github.com/taiga4112/9551990f1758b634b763a34504088753)
+  - [MMG 3DOF](https://gist.github.com/taiga4112/9551990f1758b634b763a34504088753)
 
 ## License
 
