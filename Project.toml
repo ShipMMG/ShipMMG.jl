@@ -4,6 +4,7 @@ authors = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
 version = "0.0.4"
 
 [deps]
+AdvancedPS = "576499cb-2369-40b2-a588-c64705576edc"
 Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
