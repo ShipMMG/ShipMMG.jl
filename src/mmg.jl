@@ -4,9 +4,9 @@
 MMG 3DOF model on DifferentialEquations.ODEProblem. Update `dX`.
 
 # Arguments
-- `dX`: [du, dv, dr, dδ, dnpm]
-- `X`: the initial state values. [`u`, `v`, `r`, `δ`, `npm`].
-- `p`: ρ and the basic & maneuvering parameters and δ & npm spline info.
+- `dX`: [du, dv, dr, dδ, dn_p]
+- `X`: the initial state values. [`u`, `v`, `r`, `δ`, `n_p`].
+- `p`: ρ and the basic & maneuvering parameters and δ & n_p spline info.
     - ρ
     - L_pp
     - B
@@ -53,11 +53,11 @@ MMG 3DOF model on DifferentialEquations.ODEProblem. Update `dX`.
     - N_vrr_dash
     - N_rrr_dash
     - spl_δ
-    - spl_npm
+    - spl_n_p
 - `t`: the time.
 """
 function mmg_3dof_model!(dX, X, p, t)
-    u, v, r, δ, npm = X
+    u, v, r, δ, n_p = X
     ρ,
     L_pp,
     B,
@@ -104,7 +104,7 @@ function mmg_3dof_model!(dX, X, p, t)
     N_vrr_dash,
     N_rrr_dash,
     spl_δ,
-    spl_npm = p
+    spl_n_p = p
 
     U = sqrt(u^2 + (v - r * x_G)^2)
 
@@ -132,10 +132,10 @@ function mmg_3dof_model!(dX, X, p, t)
     w_P = w_P0 * exp(-4.0 * (β - x_P * r_dash)^2)
 
     J = 0.0
-    if npm == 0.0
+    if n_p == 0.0
         J = 0.0
     else
-        J = (1 - w_P) * u / (npm * D_p)
+        J = (1 - w_P) * u / (n_p * D_p)
     end
     K_T = k_0 + k_1 * J + k_2 * J^2
     β_R = β - l_R * r_dash
@@ -151,7 +151,7 @@ function mmg_3dof_model!(dX, X, p, t)
 
     u_R = 0.0
     if J == 0.0
-        u_R = sqrt(η * (κ * ϵ * 8.0 * k_0 * npm^2 * D_p^4 / pi)^2)
+        u_R = sqrt(η * (κ * ϵ * 8.0 * k_0 * n_p^2 * D_p^4 / pi)^2)
     else
         u_R =
             u *
@@ -179,7 +179,7 @@ function mmg_3dof_model!(dX, X, p, t)
         )
     )
     X_R = -(1.0 - t_R) * F_N * sin(δ)
-    X_P = (1.0 - t_P) * ρ * K_T * npm^2 * D_p^4
+    X_P = (1.0 - t_P) * ρ * K_T * n_p^2 * D_p^4
     Y_H = (
         0.5 *
         ρ *
@@ -221,7 +221,7 @@ function mmg_3dof_model!(dX, X, p, t)
             ) / ((I_zG + J_z + (x_G^2) * m) * (m + m_y) - (x_G^2) * (m^2))
     dX[3] = dr = (N_H + N_R - x_G * m * (dv + u * r)) / (I_zG + J_z + (x_G^2) * m)
     dX[4] = dδ = derivative(spl_δ, t)
-    dX[5] = dnpm = derivative(spl_npm, t)
+    dX[5] = dn_p = derivative(spl_n_p, t)
 end
 
 """
@@ -329,9 +329,9 @@ Maneuvering parameters of target ship for MMG 3DOF simulation.
 end
 
 """
-    mmg_3dof_simulate(time_list, npm_list, δ_list, basic_params, maneuvering_params, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, δ, npm
+    mmg_3dof_simulate(time_list, n_p_list, δ_list, basic_params, maneuvering_params, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, δ, n_p
 
-Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, npm.
+Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, n_p.
 This function has the same logic of `ShipMMG.simulate()`.
 
 # Arguments
@@ -339,7 +339,7 @@ This function has the same logic of `ShipMMG.simulate()`.
 - `maneuvering_params::Mmg3DofManeuveringParams`: the maneuvering parameters of target ship.
 - `time_list`: the list of simulatino time.
 - `δ_list`: the list of rudder angle [rad].
-- `npm_list`: the list of propeller rpm.
+- `n_p_list`: the list of propeller rps.
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
@@ -355,17 +355,17 @@ KVLCC2_L7 turning test.
 julia> basic_params, maneuvering_params = get_KVLCC2_L7_params();
 julia> duration = 200; # [s]
 julia> max_δ_rad = 35 * pi / 180.0;  # [rad]
-julia> n_const = 17.95;  # [rpm]
+julia> n_const = 17.95;  # [rps]
 julia> sampling = duration * 10;
 julia> time_list = range(0.00, stop = duration, length = sampling);
 julia> δ_rad_list = max_δ_rad .* ones(Float64, sampling);
-julia> npm_list = n_const .* ones(Float64, sampling);
+julia> n_p_list = n_const .* ones(Float64, sampling);
 julia> mmg_results = mmg_3dof_simulate(
     basic_params,
     maneuvering_params,
     time_list,
     δ_rad_list,
-    npm_list,
+    n_p_list,
     u0 = 2.29 * 0.512,
     v0 = 0.0,
     r0 = 0.0,
@@ -377,7 +377,7 @@ function mmg_3dof_simulate(
     maneuvering_params::Mmg3DofManeuveringParams,
     time_list,
     δ_list,
-    npm_list;
+    n_p_list;
     u0 = 0.0,
     v0 = 0.0,
     r0 = 0.0,
@@ -478,7 +478,7 @@ function mmg_3dof_simulate(
         N_rrr_dash,
         time_list,
         δ_list,
-        npm_list,
+        n_p_list,
         u0 = u0,
         v0 = v0,
         r0 = r0,
@@ -490,9 +490,9 @@ function mmg_3dof_simulate(
 end
 
 """
-    mmg_3dof_simulate(time_list, npm_list, δ_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, δ, npm
+    mmg_3dof_simulate(time_list, n_p_list, δ_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, δ, n_p
 
-Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, npm.
+Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, n_p.
 This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 
 # Arguments
@@ -542,7 +542,7 @@ This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 - `N_rrr_dash`
 - `time_list`: the list of simulatino time.
 - `δ_list`: the list of rudder angle [rad].
-- `npm_list`: the list of propeller rpm.
+- `n_p_list`: the list of propeller rps.
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
@@ -598,7 +598,7 @@ function simulate(
     N_rrr_dash,
     time_list,
     δ_list,
-    npm_list;
+    n_p_list;
     u0 = 0.0,
     v0 = 0.0,
     r0 = 0.0,
@@ -608,9 +608,9 @@ function simulate(
     abstol = 1e-8,
 )
     spl_δ = Spline1D(time_list, δ_list)
-    spl_npm = Spline1D(time_list, npm_list)
+    spl_n_p = Spline1D(time_list, n_p_list)
 
-    X0 = [u0; v0; r0; δ_list[1]; npm_list[1]]
+    X0 = [u0; v0; r0; δ_list[1]; n_p_list[1]]
     p = [
         ρ,
         L_pp,
@@ -658,7 +658,7 @@ function simulate(
         N_vrr_dash,
         N_rrr_dash,
         spl_δ,
-        spl_npm,
+        spl_n_p,
     ]
     prob = ODEProblem(mmg_3dof_model!, X0, (time_list[1], time_list[end]), p)
     sol = solve(prob, algorithm, reltol = reltol, abstol = abstol)
@@ -668,12 +668,12 @@ function simulate(
     v = results[2, :]
     r = results[3, :]
     δ = results[4, :]
-    npm = results[5, :]
-    u, v, r, δ, npm
+    n_p = results[5, :]
+    u, v, r, δ, n_p
 end
 
 """
-    mmg_3dof_zigzag_test(basic_params, maneuvering_params, time_list, npm_list, target_δ_rad, target_ψ_rad_deviation, [, u0, v0, r0, ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> final_u_list, final_v_list, final_r_list, final_ψ_list, final_δ_list
+    mmg_3dof_zigzag_test(basic_params, maneuvering_params, time_list, n_p_list, target_δ_rad, target_ψ_rad_deviation, [, u0, v0, r0, ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> final_u_list, final_v_list, final_r_list, final_ψ_list, final_δ_list
 
 Returns the MMG 3DOF zigzag simulation results.
 
@@ -681,7 +681,7 @@ Returns the MMG 3DOF zigzag simulation results.
 - `basic_params::Mmg3DofBasicParams`: the basic parameters of target ship.
 - `maneuvering_params::Mmg3DofManeuveringParams`: the maneuvering parameters of target ship.
 - `time_list`: the list of simulatino time.
-- `npm_list`: the list of propeller rpm.
+- `n_p_list`: the list of propeller rps.
 - `target_δ_rad`: target rudder angle of zigzag test.
 - `target_ψ_rad_deviation`: target azimuth deviation of zigzag test.
 - `u0=0.0`: the initial x (surge) velocity.
@@ -706,13 +706,13 @@ julia> start_time_second = 0.00
 julia> time_second_interval = 0.01
 julia> end_time_second = 80.00
 julia> time_list = start_time_second:time_second_interval:end_time_second
-julia> n_const = 17.95  # [rpm]
-julia> npm_list = n_const * ones(Float64, length(time_list))
+julia> n_const = 17.95  # [rps]
+julia> n_p_list = n_const * ones(Float64, length(time_list))
 julia> δ_list, u_list, v_list, r_list, ψ_list = mmg_3dof_zigzag_test(
     basic_params,
     maneuvering_params,
     time_list
-    npm_list,
+    n_p_list,
     target_δ_rad,
     target_ψ_rad_deviation,
 );
@@ -722,7 +722,7 @@ function mmg_3dof_zigzag_test(
     basic_params::Mmg3DofBasicParams,
     maneuvering_params::Mmg3DofManeuveringParams,
     time_list,
-    npm_list,
+    n_p_list,
     target_δ_rad,
     target_ψ_rad_deviation;
     u0 = 0.0,
@@ -782,12 +782,12 @@ function mmg_3dof_zigzag_test(
             end
         end
 
-        u, v, r, δ, npm = mmg_3dof_simulate(
+        u, v, r, δ, n_p = mmg_3dof_simulate(
             basic_params,
             maneuvering_params,
             time_list[start_index:end],
             δ_list,
-            npm_list[start_index:end],
+            n_p_list[start_index:end],
             u0 = u0,
             v0 = v0,
             r0 = r0,
@@ -836,7 +836,7 @@ function estimate_mmg_approx_lsm(
     k_2;
     ρ = 1.025,
 )
-    @unpack time, u, v, r, x, y, ψ, δ, npm = data
+    @unpack time, u, v, r, x, y, ψ, δ, n_p = data
     @unpack L_pp,
     B,
     d,
@@ -891,8 +891,8 @@ function estimate_mmg_approx_lsm(
 
     J = U .^ 0
     for i = 1:length(time)
-        if isapprox(npm[i], 0.0) == false
-            J[i] = (1.0 - w_P[i]) * u[i] / (npm[i] * D_p)
+        if isapprox(n_p[i], 0.0) == false
+            J[i] = (1.0 - w_P[i]) * u[i] / (n_p[i] * D_p)
         end
     end
 
@@ -913,7 +913,7 @@ function estimate_mmg_approx_lsm(
     u_R = U .^ 0
     for i = 1:length(time)
         if J[i] == 0.0
-            u_R[i] = sqrt(η * (κ * ϵ * 8.0 * k_0 * npm[i]^2 * D_p^4 / pi)^2)
+            u_R[i] = sqrt(η * (κ * ϵ * 8.0 * k_0 * n_p[i]^2 * D_p^4 / pi)^2)
         else
             u_R[i] =
                 u[i] *
@@ -930,7 +930,7 @@ function estimate_mmg_approx_lsm(
     α_R = δ - atan.(v_R, u_R)
     F_N = 0.5 * A_R * ρ * f_α * (U_R .^ 2) .* sin.(α_R)
     X_R = -(1.0 - t_R) .* F_N .* sin.(δ)
-    X_P = (1.0 - t_P) * ρ .* K_T .* npm .^ 2 .* D_p^4
+    X_P = (1.0 - t_P) * ρ .* K_T .* n_p .^ 2 .* D_p^4
     Y_R = -(1.0 + a_H) .* F_N .* cos.(δ)
     N_R = -(-0.5 + a_H * x_H) .* F_N .* cos.(δ)
     # -------------------------------------
@@ -1040,7 +1040,7 @@ function estimate_mmg_approx_lsm_time_window_sampling(
             data.y[i:i+window_size],
             data.ψ[i:i+window_size],
             data.δ[i:i+window_size],
-            data.npm[i:i+window_size],
+            data.n_p[i:i+window_size],
         )
         R_0_dash_samples[i],
         X_vv_dash_samples[i],
@@ -1116,7 +1116,7 @@ function create_model_for_mcmc_sample_mmg(
     v_obs = data.v
     r_obs = data.r
     δ_obs = data.δ
-    npm_obs = data.npm
+    n_p_obs = data.n_p
 
     @unpack L_pp,
     B,
@@ -1145,9 +1145,9 @@ function create_model_for_mcmc_sample_mmg(
 
     # create sytem model
     spl_δ = Spline1D(time_obs, δ_obs)
-    spl_npm = Spline1D(time_obs, npm_obs)
+    spl_n_p = Spline1D(time_obs, n_p_obs)
     function MMG!(dX, X, p, t)
-        u, v, r, δ, npm = X
+        u, v, r, δ, n_p = X
         R_0_dash,
         X_vv_dash,
         X_vr_dash,
@@ -1192,10 +1192,10 @@ function create_model_for_mcmc_sample_mmg(
         w_P = w_P0 * exp(-4.0 * (β - x_P * r_dash)^2)
 
         J = 0.0
-        if npm == 0.0
+        if n_p == 0.0
             J = 0.0
         else
-            J = (1 - w_P) * u / (npm * D_p)
+            J = (1 - w_P) * u / (n_p * D_p)
         end
         K_T = k_0 + k_1 * J + k_2 * J^2
         β_R = β - l_R * r_dash
@@ -1211,7 +1211,7 @@ function create_model_for_mcmc_sample_mmg(
 
         u_R = 0.0
         if J == 0.0
-            u_R = sqrt(η * (κ * ϵ * 8.0 * k_0 * npm^2 * D_p^4 / pi)^2)
+            u_R = sqrt(η * (κ * ϵ * 8.0 * k_0 * n_p^2 * D_p^4 / pi)^2)
         else
             u_R =
                 u *
@@ -1239,7 +1239,7 @@ function create_model_for_mcmc_sample_mmg(
             )
         )
         X_R = -(1.0 - t_R) * F_N * sin(δ)
-        X_P = (1.0 - t_P) * ρ * K_T * npm^2 * D_p^4
+        X_P = (1.0 - t_P) * ρ * K_T * n_p^2 * D_p^4
         Y_H = (
             0.5 *
             ρ *
@@ -1281,7 +1281,7 @@ function create_model_for_mcmc_sample_mmg(
                 ) / ((I_zG + J_z + (x_G^2) * m) * (m + m_y) - (x_G^2) * (m^2))
         dX[3] = dr = (N_H + N_R - x_G * m * (dv + u * r)) / (I_zG + J_z + (x_G^2) * m)
         dX[4] = dδ = derivative(spl_δ, t)
-        dX[5] = dnpm = derivative(spl_npm, t)
+        dX[5] = dn_p = derivative(spl_n_p, t)
     end
 
     R_0_dash_start = 0.022
@@ -1325,7 +1325,7 @@ function create_model_for_mcmc_sample_mmg(
     u0 = 2.29 * 0.512
     v0 = 0.0
     r0 = 0.0
-    X0 = [u_obs[1]; v_obs[1]; r_obs[1]; δ_obs[1]; npm_obs[1]]
+    X0 = [u_obs[1]; v_obs[1]; r_obs[1]; δ_obs[1]; n_p_obs[1]]
     prob1 = ODEProblem(MMG!, X0, (time_obs[1], time_obs[end]), p)
 
     # create probabilistic model
@@ -1419,7 +1419,7 @@ function create_model_for_mcmc_sample_mmg(
     v_obs = data.v
     r_obs = data.r
     δ_obs = data.δ
-    npm_obs = data.npm
+    n_p_obs = data.n_p
 
     @unpack L_pp,
     B,
@@ -1448,9 +1448,9 @@ function create_model_for_mcmc_sample_mmg(
 
     # create sytem model
     spl_δ = Spline1D(time_obs, δ_obs)
-    spl_npm = Spline1D(time_obs, npm_obs)
+    spl_n_p = Spline1D(time_obs, n_p_obs)
     function MMG!(dX, X, p, t)
-        u, v, r, δ, npm = X
+        u, v, r, δ, n_p = X
         R_0_dash,
         X_vv_dash,
         X_vr_dash,
@@ -1495,10 +1495,10 @@ function create_model_for_mcmc_sample_mmg(
         w_P = w_P0 * exp(-4.0 * (β - x_P * r_dash)^2)
 
         J = 0.0
-        if npm == 0.0
+        if n_p == 0.0
             J = 0.0
         else
-            J = (1 - w_P) * u / (npm * D_p)
+            J = (1 - w_P) * u / (n_p * D_p)
         end
         K_T = k_0 + k_1 * J + k_2 * J^2
         β_R = β - l_R * r_dash
@@ -1514,7 +1514,7 @@ function create_model_for_mcmc_sample_mmg(
 
         u_R = 0.0
         if J == 0.0
-            u_R = sqrt(η * (κ * ϵ * 8.0 * k_0 * npm^2 * D_p^4 / pi)^2)
+            u_R = sqrt(η * (κ * ϵ * 8.0 * k_0 * n_p^2 * D_p^4 / pi)^2)
         else
             u_R =
                 u *
@@ -1542,7 +1542,7 @@ function create_model_for_mcmc_sample_mmg(
             )
         )
         X_R = -(1.0 - t_R) * F_N * sin(δ)
-        X_P = (1.0 - t_P) * ρ * K_T * npm^2 * D_p^4
+        X_P = (1.0 - t_P) * ρ * K_T * n_p^2 * D_p^4
         Y_H = (
             0.5 *
             ρ *
@@ -1584,7 +1584,7 @@ function create_model_for_mcmc_sample_mmg(
                 ) / ((I_zG + J_z + (x_G^2) * m) * (m + m_y) - (x_G^2) * (m^2))
         dX[3] = dr = (N_H + N_R - x_G * m * (dv + u * r)) / (I_zG + J_z + (x_G^2) * m)
         dX[4] = dδ = derivative(spl_δ, t)
-        dX[5] = dnpm = derivative(spl_npm, t)
+        dX[5] = dn_p = derivative(spl_n_p, t)
     end
 
     R_0_dash_start = 0.022
@@ -1628,7 +1628,7 @@ function create_model_for_mcmc_sample_mmg(
     u0 = 2.29 * 0.512
     v0 = 0.0
     r0 = 0.0
-    X0 = [u_obs[1]; v_obs[1]; r_obs[1]; δ_obs[1]; npm_obs[1]]
+    X0 = [u_obs[1]; v_obs[1]; r_obs[1]; δ_obs[1]; n_p_obs[1]]
     prob1 = ODEProblem(MMG!, X0, (time_obs[1], time_obs[end]), p)
 
     # create probabilistic model
