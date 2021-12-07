@@ -18,7 +18,7 @@ Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 [compat]
 AdvancedPS = "0.2.4"
 Libtask_jll = "0.5.1"
-Libtask = "0.5"
+Libtask = "0.5.3"
 Dierckx = "0.5"
 DifferentialEquations = "6.15"
 Distributions = "0.25"
@@ -26,7 +26,7 @@ ParameterizedFunctions = "5.6"
 Parameters = "0.12"
 Plots = "1.6"
 Turing = "0.19"
-julia = "^1.6"
+julia = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
