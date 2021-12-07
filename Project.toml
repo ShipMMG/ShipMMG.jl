@@ -17,7 +17,7 @@ Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 
 [compat]
 AdvancedPS = "0.2.4"
-Libtask_jll = "0.4"
+Libtask_jll = "0.5"
 Libtask = "0.5"
 Dierckx = "0.5"
 DifferentialEquations = "6.15"
