@@ -4,23 +4,23 @@ basic_params, maneuvering_params = get_KVLCC2_L7_params()
 
     duration = 200  # [s]
     max_δ_rad = 35 * pi / 180.0  # [rad]
-    n_const = 17.95  # [rpm]
+    n_const = 17.95  # [rps]
 
     sampling = duration * 10
     time_list = range(0.00, stop = duration, length = sampling)
     δ_rad_list = max_δ_rad .* ones(Float64, sampling)
-    npm_list = n_const .* ones(Float64, sampling)
+    n_p_list = n_const .* ones(Float64, sampling)
     mmg_results = mmg_3dof_simulate(
         basic_params,
         maneuvering_params,
         time_list,
         δ_rad_list,
-        npm_list,
+        n_p_list,
         u0 = 2.29 * 0.512,
         v0 = 0.0,
         r0 = 0.0,
     )
-    u, v, r, δ, npm = mmg_results
+    u, v, r, δ, n_p = mmg_results
     x, y, ψ = calc_position(time_list, u, v, r)
 end
 
@@ -31,13 +31,13 @@ end
     time_second_interval = 0.01
     end_time_second = 80.00
     time_list = start_time_second:time_second_interval:end_time_second
-    n_const = 17.95  # [rpm]
-    npm_list = n_const * ones(Float64, length(time_list))
+    n_const = 17.95  # [rps]
+    n_p_list = n_const * ones(Float64, length(time_list))
     u_list, v_list, r_list, ψ_list, δ_list = mmg_3dof_zigzag_test(
         basic_params,
         maneuvering_params,
         time_list,
-        npm_list,
+        n_p_list,
         target_δ_rad,
         target_ψ_rad_deviation,
     )
@@ -48,22 +48,22 @@ end
     sampling = duration * 10
     time_list = range(0.00, stop = duration, length = sampling)
     max_δ_rad = 35 * pi / 180.0  # [rad]
-    n_const = 17.95  # [rpm]
+    n_const = 17.95  # [rps]
     δ_rad_list = max_δ_rad .* ones(Float64, sampling)
-    npm_list = n_const .* ones(Float64, sampling)
+    n_p_list = n_const .* ones(Float64, sampling)
     mmg_results = mmg_3dof_simulate(
         basic_params,
         maneuvering_params,
         time_list,
         δ_rad_list,
-        npm_list,
+        n_p_list,
         u0 = 2.29 * 0.512,
         v0 = 0.0,
         r0 = 0.0,
     )
-    u, v, r, δ, npm = mmg_results
+    u, v, r, δ, n_p = mmg_results
     x, y, ψ = calc_position(time_list, u, v, r)
-    data = ShipData(time_list, u, v, r, x, y, ψ, δ, npm)
+    data = ShipData(time_list, u, v, r, x, y, ψ, δ, n_p)
     estimate_mmg_approx_lsm(
         data,
         basic_params,
@@ -76,29 +76,29 @@ end
 @testset "mmg 3dof approx time window sampling least square method func" begin
     duration = 200  # [s]
     max_δ_rad = 35 * pi / 180.0  # [rad]
-    n_const = 17.95  # [rpm]
+    n_const = 17.95  # [rps]
 
     sampling = duration * 10
     time_list = range(0.00, stop = duration, length = sampling)
     δ_rad_list = max_δ_rad .* ones(Float64, sampling)
-    npm_list = n_const .* ones(Float64, sampling)
+    n_p_list = n_const .* ones(Float64, sampling)
     mmg_results = mmg_3dof_simulate(
         basic_params,
         maneuvering_params,
         time_list,
         δ_rad_list,
-        npm_list,
+        n_p_list,
         u0 = 2.29 * 0.512,
         v0 = 0.0,
         r0 = 0.0,
     )
-    u, v, r, δ, npm = mmg_results
+    u, v, r, δ, n_p = mmg_results
     noize_dist = Normal(0.0, 0.0005)
     u_obs = u + rand(noize_dist, size(u))
     v_obs = v + rand(noize_dist, size(v))
     r_obs = r + rand(noize_dist, size(r))
     x, y, ψ = calc_position(time_list, u_obs, v_obs, r_obs)
-    data = ShipData(time_list, u_obs, v_obs, r_obs, x, y, ψ, δ, npm)
+    data = ShipData(time_list, u_obs, v_obs, r_obs, x, y, ψ, δ, n_p)
     one_sample_size = 5000
     estimate_mmg_approx_lsm_time_window_sampling(
         data,
@@ -113,23 +113,23 @@ end
 @testset "mmg mcmc sampling func" begin
     duration = 200  # [s]
     max_δ_rad = 35 * pi / 180.0  # [rad]
-    n_const = 17.95  # [rpm]
+    n_const = 17.95  # [rps]
 
     sampling = duration * 10 + 1
     time_list = range(0.00, stop = duration, length = sampling)
     δ_rad_list = max_δ_rad .* ones(Float64, sampling)
-    npm_list = n_const .* ones(Float64, sampling)
+    n_p_list = n_const .* ones(Float64, sampling)
     mmg_results = mmg_3dof_simulate(
         basic_params,
         maneuvering_params,
         time_list,
         δ_rad_list,
-        npm_list,
+        n_p_list,
         u0 = 2.29 * 0.512,
         v0 = 0.0,
         r0 = 0.0,
     )
-    u, v, r, δ, npm = mmg_results
+    u, v, r, δ, n_p = mmg_results
     sampling_rate = 10
     time_obs = time_list[1:sampling_rate:end]
     noize_dist = Normal(0.0, 0.01)
@@ -146,7 +146,7 @@ end
         y,
         ψ,
         δ[1:sampling_rate:end],
-        npm[1:sampling_rate:end],
+        n_p[1:sampling_rate:end],
     )
     n_samples = 10
     n_chains = 1
