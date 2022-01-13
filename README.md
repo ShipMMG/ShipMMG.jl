@@ -4,6 +4,10 @@
 
 **ShipMMG.jl** is a unofficial Julia package of ship maneuvering simulation with respect to the research committee on “standardization of mathematical model for ship maneuvering predictions” was organized by the JASNAOE.
 
+## Install
+
+If you want to use MCMC calculation package of this library, you should install from **main** or **dev** branch of this GitHub repository, not from JuliaHub. 
+
 **ShipMMG.jl** is the project of Julia transportation of [ShipMMG](https://github.com/ShipMMG/shipmmg).
 
 ## Example
