@@ -23,7 +23,7 @@ Libtask = "0.7"
 ParameterizedFunctions = "5.6"
 Parameters = "0.12"
 Plots = "1.6"
-Turing = "0.20"
+Turing = "0.20, 0.21"
 julia = "1.6"
 
 [extras]
