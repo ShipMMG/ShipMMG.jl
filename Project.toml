@@ -1,7 +1,7 @@
 name = "ShipMMG"
 uuid = "37f2b0bf-0c13-4883-8808-e75eb56597e7"
 authors = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
-version = "0.0.4"
+version = "0.0.5"
 
 [deps]
 AdvancedPS = "576499cb-2369-40b2-a588-c64705576edc"
@@ -24,7 +24,7 @@ ParameterizedFunctions = "5.6"
 Parameters = "0.12"
 Plots = "1.6"
 Turing = "0.20, 0.21"
-julia = "1.6"
+julia = "^1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

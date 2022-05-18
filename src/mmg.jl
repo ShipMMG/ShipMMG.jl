@@ -23,6 +23,7 @@ MMG 3DOF model on DifferentialEquations.ODEProblem. Update `dX`.
     - f_α
     - ϵ
     - t_R
+    - x_R
     - a_H
     - x_H
     - γ_R_minus
@@ -74,6 +75,7 @@ function mmg_3dof_model!(dX, X, p, t)
     f_α,
     ϵ,
     t_R,
+    x_R,
     a_H,
     x_H,
     γ_R_minus,
@@ -211,7 +213,7 @@ function mmg_3dof_model!(dX, X, p, t)
             N_rrr_dash * (r_dash^3)
         )
     )
-    N_R = -(-0.5 + a_H * x_H) * F_N * cos(δ)
+    N_R = -(x_R + a_H * x_H) * F_N * cos(δ)
     dX[1] = du = ((X_H + X_R + X_P) + (m + m_y) * v * r + x_G * m * (r^2)) / (m + m_x)
     dX[2] =
         dv =
@@ -243,6 +245,7 @@ Basic parameters of target ship for MMG 3DOF simulation.
 - `f_α`: 
 - `ϵ`: 
 - `t_R`: 
+- `x_R`: 
 - `a_H`: 
 - `x_H`: 
 - `γ_R_minus`: 
@@ -269,6 +272,7 @@ Basic parameters of target ship for MMG 3DOF simulation.
     f_α::T
     ϵ::T
     t_R::T
+    x_R::T
     a_H::T
     x_H::T
     γ_R_minus::T
@@ -343,7 +347,7 @@ This function has the same logic of `ShipMMG.simulate()`.
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
-- `ρ=1.025`: the seawater density [g/cm^3].
+- `ρ=1025.0`: the seawater density [kg/m^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -381,7 +385,7 @@ function mmg_3dof_simulate(
     u0 = 0.0,
     v0 = 0.0,
     r0 = 0.0,
-    ρ = 1.025,
+    ρ = 1025.0,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
@@ -401,6 +405,7 @@ function mmg_3dof_simulate(
     f_α,
     ϵ,
     t_R,
+    x_R,
     a_H,
     x_H,
     γ_R_minus,
@@ -447,6 +452,7 @@ function mmg_3dof_simulate(
         f_α,
         ϵ,
         t_R,
+        x_R,
         a_H,
         x_H,
         γ_R_minus,
@@ -490,7 +496,7 @@ function mmg_3dof_simulate(
 end
 
 """
-    mmg_3dof_simulate(time_list, n_p_list, δ_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, δ, n_p
+    mmg_3dof_simulate(time_list, n_p_list, δ_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, x_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, δ, n_p
 
 Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, n_p.
 This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
@@ -511,6 +517,7 @@ This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 - `f_α`: 
 - `ϵ`: 
 - `t_R`: 
+- `x_R`: 
 - `a_H`: 
 - `x_H`: 
 - `γ_R_minus`: 
@@ -546,7 +553,7 @@ This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
-- `ρ=1.025`: the seawater density [g/cm^3].
+- `ρ=1025.0`: the seawater density [kg/m^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -567,6 +574,7 @@ function simulate(
     f_α,
     ϵ,
     t_R,
+    x_R,
     a_H,
     x_H,
     γ_R_minus,
@@ -602,7 +610,7 @@ function simulate(
     u0 = 0.0,
     v0 = 0.0,
     r0 = 0.0,
-    ρ = 1.025,
+    ρ = 1025.0,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
@@ -628,6 +636,7 @@ function simulate(
         f_α,
         ϵ,
         t_R,
+        x_R,
         a_H,
         x_H,
         γ_R_minus,
@@ -689,7 +698,7 @@ Returns the MMG 3DOF zigzag simulation results.
 - `r0=0.0`: the initial rate of turn [rad/s].
 - `δ0=0.0`: the initial rudder angle.
 - `δ_rad_rate=10.0*π/180`: the change rate of rudder angle [rad/s]. 
-- `ρ=1.025`: the seawater density [g/cm^3].
+- `ρ=1025.0`: the seawater density [kg/m^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -698,7 +707,7 @@ Returns the MMG 3DOF zigzag simulation results.
 KVLCC2_L7 zigzag test.
 
 ```julia-rep1
-julia> ρ = 1.025;
+julia> ρ = 1025.0;
 julia> basic_params, maneuvering_params = get_KVLCC2_L7_params();
 julia> target_δ_rad = 20.0 * π / 180.0
 julia> target_ψ_rad_deviation = 20.0 * π / 180.0
@@ -731,7 +740,7 @@ function mmg_3dof_zigzag_test(
     ψ0 = 0.0,
     δ0 = 0.0,
     δ_rad_rate = 10.0 * π / 180,
-    ρ = 1.025,
+    ρ = 1025.0,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
@@ -834,7 +843,7 @@ function estimate_mmg_approx_lsm(
     k_0,
     k_1,
     k_2;
-    ρ = 1.025,
+    ρ = 1025.0,
 )
     @unpack time, u, v, r, x, y, ψ, δ, n_p = data
     @unpack L_pp,
@@ -852,6 +861,7 @@ function estimate_mmg_approx_lsm(
     f_α,
     ϵ,
     t_R,
+    x_R,
     a_H,
     x_H,
     γ_R_minus,
@@ -932,7 +942,7 @@ function estimate_mmg_approx_lsm(
     X_R = -(1.0 - t_R) .* F_N .* sin.(δ)
     X_P = (1.0 - t_P) * ρ .* K_T .* n_p .^ 2 .* D_p^4
     Y_R = -(1.0 + a_H) .* F_N .* cos.(δ)
-    N_R = -(-0.5 + a_H * x_H) .* F_N .* cos.(δ)
+    N_R = -(x_R + a_H * x_H) .* F_N .* cos.(δ)
     # -------------------------------------
 
     # -------------------------------------
@@ -1010,7 +1020,7 @@ function estimate_mmg_approx_lsm_time_window_sampling(
     k_0,
     k_1,
     k_2;
-    ρ = 1.025,
+    ρ = 1025.0,
 )
     n_samples = length(data.time) - window_size
     R_0_dash_samples = zeros(n_samples)
@@ -1086,7 +1096,7 @@ function create_model_for_mcmc_sample_mmg(
     k_0,
     k_1,
     k_2;
-    ρ = 1.025,
+    ρ = 1025.0,
     σ_u_prior_dist = Uniform(0.00, 0.20),
     σ_v_prior_dist = Uniform(0.00, 0.20),
     σ_r_prior_dist = Uniform(0.00, 0.20),
@@ -1133,6 +1143,7 @@ function create_model_for_mcmc_sample_mmg(
     f_α,
     ϵ,
     t_R,
+    x_R,
     a_H,
     x_H,
     γ_R_minus,
@@ -1271,7 +1282,7 @@ function create_model_for_mcmc_sample_mmg(
                 N_rrr_dash * (r_dash^3)
             )
         )
-        N_R = -(-0.5 + a_H * x_H) * F_N * cos(δ)
+        N_R = -(x_R + a_H * x_H) * F_N * cos(δ)
         dX[1] = du = ((X_H + X_R + X_P) + (m + m_y) * v * r + x_G * m * (r^2)) / (m + m_x)
         dX[2] =
             dv =
@@ -1392,7 +1403,7 @@ function create_model_for_mcmc_sample_mmg(
     σ_u,
     σ_v,
     σ_r;
-    ρ = 1.025,
+    ρ = 1025.0,
     R_0_dash_prior_dist = Uniform(-2.0, 2.0),
     X_vv_dash_prior_dist = Uniform(-2.0, 2.0),
     X_vr_dash_prior_dist = Uniform(-2.0, 2.0),
@@ -1436,6 +1447,7 @@ function create_model_for_mcmc_sample_mmg(
     f_α,
     ϵ,
     t_R,
+    x_R,
     a_H,
     x_H,
     γ_R_minus,
@@ -1574,7 +1586,7 @@ function create_model_for_mcmc_sample_mmg(
                 N_rrr_dash * (r_dash^3)
             )
         )
-        N_R = -(-0.5 + a_H * x_H) * F_N * cos(δ)
+        N_R = -(x_R + a_H * x_H) * F_N * cos(δ)
         dX[1] = du = ((X_H + X_R + X_P) + (m + m_y) * v * r + x_G * m * (r^2)) / (m + m_x)
         dX[2] =
             dv =

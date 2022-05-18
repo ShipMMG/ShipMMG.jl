@@ -6,7 +6,7 @@
 
 ## Install
 
-If you want to use MCMC calculation package of this library, you should install from **main** or **dev** branch of this GitHub repository, not from JuliaHub. 
+If you want to use MCMC calculation package of this library, you should install from **main** or **dev** branch of this GitHub repository, not from JuliaHub.
 
 **ShipMMG.jl** is the project of Julia transportation of [ShipMMG](https://github.com/ShipMMG/shipmmg).
 
