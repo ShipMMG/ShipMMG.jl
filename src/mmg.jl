@@ -347,7 +347,7 @@ This function has the same logic of `ShipMMG.simulate()`.
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
-- `ρ=1.025`: the seawater density [g/cm^3].
+- `ρ=1025.0`: the seawater density [kg/m^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -385,7 +385,7 @@ function mmg_3dof_simulate(
     u0 = 0.0,
     v0 = 0.0,
     r0 = 0.0,
-    ρ = 1.025,
+    ρ = 1025.0,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
@@ -553,7 +553,7 @@ This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
-- `ρ=1.025`: the seawater density [g/cm^3].
+- `ρ=1025.0`: the seawater density [kg/m^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -610,7 +610,7 @@ function simulate(
     u0 = 0.0,
     v0 = 0.0,
     r0 = 0.0,
-    ρ = 1.025,
+    ρ = 1025.0,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
@@ -698,7 +698,7 @@ Returns the MMG 3DOF zigzag simulation results.
 - `r0=0.0`: the initial rate of turn [rad/s].
 - `δ0=0.0`: the initial rudder angle.
 - `δ_rad_rate=10.0*π/180`: the change rate of rudder angle [rad/s]. 
-- `ρ=1.025`: the seawater density [g/cm^3].
+- `ρ=1025.0`: the seawater density [kg/m^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -707,7 +707,7 @@ Returns the MMG 3DOF zigzag simulation results.
 KVLCC2_L7 zigzag test.
 
 ```julia-rep1
-julia> ρ = 1.025;
+julia> ρ = 1025.0;
 julia> basic_params, maneuvering_params = get_KVLCC2_L7_params();
 julia> target_δ_rad = 20.0 * π / 180.0
 julia> target_ψ_rad_deviation = 20.0 * π / 180.0
@@ -740,7 +740,7 @@ function mmg_3dof_zigzag_test(
     ψ0 = 0.0,
     δ0 = 0.0,
     δ_rad_rate = 10.0 * π / 180,
-    ρ = 1.025,
+    ρ = 1025.0,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
@@ -843,7 +843,7 @@ function estimate_mmg_approx_lsm(
     k_0,
     k_1,
     k_2;
-    ρ = 1.025,
+    ρ = 1025.0,
 )
     @unpack time, u, v, r, x, y, ψ, δ, n_p = data
     @unpack L_pp,
@@ -1020,7 +1020,7 @@ function estimate_mmg_approx_lsm_time_window_sampling(
     k_0,
     k_1,
     k_2;
-    ρ = 1.025,
+    ρ = 1025.0,
 )
     n_samples = length(data.time) - window_size
     R_0_dash_samples = zeros(n_samples)
@@ -1096,7 +1096,7 @@ function create_model_for_mcmc_sample_mmg(
     k_0,
     k_1,
     k_2;
-    ρ = 1.025,
+    ρ = 1025.0,
     σ_u_prior_dist = Uniform(0.00, 0.20),
     σ_v_prior_dist = Uniform(0.00, 0.20),
     σ_r_prior_dist = Uniform(0.00, 0.20),
@@ -1403,7 +1403,7 @@ function create_model_for_mcmc_sample_mmg(
     σ_u,
     σ_v,
     σ_r;
-    ρ = 1.025,
+    ρ = 1025.0,
     R_0_dash_prior_dist = Uniform(-2.0, 2.0),
     X_vv_dash_prior_dist = Uniform(-2.0, 2.0),
     X_vr_dash_prior_dist = Uniform(-2.0, 2.0),

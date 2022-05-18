@@ -10,8 +10,7 @@
     n_p::Tn_p
 end
 
-function get_KVLCC2_L7_basic_params()
-    ρ = 1.025
+function get_KVLCC2_L7_basic_params(ρ = 1025.0)
     L_pp = 7.00  # 船長Lpp[m]
     B = 1.27  # 船幅[m]
     d = 0.46  # 喫水[m]
