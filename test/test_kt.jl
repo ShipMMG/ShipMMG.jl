@@ -15,16 +15,16 @@ end
 @testset "kt_zigzag_test" begin
     target_δ_rad = 10.0 * π / 180.0
     target_ψ_rad_deviation = 10.0 * π / 180.0
-    r_list, ψ_list, δ_list =
+    u_list, v_list, r_list, x_list, y_list, ψ_list, δ_list =
         kt_zigzag_test(K, T, time_list, target_δ_rad, target_ψ_rad_deviation)
 end
 
 @testset "kt least square method func" begin
     Ts = 50.0
     δ_list = 10.0 * pi / 180.0 * sin.(2.0 * pi / Ts * time_list) # [rad]
-    r, δ = kt_simulate(K, T, time_list, δ_list)
+    u, v, r, x, y, Ψ, δ = kt_simulate(K, T, time_list, δ_list)
 
-    data = ShipData(time_list, 0, 0, r, 0, 0, 0, δ, 0)
+    data = ShipData(time_list, u, v, r, x, y, Ψ, δ, 0)
     K_est, T_est = estimate_kt_lsm(data)
     @test abs(K - K_est) < 1.0
     @test abs(T - T_est) < 10.0
@@ -33,10 +33,10 @@ end
 @testset "kt bootstrap least square method func" begin
     Ts = 50.0
     δ_list = 10.0 * pi / 180.0 * sin.(2.0 * pi / Ts * time_list) # [rad]
-    r, δ = kt_simulate(K, T, time_list, δ_list)
+    u, v, r, x, y, Ψ, δ = kt_simulate(K, T, time_list, δ_list)
     noize_dist = Normal(0.0, 0.0005)
     r_obs = r + rand(noize_dist, size(r))
-    data = ShipData(time_list, 0, 0, r_obs, 0, 0, 0, δ, 0)
+    data = ShipData(time_list, u, v, r_obs, x, y, Ψ, δ, 0)
     one_sample_size = 5000
     K_est_samples, T_est_samples =
         estimate_kt_lsm_time_window_sampling(data, one_sample_size)
@@ -45,7 +45,7 @@ end
 @testset "kt mcmc sampling func" begin
     Ts = 50.0
     δ_list = 10.0 * pi / 180.0 * sin.(2.0 * pi / Ts * time_list) # [rad]
-    r, δ = kt_simulate(K, T, time_list, δ_list)
+    u, v, r, x, y, Ψ, δ = kt_simulate(K, T, time_list, δ_list)
     sampling_rate = 10
     time_obs = time_list[1:sampling_rate:end]
     noize_dist = Normal(0.0, 0.005)
