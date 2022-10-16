@@ -27,15 +27,15 @@ julia> sol = solve(prob, Tsit5(), saveat=time_list[2] - time_list[1])
 ```
 """
 function kt_model!(dX, X, p, t)
-    u, v, r, x, y, Ψ, δ= X
+    u, v, r, x, y, Ψ, δ = X
     K, T, spl_δ = p
     dX[1] = du = 0.0
     dX[2] = dv = 0.0
-    dX[3] = dr = 1.0 / T * (-r + K * δ) 
+    dX[3] = dr = 1.0 / T * (-r + K * δ)
     dX[4] = dx = u * cos(Ψ)
     dX[5] = dy = u * sin(Ψ)
     dX[6] = dΨ = r
-    dX[7] = dδ = derivative(spl_δ, t) 
+    dX[7] = dδ = derivative(spl_δ, t)
 end
 
 """
@@ -237,7 +237,7 @@ function kt_zigzag_test(
             reltol = reltol,
             abstol = abstol,
         )
-        
+
         # get finish index
         target_Ψ_rad = Ψ0 + target_Ψ_rad_deviation
         if target_δ_rad < 0
@@ -268,7 +268,13 @@ function kt_zigzag_test(
             final_Ψ_list[start_index:next_stage_index-1] = Ψ_list[begin:over_index-1]
         end
     end
-    final_u_list, final_v_list, final_r_list, final_x_list, final_y_list, final_Ψ_list, final_δ_list
+    final_u_list,
+    final_v_list,
+    final_r_list,
+    final_x_list,
+    final_y_list,
+    final_Ψ_list,
+    final_δ_list
 end
 
 function estimate_kt_lsm(data::ShipData)
