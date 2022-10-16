@@ -4,8 +4,8 @@
 MMG 3DOF model on DifferentialEquations.ODEProblem. Update `dX`.
 
 # Arguments
-- `dX`: [du, dv, dr, dδ, dn_p]
-- `X`: the initial state values. [`u`, `v`, `r`, `δ`, `n_p`].
+- `dX`: [du, dv, dr, dx, dy, dΨ, dδ, dn_p]
+- `X`: the initial state values. [`u`, `v`, `r`, `x`, `y`, `Ψ`, `δ`, `n_p`].
 - `p`: ρ and the basic & maneuvering parameters and δ & n_p spline info.
     - ρ
     - L_pp
@@ -58,7 +58,7 @@ MMG 3DOF model on DifferentialEquations.ODEProblem. Update `dX`.
 - `t`: the time.
 """
 function mmg_3dof_model!(dX, X, p, t)
-    u, v, r, δ, n_p = X
+    u, v, r, x, y, Ψ, δ, n_p = X
     ρ,
     L_pp,
     B,
@@ -222,8 +222,11 @@ function mmg_3dof_model!(dX, X, p, t)
                 ((Y_H + Y_R) - (m + m_x) * u * r) * (I_zG + J_z + (x_G^2) * m)
             ) / ((I_zG + J_z + (x_G^2) * m) * (m + m_y) - (x_G^2) * (m^2))
     dX[3] = dr = (N_H + N_R - x_G * m * (dv + u * r)) / (I_zG + J_z + (x_G^2) * m)
-    dX[4] = dδ = derivative(spl_δ, t)
-    dX[5] = dn_p = derivative(spl_n_p, t)
+    dX[4] = dx = u * cos(Ψ) - v * sin(Ψ)
+    dX[5] = dy = u * sin(Ψ) + v * cos(Ψ)
+    dX[6] = dΨ = r
+    dX[7] = dδ = derivative(spl_δ, t)
+    dX[8] = dn_p = derivative(spl_n_p, t)
 end
 
 """
@@ -385,6 +388,9 @@ function mmg_3dof_simulate(
     u0 = 0.0,
     v0 = 0.0,
     r0 = 0.0,
+    x0 = 0.0,
+    y0 = 0.0,
+    Ψ0 = 0.0,
     ρ = 1025.0,
     algorithm = Tsit5(),
     reltol = 1e-8,
@@ -488,6 +494,9 @@ function mmg_3dof_simulate(
         u0 = u0,
         v0 = v0,
         r0 = r0,
+        x0 = x0,
+        y0 = y0,
+        Ψ0 = Ψ0,
         ρ = ρ,
         algorithm = algorithm,
         reltol = reltol,
@@ -553,6 +562,9 @@ This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
+- `x0=0.0`: the initial x (surge) position.
+- `y0=0.0`: the initial y (sway) position.
+- `Ψ0=0.0`: the initial Ψ (yaw) azimuth [rad].
 - `ρ=1025.0`: the seawater density [kg/m^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -610,6 +622,9 @@ function simulate(
     u0 = 0.0,
     v0 = 0.0,
     r0 = 0.0,
+    x0 = 0.0,
+    y0 = 0.0,
+    Ψ0 = 0.0,
     ρ = 1025.0,
     algorithm = Tsit5(),
     reltol = 1e-8,
@@ -618,7 +633,7 @@ function simulate(
     spl_δ = Spline1D(time_list, δ_list)
     spl_n_p = Spline1D(time_list, n_p_list)
 
-    X0 = [u0; v0; r0; δ_list[1]; n_p_list[1]]
+    X0 = [u0; v0; r0; x0; y0; Ψ0; δ_list[1]; n_p_list[1]]
     p = [
         ρ,
         L_pp,
@@ -676,9 +691,12 @@ function simulate(
     u = results[1, :]
     v = results[2, :]
     r = results[3, :]
-    δ = results[4, :]
-    n_p = results[5, :]
-    u, v, r, δ, n_p
+    x = results[4, :]
+    y = results[5, :]
+    Ψ = results[6, :]
+    δ = results[7, :]
+    n_p = results[8, :]
+    u, v, r, x, y, Ψ, δ, n_p
 end
 
 """
