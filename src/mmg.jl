@@ -336,9 +336,9 @@ Maneuvering parameters of target ship for MMG 3DOF simulation.
 end
 
 """
-    mmg_3dof_simulate(time_list, n_p_list, δ_list, basic_params, maneuvering_params, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, δ, n_p
+    mmg_3dof_simulate(time_list, n_p_list, δ_list, basic_params, maneuvering_params, [, u0, v0, r0, x0, y0, Ψ0, ρ, algorithm, reltol, abstol]) -> u, v, r, x, y, Ψ, δ, n_p
 
-Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, n_p.
+Returns the MMG 3DOF simulation results including the lists of time, u, v, r, x, y, Ψ, δ, n_p.
 This function has the same logic of `ShipMMG.simulate()`.
 
 # Arguments
@@ -350,6 +350,9 @@ This function has the same logic of `ShipMMG.simulate()`.
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
+- `x0=0.0`: the initial x (surge) position.
+- `y0=0.0`: the initial y (sway) position.
+- `Ψ0=0.0`: the initial Ψ (yaw) azimuth [rad].
 - `ρ=1025.0`: the seawater density [kg/m^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -505,7 +508,7 @@ function mmg_3dof_simulate(
 end
 
 """
-    mmg_3dof_simulate(time_list, n_p_list, δ_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, x_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, δ, n_p
+    simulate(time_list, n_p_list, δ_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, x_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, x, y, Ψ, δ, n_p
 
 Returns the MMG 3DOF simulation results including the lists of time, u, v, r, x, y, Ψ, δ, n_p.
 This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
@@ -700,7 +703,7 @@ function simulate(
 end
 
 """
-    mmg_3dof_zigzag_test(basic_params, maneuvering_params, time_list, n_p_list, target_δ_rad, target_Ψ_rad_deviation, [, u0, v0, r0, Ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> final_u_list, final_v_list, final_r_list, final_Ψ_list, final_δ_list
+    mmg_3dof_zigzag_test(basic_params, maneuvering_params, time_list, n_p_list, target_δ_rad, target_Ψ_rad_deviation, [, u0, v0, r0, x0, y0, Ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> u, v, r, x, y, Ψ, δ
 
 Returns the MMG 3DOF zigzag simulation results.
 
@@ -714,6 +717,9 @@ Returns the MMG 3DOF zigzag simulation results.
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
+- `x0=0.0`: the initial x (surge) position.
+- `y0=0.0`: the initial y (sway) position.
+- `Ψ0=0.0`: the initial Ψ (yaw) azimuth [rad].
 - `δ0=0.0`: the initial rudder angle.
 - `δ_rad_rate=10.0*π/180`: the change rate of rudder angle [rad/s]. 
 - `ρ=1025.0`: the seawater density [kg/m^3].
