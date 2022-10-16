@@ -4,8 +4,8 @@
 KT model on DifferentialEquations.ODEProblem. Update `dX`.
 
 # Arguments
-- `dX`: [dr, dδ]
-- `X`: the initial state values. [`r`, `δ`].
+- `dX`: [dr, dx, dy, dΨ, dδ]
+- `X`: the initial state values. [`r`, `x`, `y`, `Ψ`, `δ`].
 - `p`: the parameters and δ spline info. [`K`, `T`, `spl_δ`].
 - `t`: the time.
 
@@ -20,21 +20,26 @@ julia> time_list = range(0.0,stop=duration,length=sampling)
 julia> Ts = 50.0
 julia> δ_list = 10.0 * pi / 180.0  * sin.(2.0 * pi / Ts * time_list) # [rad]
 julia> spl_δ = Spline1D(time_list, δ_list)
-julia> X0 = [0.0; δ_list[1]]
+julia> X0 = [10.0; 0.0; 0.0; 0.0; 0.0, 0.0; δ_list[1]]
 julia> p = [K_log, T_log, spl_δ]
 julia> prob = ODEProblem(kt_model!, X0, (time_list[1], time_list[end]), p)
 julia> sol = solve(prob, Tsit5(), saveat=time_list[2] - time_list[1])
 ```
 """
 function kt_model!(dX, X, p, t)
-    r, δ = X
+    u, v, r, x, y, Ψ, δ= X
     K, T, spl_δ = p
-    dX[1] = dr = 1.0 / T * (-r + K * δ) # dr = 
-    dX[2] = dδ = derivative(spl_δ, t) # dδ = 
+    dX[1] = du = 0.0
+    dX[2] = dv = 0.0
+    dX[3] = dr = 1.0 / T * (-r + K * δ) 
+    dX[4] = dx = u * cos(Ψ)
+    dX[5] = dy = u * sin(Ψ)
+    dX[6] = dΨ = r
+    dX[7] = dδ = derivative(spl_δ, t) 
 end
 
 """
-    kt_simulate(time_list, δ_list, K, T, [, r0, algorithm, reltol, abstol]) -> r, δ
+    kt_simulate(time_list, δ_list, K, T, [, u0, v0, r0, x0, y0, Ψ0, algorithm, reltol, abstol]) -> u, v, r, x, y, Ψ, δ
 
 Returns the KT simulation results.
 
@@ -43,7 +48,12 @@ Returns the KT simulation results.
 - `T`: the T Parameter.
 - `time_list`: the list of simulatino time.
 - `δ_list`: the list of rudder angle [rad].
+- `u0=10.0`: the initial x (surge) velocity.
+- `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the inital rate of turn [rad/s].
+- `x0=0.0`: the initial x (surge) position.
+- `y0=0.0`: the initial y (sway) position.
+- `Ψ0=0.0`: the initial Ψ (yaw) azimuth [rad].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `abstol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -59,7 +69,7 @@ julia> sampling = 1001
 julia> time_list = range(0.0,stop=duration,length=sampling)
 julia> Ts = 50.0
 julia> δ_list = 10.0 * pi / 180.0  * sin.(2.0 * pi / Ts * time_list) # [rad]
-julia> r, δ = kt_simulate(time_list, δ_list, K_log, T_log)
+julia> u, v, r, x, y, Ψ, δ = kt_simulate(K_log, T_log, time_list, δ_list, u0 = 10.0)
 ```
 """
 function kt_simulate(
@@ -67,7 +77,12 @@ function kt_simulate(
     T,
     time_list,
     δ_list;
+    u0 = 10.0,
+    v0 = 0.0,
     r0 = 0.0,
+    x0 = 0.0,
+    y0 = 0.0,
+    Ψ0 = 0.0,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
@@ -75,19 +90,24 @@ function kt_simulate(
 
     spl_δ = Spline1D(time_list, δ_list)
 
-    X0 = [r0; δ_list[1]]
+    X0 = [u0; v0; r0; x0; y0; Ψ0; δ_list[1]]
     p = [K, T, spl_δ]
     prob = ODEProblem(kt_model!, X0, (time_list[1], time_list[end]), p)
     sol = solve(prob, algorithm, reltol = reltol, abstol = abstol)
     sol_timelist = sol(time_list)
     results = hcat(sol_timelist.u...)
-    r = results[1, :]
-    δ = results[2, :]
-    r, δ
+    u = results[1, :]
+    v = results[2, :]
+    r = results[3, :]
+    x = results[4, :]
+    y = results[5, :]
+    Ψ = results[6, :]
+    δ = results[7, :]
+    u, v, r, x, y, Ψ, δ
 end
 
 """
-    kt_zigzag_test(K, T, target_δ_rad, target_ψ_rad_deviation, time_second_interval, end_time_second, [, r0, ψ0, δ0, δ_rad_rate, start_time_second, algorithm, reltol, abstol]) -> r, δ, ψ
+    kt_zigzag_test(K, T, target_δ_rad, target_Ψ_rad_deviation, time_second_interval, end_time_second, [, u0, v0, r0, x0, y0, Ψ0, δ0, δ_rad_rate, start_time_second, algorithm, reltol, abstol]) -> u, v, r, x, y, Ψ, δ
 
 Returns the KT simulation results.
 
@@ -96,9 +116,13 @@ Returns the KT simulation results.
 - `T`: the T Parameter.
 - `time_list`: the list of simulatino time.
 - `target_δ_rad`: target rudder angle of zigzag test.
-- `target_ψ_rad_deviation`: target azimuth deviation of zigzag test.
+- `target_Ψ_rad_deviation`: target azimuth deviation of zigzag test.
+- `u0=10.0`: the initial x (surge) velocity.
+- `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
-- `ψ0=0.0`: the initial azimuth.
+- `x0=0.0`: the initial x (surge) position.
+- `y0=0.0`: the initial y (sway) position.
+- `Ψ0=0.0`: the initial Ψ (yaw) azimuth [rad].
 - `δ0=0.0`: the initial rudder angle.
 - `δ_rad_rate=10.0*π/180`: the change rate of rudder angle [rad/s]. 
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -112,16 +136,19 @@ KT simulation.
 julia> K = 0.155
 julia> T = 80.5
 julia> target_δ_rad = 30.0 * π / 180.0
-julia> target_ψ_rad_deviation = 10.0 * π / 180.0
+julia> target_Ψ_rad_deviation = 10.0 * π / 180.0
 julia> time_second_interval = 0.01
 julia> end_time_second = 500.0
 julia> time_list = start_time_second:time_second_interval:end_time_second
-julia> r_list, δ_list, ψ_list = kt_zigzag_test(
+julia> u_list, v_list, r_list, x_list, y_list, Ψ_list, δ_list, = kt_zigzag_test(
         K,
         T,
         time_list,
         target_δ_rad,
-        target_ψ_rad_deviation,
+        target_Ψ_rad_deviation,
+        u0 = 10.0, 
+        x0 = 0.0,
+        y0 = 0.0,
     )
 ```
 """
@@ -130,25 +157,32 @@ function kt_zigzag_test(
     T,
     time_list,
     target_δ_rad,
-    target_ψ_rad_deviation;
+    target_Ψ_rad_deviation;
+    u0 = 10.0,
+    v0 = 0.0,
     r0 = 0.0,
-    ψ0 = 0.0,
+    x0 = 0.0,
+    y0 = 0.0,
+    Ψ0 = 0.0,
     δ0 = 0.0,
     δ_rad_rate = 10.0 * π / 180,
     algorithm = Tsit5(),
     reltol = 1e-8,
     abstol = 1e-8,
 )
-    target_ψ_rad_deviation = abs(target_ψ_rad_deviation)
+    target_Ψ_rad_deviation = abs(target_Ψ_rad_deviation)
 
     final_δ_list = zeros(length(time_list))
+    final_u_list = zeros(length(time_list))
+    final_v_list = zeros(length(time_list))
     final_r_list = zeros(length(time_list))
-    final_ψ_list = zeros(length(time_list))
+    final_x_list = zeros(length(time_list))
+    final_y_list = zeros(length(time_list))
+    final_Ψ_list = zeros(length(time_list))
 
     next_stage_index = 1
     target_δ_rad = -target_δ_rad  # for changing in while loop
-    ψ = ψ0
-
+    Ψ = Ψ0
     while next_stage_index < length(time_list)
         target_δ_rad = -target_δ_rad
         start_index = next_stage_index
@@ -157,10 +191,18 @@ function kt_zigzag_test(
         δ_list = zeros(length(time_list) - start_index + 1)
         if start_index == 1
             δ_list[1] = δ0
+            u0 = u0
+            v0 = v0
             r0 = r0
+            x0 = x0
+            y0 = y0
         else
             δ_list[1] = final_δ_list[start_index-1]
+            u0 = final_u_list[start_index-1]
+            v0 = final_v_list[start_index-1]
             r0 = final_r_list[start_index-1]
+            x0 = final_x_list[start_index-1]
+            y0 = final_y_list[start_index-1]
         end
 
         for i = (start_index+1):length(time_list)
@@ -180,43 +222,53 @@ function kt_zigzag_test(
             end
         end
 
-        r, δ = kt_simulate(
+        u, v, r, x, y, Ψ_list, δ = kt_simulate(
             K,
             T,
             time_list[start_index:end],
             δ_list,
+            u0 = u0,
+            v0 = v0,
             r0 = r0,
+            x0 = x0,
+            y0 = y0,
+            Ψ0 = Ψ,
             algorithm = algorithm,
             reltol = reltol,
             abstol = abstol,
         )
-        u = zeros(length(r))
-        v = zeros(length(r))
-        x_dummy, y_dummy, ψ_list =
-            calc_position(time_list[start_index:end], u, v, r, x0 = 0.0, y0 = 0.0, ψ0 = ψ)
+        
         # get finish index
-        target_ψ_rad = ψ0 + target_ψ_rad_deviation
+        target_Ψ_rad = Ψ0 + target_Ψ_rad_deviation
         if target_δ_rad < 0
-            target_ψ_rad = ψ0 - target_ψ_rad_deviation
+            target_Ψ_rad = Ψ0 - target_Ψ_rad_deviation
         end
-        over_index = findfirst(e -> e > target_ψ_rad, ψ_list)
+        over_index = findfirst(e -> e > target_Ψ_rad, Ψ_list)
         if target_δ_rad < 0
-            over_index = findfirst(e -> e < target_ψ_rad, ψ_list)
+            over_index = findfirst(e -> e < target_Ψ_rad, Ψ_list)
         end
         if isnothing(over_index)
             final_δ_list[start_index:end] = δ_list
+            final_u_list[start_index:end] = u
+            final_v_list[start_index:end] = v
             final_r_list[start_index:end] = r
-            final_ψ_list[start_index:end] = ψ_list
+            final_x_list[start_index:end] = x
+            final_y_list[start_index:end] = y
+            final_Ψ_list[start_index:end] = Ψ_list
             next_stage_index = length(time_list) # break
         else
-            ψ = ψ_list[over_index]
+            Ψ = Ψ_list[over_index]
             next_stage_index = over_index + start_index - 1
             final_δ_list[start_index:next_stage_index-1] = δ_list[begin:over_index-1]
+            final_u_list[start_index:next_stage_index-1] = u[begin:over_index-1]
+            final_v_list[start_index:next_stage_index-1] = v[begin:over_index-1]
             final_r_list[start_index:next_stage_index-1] = r[begin:over_index-1]
-            final_ψ_list[start_index:next_stage_index-1] = ψ_list[begin:over_index-1]
+            final_x_list[start_index:next_stage_index-1] = x[begin:over_index-1]
+            final_y_list[start_index:next_stage_index-1] = y[begin:over_index-1]
+            final_Ψ_list[start_index:next_stage_index-1] = Ψ_list[begin:over_index-1]
         end
     end
-    final_r_list, final_ψ_list, final_δ_list
+    final_u_list, final_v_list, final_r_list, final_x_list, final_y_list, final_Ψ_list, final_δ_list
 end
 
 function estimate_kt_lsm(data::ShipData)
@@ -282,47 +334,6 @@ function create_model_for_mcmc_sample_kt(
     # create probabilistic model
     @model function fitKT(time_obs, r_obs, prob1)
         σ_r ~ σ_r_prior_dist
-        K ~ K_prior_dist
-        T ~ T_prior_dist
-
-        p = [K, T]
-        prob = remake(prob1, p = p)
-        sol = solve(prob, Tsit5())
-        predicted = sol(time_obs)
-        for i = 1:length(predicted)
-            r_obs[i] ~ Normal(predicted[i][1], σ_r) # index number of r is 1
-        end
-    end
-
-    return fitKT(time_obs, r_obs, prob1)
-end
-
-function create_model_for_mcmc_sample_kt(
-    data::ShipData,
-    σ_r::Float64;
-    K_prior_dist::Distribution = Uniform(0.01, 10.0),
-    T_prior_dist::Distribution = truncated(Normal(100.0, 50.0), 10.0, 200.0),
-)
-    time_obs = data.time
-    r_obs = data.r
-    δ_obs = data.δ
-
-    # create sytem model
-    spl_δ = Spline1D(time_obs, δ_obs)
-    function KT!(dX, X, p, t)
-        r, δ = X
-        K, T = p
-        dX[1] = dr = 1.0 / T * (-r + K * δ) # dr = 
-        dX[2] = dδ = derivative(spl_δ, t) # dδ = 
-    end
-    u0 = [r_obs[1]; δ_obs[1]]
-    K_start = 0.10
-    T_start = 60.0
-    p = [K_start, T_start]
-    prob1 = ODEProblem(KT!, u0, (time_obs[1], time_obs[end]), p)
-
-    # create probabilistic model
-    @model function fitKT(time_obs, r_obs, prob1)
         K ~ K_prior_dist
         T ~ T_prior_dist
 
