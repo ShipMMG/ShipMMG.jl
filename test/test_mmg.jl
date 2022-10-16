@@ -20,8 +20,8 @@ basic_params, maneuvering_params = get_KVLCC2_L7_params()
         v0 = 0.0,
         r0 = 0.0,
     )
-    u, v, r, δ, n_p = mmg_results
-    x, y, ψ = calc_position(time_list, u, v, r)
+    u, v, r, x, y, ψ, δ, n_p = mmg_results
+    x_est, y_est, ψ_est = calc_position(time_list, u, v, r)
 end
 
 @testset "mmg_zigzag_test" begin
@@ -33,7 +33,7 @@ end
     time_list = start_time_second:time_second_interval:end_time_second
     n_const = 17.95  # [rps]
     n_p_list = n_const * ones(Float64, length(time_list))
-    u_list, v_list, r_list, ψ_list, δ_list = mmg_3dof_zigzag_test(
+    u_list, v_list, r_list, x_list, y_list, ψ_list, δ_list = mmg_3dof_zigzag_test(
         basic_params,
         maneuvering_params,
         time_list,

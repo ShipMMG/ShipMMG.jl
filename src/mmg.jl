@@ -507,7 +507,7 @@ end
 """
     mmg_3dof_simulate(time_list, n_p_list, δ_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, x_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, δ, n_p
 
-Returns the MMG 3DOF simulation results including the lists of time, u, v, r, δ, n_p.
+Returns the MMG 3DOF simulation results including the lists of time, u, v, r, x, y, Ψ, δ, n_p.
 This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 
 # Arguments
@@ -700,7 +700,7 @@ function simulate(
 end
 
 """
-    mmg_3dof_zigzag_test(basic_params, maneuvering_params, time_list, n_p_list, target_δ_rad, target_ψ_rad_deviation, [, u0, v0, r0, ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> final_u_list, final_v_list, final_r_list, final_ψ_list, final_δ_list
+    mmg_3dof_zigzag_test(basic_params, maneuvering_params, time_list, n_p_list, target_δ_rad, target_Ψ_rad_deviation, [, u0, v0, r0, Ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> final_u_list, final_v_list, final_r_list, final_Ψ_list, final_δ_list
 
 Returns the MMG 3DOF zigzag simulation results.
 
@@ -710,7 +710,7 @@ Returns the MMG 3DOF zigzag simulation results.
 - `time_list`: the list of simulatino time.
 - `n_p_list`: the list of propeller rps.
 - `target_δ_rad`: target rudder angle of zigzag test.
-- `target_ψ_rad_deviation`: target azimuth deviation of zigzag test.
+- `target_Ψ_rad_deviation`: target azimuth deviation of zigzag test.
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
@@ -728,20 +728,20 @@ KVLCC2_L7 zigzag test.
 julia> ρ = 1025.0;
 julia> basic_params, maneuvering_params = get_KVLCC2_L7_params();
 julia> target_δ_rad = 20.0 * π / 180.0
-julia> target_ψ_rad_deviation = 20.0 * π / 180.0
+julia> target_Ψ_rad_deviation = 20.0 * π / 180.0
 julia> start_time_second = 0.00
 julia> time_second_interval = 0.01
 julia> end_time_second = 80.00
 julia> time_list = start_time_second:time_second_interval:end_time_second
 julia> n_const = 17.95  # [rps]
 julia> n_p_list = n_const * ones(Float64, length(time_list))
-julia> δ_list, u_list, v_list, r_list, ψ_list = mmg_3dof_zigzag_test(
+julia> δ_list, u_list, v_list, r_list, Ψ_list = mmg_3dof_zigzag_test(
     basic_params,
     maneuvering_params,
     time_list
     n_p_list,
     target_δ_rad,
-    target_ψ_rad_deviation,
+    target_Ψ_rad_deviation,
 );
 ```
 """
@@ -751,11 +751,13 @@ function mmg_3dof_zigzag_test(
     time_list,
     n_p_list,
     target_δ_rad,
-    target_ψ_rad_deviation;
+    target_Ψ_rad_deviation;
     u0 = 0.0,
     v0 = 0.0,
     r0 = 0.0,
-    ψ0 = 0.0,
+    x0 = 0.0,
+    y0 = 0.0,
+    Ψ0 = 0.0,
     δ0 = 0.0,
     δ_rad_rate = 10.0 * π / 180,
     ρ = 1025.0,
@@ -763,17 +765,19 @@ function mmg_3dof_zigzag_test(
     reltol = 1e-8,
     abstol = 1e-8,
 )
-    target_ψ_rad_deviation = abs(target_ψ_rad_deviation)
+    target_Ψ_rad_deviation = abs(target_Ψ_rad_deviation)
 
     final_δ_list = zeros(length(time_list))
     final_u_list = zeros(length(time_list))
     final_v_list = zeros(length(time_list))
     final_r_list = zeros(length(time_list))
-    final_ψ_list = zeros(length(time_list))
+    final_x_list = zeros(length(time_list))
+    final_y_list = zeros(length(time_list))
+    final_Ψ_list = zeros(length(time_list))
 
     next_stage_index = 1
     target_δ_rad = -target_δ_rad  # for changing in while loop
-    ψ = ψ0
+    Ψ = Ψ0
     while next_stage_index < length(time_list)
         target_δ_rad = -target_δ_rad
         start_index = next_stage_index
@@ -785,11 +789,15 @@ function mmg_3dof_zigzag_test(
             u0 = u0
             v0 = v0
             r0 = r0
+            x0 = x0
+            y0 = y0
         else
             δ_list[1] = final_δ_list[start_index-1]
             u0 = final_u_list[start_index-1]
             v0 = final_v_list[start_index-1]
             r0 = final_r_list[start_index-1]
+            x0 = final_x_list[start_index-1]
+            y0 = final_y_list[start_index-1]
         end
 
         for i = (start_index+1):length(time_list)
@@ -809,7 +817,7 @@ function mmg_3dof_zigzag_test(
             end
         end
 
-        u, v, r, δ, n_p = mmg_3dof_simulate(
+        u, v, r, x, y, Ψ_list, δ, n_p = mmg_3dof_simulate(
             basic_params,
             maneuvering_params,
             time_list[start_index:end],
@@ -818,21 +826,23 @@ function mmg_3dof_zigzag_test(
             u0 = u0,
             v0 = v0,
             r0 = r0,
+            x0 = x0,
+            y0 = y0,
+            Ψ0 = Ψ,
             ρ = ρ,
             algorithm = algorithm,
             reltol = reltol,
             abstol = abstol,
         )
-        x_dummy, y_dummy, ψ_list =
-            calc_position(time_list[start_index:end], u, v, r, x0 = 0.0, y0 = 0.0, ψ0 = ψ)
+        
         # get finish index
-        target_ψ_rad = ψ0 + target_ψ_rad_deviation
+        target_Ψ_rad = Ψ0 + target_Ψ_rad_deviation
         if target_δ_rad < 0
-            target_ψ_rad = ψ0 - target_ψ_rad_deviation
+            target_Ψ_rad = Ψ0 - target_Ψ_rad_deviation
         end
-        over_index = findfirst(e -> e > target_ψ_rad, ψ_list)
+        over_index = findfirst(e -> e > target_Ψ_rad, Ψ_list)
         if target_δ_rad < 0
-            over_index = findfirst(e -> e < target_ψ_rad, ψ_list)
+            over_index = findfirst(e -> e < target_Ψ_rad, Ψ_list)
         end
         next_stage_index = length(time_list)
         if isnothing(over_index)
@@ -840,18 +850,22 @@ function mmg_3dof_zigzag_test(
             final_u_list[start_index:next_stage_index] = u
             final_v_list[start_index:next_stage_index] = v
             final_r_list[start_index:next_stage_index] = r
-            final_ψ_list[start_index:next_stage_index] = ψ_list
+            final_x_list[start_index:next_stage_index] = x
+            final_y_list[start_index:next_stage_index] = y
+            final_Ψ_list[start_index:next_stage_index] = Ψ_list
         else
-            ψ = ψ_list[over_index]
+            Ψ = Ψ_list[over_index]
             next_stage_index = over_index + start_index - 1
             final_δ_list[start_index:next_stage_index-1] = δ_list[begin:over_index-1]
             final_u_list[start_index:next_stage_index-1] = u[begin:over_index-1]
             final_v_list[start_index:next_stage_index-1] = v[begin:over_index-1]
             final_r_list[start_index:next_stage_index-1] = r[begin:over_index-1]
-            final_ψ_list[start_index:next_stage_index-1] = ψ_list[begin:over_index-1]
+            final_x_list[start_index:next_stage_index-1] = x[begin:over_index-1]
+            final_y_list[start_index:next_stage_index-1] = y[begin:over_index-1]
+            final_Ψ_list[start_index:next_stage_index-1] = Ψ_list[begin:over_index-1]
         end
     end
-    final_u_list, final_v_list, final_r_list, final_ψ_list, final_δ_list
+    final_u_list, final_v_list, final_r_list, final_x_list, final_y_list, final_Ψ_list, final_δ_list
 end
 
 function create_model_for_mcmc_sample_mmg(
