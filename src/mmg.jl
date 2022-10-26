@@ -388,16 +388,16 @@ function mmg_3dof_simulate(
     time_list,
     δ_list,
     n_p_list;
-    u0 = 0.0,
-    v0 = 0.0,
-    r0 = 0.0,
-    x0 = 0.0,
-    y0 = 0.0,
-    Ψ0 = 0.0,
-    ρ = 1025.0,
-    algorithm = Tsit5(),
-    reltol = 1e-8,
-    abstol = 1e-8,
+    u0=0.0,
+    v0=0.0,
+    r0=0.0,
+    x0=0.0,
+    y0=0.0,
+    Ψ0=0.0,
+    ρ=1025.0,
+    algorithm=Tsit5(),
+    reltol=1e-8,
+    abstol=1e-8
 )
     @unpack L_pp,
     B,
@@ -494,16 +494,16 @@ function mmg_3dof_simulate(
         time_list,
         δ_list,
         n_p_list,
-        u0 = u0,
-        v0 = v0,
-        r0 = r0,
-        x0 = x0,
-        y0 = y0,
-        Ψ0 = Ψ0,
-        ρ = ρ,
-        algorithm = algorithm,
-        reltol = reltol,
-        abstol = abstol,
+        u0=u0,
+        v0=v0,
+        r0=r0,
+        x0=x0,
+        y0=y0,
+        Ψ0=Ψ0,
+        ρ=ρ,
+        algorithm=algorithm,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 
@@ -622,16 +622,16 @@ function simulate(
     time_list,
     δ_list,
     n_p_list;
-    u0 = 0.0,
-    v0 = 0.0,
-    r0 = 0.0,
-    x0 = 0.0,
-    y0 = 0.0,
-    Ψ0 = 0.0,
-    ρ = 1025.0,
-    algorithm = Tsit5(),
-    reltol = 1e-8,
-    abstol = 1e-8,
+    u0=0.0,
+    v0=0.0,
+    r0=0.0,
+    x0=0.0,
+    y0=0.0,
+    Ψ0=0.0,
+    ρ=1025.0,
+    algorithm=Tsit5(),
+    reltol=1e-8,
+    abstol=1e-8
 )
     spl_δ = Spline1D(time_list, δ_list)
     spl_n_p = Spline1D(time_list, n_p_list)
@@ -688,7 +688,7 @@ function simulate(
         spl_n_p,
     ]
     prob = ODEProblem(mmg_3dof_model!, X0, (time_list[1], time_list[end]), p)
-    sol = solve(prob, algorithm, reltol = reltol, abstol = abstol)
+    sol = solve(prob, algorithm, reltol=reltol, abstol=abstol)
     sol_timelist = sol(time_list)
     results = hcat(sol_timelist.u...)
     u = results[1, :]
@@ -758,18 +758,18 @@ function mmg_3dof_zigzag_test(
     n_p_list,
     target_δ_rad,
     target_Ψ_rad_deviation;
-    u0 = 0.0,
-    v0 = 0.0,
-    r0 = 0.0,
-    x0 = 0.0,
-    y0 = 0.0,
-    Ψ0 = 0.0,
-    δ0 = 0.0,
-    δ_rad_rate = 10.0 * π / 180,
-    ρ = 1025.0,
-    algorithm = Tsit5(),
-    reltol = 1e-8,
-    abstol = 1e-8,
+    u0=0.0,
+    v0=0.0,
+    r0=0.0,
+    x0=0.0,
+    y0=0.0,
+    Ψ0=0.0,
+    δ0=0.0,
+    δ_rad_rate=10.0 * π / 180,
+    ρ=1025.0,
+    algorithm=Tsit5(),
+    reltol=1e-8,
+    abstol=1e-8
 )
     target_Ψ_rad_deviation = abs(target_Ψ_rad_deviation)
 
@@ -829,18 +829,18 @@ function mmg_3dof_zigzag_test(
             time_list[start_index:end],
             δ_list,
             n_p_list[start_index:end],
-            u0 = u0,
-            v0 = v0,
-            r0 = r0,
-            x0 = x0,
-            y0 = y0,
-            Ψ0 = Ψ,
-            ρ = ρ,
-            algorithm = algorithm,
-            reltol = reltol,
-            abstol = abstol,
+            u0=u0,
+            v0=v0,
+            r0=r0,
+            x0=x0,
+            y0=y0,
+            Ψ0=Ψ,
+            ρ=ρ,
+            algorithm=algorithm,
+            reltol=reltol,
+            abstol=abstol,
         )
-        
+
         # get finish index
         target_Ψ_rad = Ψ0 + target_Ψ_rad_deviation
         if target_δ_rad < 0
@@ -871,7 +871,13 @@ function mmg_3dof_zigzag_test(
             final_Ψ_list[start_index:next_stage_index-1] = Ψ_list[begin:over_index-1]
         end
     end
-    final_u_list, final_v_list, final_r_list, final_x_list, final_y_list, final_Ψ_list, final_δ_list
+    final_u_list,
+    final_v_list,
+    final_r_list,
+    final_x_list,
+    final_y_list,
+    final_Ψ_list,
+    final_δ_list
 end
 
 function create_model_for_mcmc_sample_mmg(
@@ -880,30 +886,30 @@ function create_model_for_mcmc_sample_mmg(
     k_0,
     k_1,
     k_2;
-    ρ = 1025.0,
-    σ_u_prior_dist = Uniform(0.00, 0.20),
-    σ_v_prior_dist = Uniform(0.00, 0.20),
-    σ_r_prior_dist = Uniform(0.00, 0.20),
-    R_0_dash_prior_dist = Uniform(0.000, 0.100),
-    X_vv_dash_prior_dist = Uniform(-0.200, 0.200),
-    X_vr_dash_prior_dist = Uniform(-0.223, 0.177),
-    X_rr_dash_prior_dist = Uniform(-0.088, 0.032),
-    X_vvvv_dash_prior_dist = Uniform(-1.400, 1.400),
-    Y_v_dash_prior_dist = Uniform(-0.500, 0.000),
-    Y_r_dash_prior_dist = Uniform(-0.100, 0.200),
-    Y_vvv_dash_prior_dist = Uniform(-6.000, 2.000),
-    Y_vvr_dash_prior_dist = Uniform(-2.500, 1.000),
-    Y_vrr_dash_prior_dist = Uniform(-1.500, 0.000),
-    Y_rrr_dash_prior_dist = Uniform(-0.120, 0.040),
-    N_v_dash_prior_dist = Uniform(-0.200, 0.000),
-    N_r_dash_prior_dist = Uniform(-0.100, 0.000),
-    N_vvv_dash_prior_dist = Uniform(-0.500, 0.400),
-    N_vvr_dash_prior_dist = Uniform(-1.000, 0.000),
-    N_vrr_dash_prior_dist = Uniform(-0.300, 0.300),
-    N_rrr_dash_prior_dist = Uniform(-0.060, 0.000),
-    solver = Tsit5(),
-    abstol = 1e-6,
-    reltol = 1e-3,
+    ρ=1025.0,
+    σ_u_prior_dist=Uniform(0.00, 0.20),
+    σ_v_prior_dist=Uniform(0.00, 0.20),
+    σ_r_prior_dist=Uniform(0.00, 0.20),
+    R_0_dash_prior_dist=Uniform(0.000, 0.100),
+    X_vv_dash_prior_dist=Uniform(-0.200, 0.200),
+    X_vr_dash_prior_dist=Uniform(-0.223, 0.177),
+    X_rr_dash_prior_dist=Uniform(-0.088, 0.032),
+    X_vvvv_dash_prior_dist=Uniform(-1.400, 1.400),
+    Y_v_dash_prior_dist=Uniform(-0.500, 0.000),
+    Y_r_dash_prior_dist=Uniform(-0.100, 0.200),
+    Y_vvv_dash_prior_dist=Uniform(-6.000, 2.000),
+    Y_vvr_dash_prior_dist=Uniform(-2.500, 1.000),
+    Y_vrr_dash_prior_dist=Uniform(-1.500, 0.000),
+    Y_rrr_dash_prior_dist=Uniform(-0.120, 0.040),
+    N_v_dash_prior_dist=Uniform(-0.200, 0.000),
+    N_r_dash_prior_dist=Uniform(-0.100, 0.000),
+    N_vvv_dash_prior_dist=Uniform(-0.500, 0.400),
+    N_vvr_dash_prior_dist=Uniform(-1.000, 0.000),
+    N_vrr_dash_prior_dist=Uniform(-0.300, 0.300),
+    N_rrr_dash_prior_dist=Uniform(-0.060, 0.000),
+    solver=Tsit5(),
+    abstol=1e-6,
+    reltol=1e-3
 )
     time_obs = data.time
     u_obs = data.u
@@ -1165,8 +1171,8 @@ function create_model_for_mcmc_sample_mmg(
             N_vrr_dash,
             N_rrr_dash,
         ]
-        prob = remake(prob1, p = p)
-        sol = solve(prob, solver, abstol = abstol, reltol = reltol)
+        prob = remake(prob1, p=p)
+        sol = solve(prob, solver, abstol=abstol, reltol=reltol)
         predicted = sol(time_obs)
         for i = 1:length(predicted)
             obs[1][i] ~ Normal(predicted[i][1], σ_u) # u
