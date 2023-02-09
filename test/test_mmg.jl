@@ -7,7 +7,7 @@ basic_params, maneuvering_params = get_KVLCC2_L7_params()
     n_const = 17.95  # [rps]
 
     sampling = duration * 10
-    time_list = range(0.00, stop = duration, length = sampling)
+    time_list = range(0.00, stop=duration, length=sampling)
     δ_rad_list = max_δ_rad .* ones(Float64, sampling)
     n_p_list = n_const .* ones(Float64, sampling)
     mmg_results = mmg_3dof_simulate(
@@ -16,9 +16,9 @@ basic_params, maneuvering_params = get_KVLCC2_L7_params()
         time_list,
         δ_rad_list,
         n_p_list,
-        u0 = 2.29 * 0.512,
-        v0 = 0.0,
-        r0 = 0.0,
+        u0=2.29 * 0.512,
+        v0=0.0,
+        r0=0.0,
     )
     u, v, r, x, y, ψ, δ, n_p = mmg_results
     x_est, y_est, ψ_est = calc_position(time_list, u, v, r)
@@ -49,7 +49,7 @@ end
     n_const = 17.95  # [rps]
 
     sampling = duration * 10 + 1
-    time_list = range(0.00, stop = duration, length = sampling)
+    time_list = range(0.00, stop=duration, length=sampling)
     δ_rad_list = max_δ_rad .* ones(Float64, sampling)
     n_p_list = n_const .* ones(Float64, sampling)
     mmg_results = mmg_3dof_simulate(
@@ -58,9 +58,9 @@ end
         time_list,
         δ_rad_list,
         n_p_list,
-        u0 = 2.29 * 0.512,
-        v0 = 0.0,
-        r0 = 0.0,
+        u0=2.29 * 0.512,
+        v0=0.0,
+        r0=0.0,
     )
     u, v, r, δ, n_p = mmg_results
     sampling_rate = 10
@@ -78,9 +78,11 @@ end
         x,
         y,
         ψ,
-        δ[1:sampling_rate:end],
-        n_p[1:sampling_rate:end],
+        δ_rad_list[1:sampling_rate:end],
+        n_p_list[1:sampling_rate:end],
     )
+
+    parameter_width = 0.001
     n_samples = 10
     n_chains = 1
     model = create_model_for_mcmc_sample_mmg(
@@ -89,6 +91,27 @@ end
         maneuvering_params.k_0,
         maneuvering_params.k_1,
         maneuvering_params.k_2,
+        ρ=1025.0,
+        σ_u_prior_dist=Uniform(0.00, 0.20),
+        σ_v_prior_dist=Uniform(0.00, 0.20),
+        σ_r_prior_dist=Uniform(0.00, 0.20),
+        R_0_dash_prior_dist=Uniform(0.022 - parameter_width, 0.022 + parameter_width),
+        X_vv_dash_prior_dist=Uniform(-0.04 - parameter_width, -0.04 + parameter_width),
+        X_vr_dash_prior_dist=Uniform(0.002 - parameter_width, 0.002 + parameter_width),
+        X_rr_dash_prior_dist=Uniform(0.011 - parameter_width, 0.011 + parameter_width),
+        X_vvvv_dash_prior_dist=Uniform(0.771 - parameter_width, 0.771 + parameter_width),
+        Y_v_dash_prior_dist=Uniform(-0.315 - parameter_width, -0.315 + parameter_width),
+        Y_r_dash_prior_dist=Uniform(0.083 - parameter_width, 0.083 + parameter_width),
+        Y_vvv_dash_prior_dist=Uniform(-1.607 - parameter_width, -1.607 + parameter_width),
+        Y_vvr_dash_prior_dist=Uniform(0.379 - parameter_width, 0.379 + parameter_width),
+        Y_vrr_dash_prior_dist=Uniform(-0.391 - parameter_width, -0.391 + parameter_width),
+        Y_rrr_dash_prior_dist=Uniform(0.008 - parameter_width, 0.008 + parameter_width),
+        N_v_dash_prior_dist=Uniform(-0.137 - parameter_width, -0.137 + parameter_width),
+        N_r_dash_prior_dist=Uniform(-0.049 - parameter_width, -0.049 + parameter_width),
+        N_vvv_dash_prior_dist=Uniform(-0.03 - parameter_width, -0.03 + parameter_width),
+        N_vvr_dash_prior_dist=Uniform(-0.294 - parameter_width, -0.294 + parameter_width),
+        N_vrr_dash_prior_dist=Uniform(0.055 - parameter_width, 0.055 + parameter_width),
+        N_rrr_dash_prior_dist=Uniform(-0.013 - parameter_width, -0.013 + parameter_width),
     )
     chain = nuts_sampling_single_thread(model, n_samples, n_chains)
 end
