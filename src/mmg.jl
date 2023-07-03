@@ -1130,7 +1130,7 @@ function create_model_for_mcmc_sample_mmg(
     prob1 = ODEProblem(MMG!, X0, (time_obs[1], time_obs[end]), p)
 
     # create probabilistic model
-    @model function fitMMG(time_obs, obs, prob1)
+    Turing.@model function fitMMG(time_obs, obs, prob1)
         σ_u ~ σ_u_prior_dist
         σ_v ~ σ_v_prior_dist
         σ_r ~ σ_r_prior_dist

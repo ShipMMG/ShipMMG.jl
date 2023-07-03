@@ -77,15 +77,15 @@ function kt_simulate(
     T,
     time_list,
     δ_list;
-    u0 = 10.0,
-    v0 = 0.0,
-    r0 = 0.0,
-    x0 = 0.0,
-    y0 = 0.0,
-    Ψ0 = 0.0,
-    algorithm = Tsit5(),
-    reltol = 1e-8,
-    abstol = 1e-8,
+    u0=10.0,
+    v0=0.0,
+    r0=0.0,
+    x0=0.0,
+    y0=0.0,
+    Ψ0=0.0,
+    algorithm=Tsit5(),
+    reltol=1e-8,
+    abstol=1e-8
 )
 
     spl_δ = Spline1D(time_list, δ_list)
@@ -93,7 +93,7 @@ function kt_simulate(
     X0 = [u0; v0; r0; x0; y0; Ψ0; δ_list[1]]
     p = [K, T, spl_δ]
     prob = ODEProblem(kt_model!, X0, (time_list[1], time_list[end]), p)
-    sol = solve(prob, algorithm, reltol = reltol, abstol = abstol)
+    sol = solve(prob, algorithm, reltol=reltol, abstol=abstol)
     sol_timelist = sol(time_list)
     results = hcat(sol_timelist.u...)
     u = results[1, :]
@@ -158,17 +158,17 @@ function kt_zigzag_test(
     time_list,
     target_δ_rad,
     target_Ψ_rad_deviation;
-    u0 = 10.0,
-    v0 = 0.0,
-    r0 = 0.0,
-    x0 = 0.0,
-    y0 = 0.0,
-    Ψ0 = 0.0,
-    δ0 = 0.0,
-    δ_rad_rate = 10.0 * π / 180,
-    algorithm = Tsit5(),
-    reltol = 1e-8,
-    abstol = 1e-8,
+    u0=10.0,
+    v0=0.0,
+    r0=0.0,
+    x0=0.0,
+    y0=0.0,
+    Ψ0=0.0,
+    δ0=0.0,
+    δ_rad_rate=10.0 * π / 180,
+    algorithm=Tsit5(),
+    reltol=1e-8,
+    abstol=1e-8
 )
     target_Ψ_rad_deviation = abs(target_Ψ_rad_deviation)
 
@@ -227,15 +227,15 @@ function kt_zigzag_test(
             T,
             time_list[start_index:end],
             δ_list,
-            u0 = u0,
-            v0 = v0,
-            r0 = r0,
-            x0 = x0,
-            y0 = y0,
-            Ψ0 = Ψ,
-            algorithm = algorithm,
-            reltol = reltol,
-            abstol = abstol,
+            u0=u0,
+            v0=v0,
+            r0=r0,
+            x0=x0,
+            y0=y0,
+            Ψ0=Ψ,
+            algorithm=algorithm,
+            reltol=reltol,
+            abstol=abstol,
         )
 
         # get finish index
@@ -315,9 +315,9 @@ end
 
 function create_model_for_mcmc_sample_kt(
     data::ShipData;
-    σ_r_prior_dist::Distribution = Chi(5),
-    K_prior_dist::Distribution = Uniform(0.01, 10.0),
-    T_prior_dist::Distribution = truncated(Normal(100.0, 50.0), 10.0, 200.0),
+    σ_r_prior_dist::Distribution=Chi(5),
+    K_prior_dist::Distribution=Uniform(0.01, 10.0),
+    T_prior_dist::Distribution=truncated(Normal(100.0, 50.0), 10.0, 200.0)
 )
     time_obs = data.time
     r_obs = data.r
@@ -338,13 +338,13 @@ function create_model_for_mcmc_sample_kt(
     prob1 = ODEProblem(KT!, u0, (time_obs[1], time_obs[end]), p)
 
     # create probabilistic model
-    @model function fitKT(time_obs, r_obs, prob1)
+    Turing.@model function fitKT(time_obs, r_obs, prob1)
         σ_r ~ σ_r_prior_dist
         K ~ K_prior_dist
         T ~ T_prior_dist
 
         p = [K, T]
-        prob = remake(prob1, p = p)
+        prob = remake(prob1, p=p)
         sol = solve(prob, Tsit5())
         predicted = sol(time_obs)
         for i = 1:length(predicted)
