@@ -1,4 +1,4 @@
-@with_kw struct ShipData{Tt,Tu,Tv,Tr,Tx,Ty,Tψ,Tδ,Tn_p}
+@with_kw struct ShipData{Tt,Tu,Tv,Tr,Tx,Ty,Tψ,Tδ,Tn_p,Tu_wind,Tψ_wind}
     time::Tt
     u::Tu
     v::Tv
@@ -8,6 +8,8 @@
     ψ::Tψ
     δ::Tδ
     n_p::Tn_p
+    u_wind::Tu_wind
+    ψ_wind::Tψ_wind
 end
 
 function get_KVLCC2_L7_basic_params(ρ = 1025.0)
@@ -136,6 +138,34 @@ function get_KVLCC2_L7_maneuvering_params()
         N_rrr_dash,
     )
     maneuvering_params
+end
+
+function get_structure_params()
+    L_pp = 7.00  # 船長Lpp[m]
+    B = 1.27  # 船幅[m]
+    d = 0.46  # 喫水[m]
+    D = 0.6563 # 深さ[m]
+    A_OD = 0.65 # デッキ上の構造物の側面投影面積[m^2]
+    H_BR = 0.85 # 喫水からブリッジ主要構造物の最高位[m]
+    H_C = 0.235 # 喫水から側面積中心までの高さ[m]
+    C = 0.0 # 船体中心から側面積中心までの前後方向座標(船首方向を正)[m]
+
+    A_OD = A_OD # デッキ上の構造物の側面投影面積[m^2]
+    A_F = (D - d) * B  # 船体の正面投影面積[m^2]
+    A_L = (D - d) * L_pp # 船体の側面投影面積[m^2]
+    H_BR = H_BR # 喫水からブリッジ主要構造物の最高位[m]
+    H_C = H_C # 喫水から側面積中心までの高さ[m]
+    C = C # 船体中心から側面積中心までの前後方向座標[m]
+    
+    structure_params = Mmg3DofStructureParams(
+        A_OD,
+        A_F,
+        A_L,
+        H_BR,
+        H_C,
+        C,
+    )
+    structure_params
 end
 
 function get_KVLCC2_L7_params()
