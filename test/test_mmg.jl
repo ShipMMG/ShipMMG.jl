@@ -10,12 +10,17 @@ basic_params, maneuvering_params = get_KVLCC2_L7_params()
     time_list = range(0.00, stop=duration, length=sampling)
     δ_rad_list = max_δ_rad .* ones(Float64, sampling)
     n_p_list = n_const .* ones(Float64, sampling)
+    u_wind_list = rand(Normal(8,1),length(time_list))
+    ψ_wind_list = rand(Normal(0,0.1)length(time_list))
+
     mmg_results = mmg_3dof_simulate(
         basic_params,
         maneuvering_params,
         time_list,
         δ_rad_list,
         n_p_list,
+        u_wind_list,
+        ψ_wind_list,
         u0=2.29 * 0.512,
         v0=0.0,
         r0=0.0,
@@ -33,6 +38,8 @@ end
     time_list = start_time_second:time_second_interval:end_time_second
     n_const = 17.95  # [rps]
     n_p_list = n_const * ones(Float64, length(time_list))
+    u_wind_list = rand(Normal(8,1),length(time_list))
+    ψ_wind_list = rand(Normal(0,0.1)length(time_list))
     u_list, v_list, r_list, x_list, y_list, ψ_list, δ_list = mmg_3dof_zigzag_test(
         basic_params,
         maneuvering_params,
@@ -40,6 +47,8 @@ end
         n_p_list,
         target_δ_rad,
         target_ψ_rad_deviation,
+        u_wind_list,
+        ψ_wind_list,
     )
 end
 
