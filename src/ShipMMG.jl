@@ -13,6 +13,7 @@ export calc_position,
     ShipData,
     get_KVLCC2_L7_basic_params,
     get_KVLCC2_L7_maneuvering_params,
+    get_structure_params,
     get_KVLCC2_L7_params,
     nuts_sampling_single_thread,
     nuts_sampling_multi_threads
@@ -28,12 +29,14 @@ export kt_simulate,
 include("mmg.jl")
 export Mmg3DofBasicParams,
     Mmg3DofManeuveringParams,
+    Mmg3DofStructureParams,
     mmg_3dof_simulate,
     mmg_3dof_model!,
     mmg_3dof_zigzag_test,
     estimate_mmg_approx_lsm,
     estimate_mmg_approx_lsm_time_window_sampling,
-    create_model_for_mcmc_sample_mmg
+    create_model_for_mcmc_sample_mmg,
+    wind_force_and_moment_coefficients
 
 include("draw.jl")
 export draw_gif_result, calc_position
