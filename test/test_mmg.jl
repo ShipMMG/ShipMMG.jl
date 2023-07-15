@@ -16,6 +16,7 @@ basic_params, maneuvering_params = get_KVLCC2_L7_params()
     mmg_results = mmg_3dof_simulate(
         basic_params,
         maneuvering_params,
+        structure_params,
         time_list,
         δ_rad_list,
         n_p_list,
@@ -43,6 +44,7 @@ end
     u_list, v_list, r_list, x_list, y_list, ψ_list, δ_list = mmg_3dof_zigzag_test(
         basic_params,
         maneuvering_params,
+        structure_params,
         time_list,
         n_p_list,
         target_δ_rad,
