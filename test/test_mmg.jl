@@ -1,17 +1,22 @@
 basic_params, maneuvering_params = get_KVLCC2_L7_params()
+structure_params = get_structure_params()
 
 @testset "mmg.jl KVLCC2_L7 turning" begin
 
     duration = 200  # [s]
     max_δ_rad = 35 * pi / 180.0  # [rad]
     n_const = 17.95  # [rps]
+    μ_u_wind = 8.0 # [m/s]
+    μ_ψ_wind = 0.0 # [deg]  
+    σ_u_wind = 1.0 # [m/s]
+    σ_ψ_wind = 0.1 # [deg]
 
     sampling = duration * 10
     time_list = range(0.00, stop=duration, length=sampling)
     δ_rad_list = max_δ_rad .* ones(Float64, sampling)
     n_p_list = n_const .* ones(Float64, sampling)
-    u_wind_list = rand(Normal(8,1),length(time_list))
-    ψ_wind_list = rand(Normal(0,0.1)length(time_list))
+    u_wind_list = rand(Normal(μ_u_wind,σ_u_wind),length(time_list))
+    ψ_wind_list = rand(Normal(μ_ψ_wind,σ_ψ_wind),length(time_list))
 
     mmg_results = mmg_3dof_simulate(
         basic_params,
@@ -33,14 +38,18 @@ end
 @testset "mmg_zigzag_test" begin
     target_δ_rad = 20.0 * π / 180.0
     target_ψ_rad_deviation = 20.0 * π / 180.0
+    μ_u_wind = 8.0 # [m/s]
+    μ_ψ_wind = 0.0 # [deg]  
+    σ_u_wind = 1.0 # [m/s]
+    σ_ψ_wind = 0.1 # [deg]
     start_time_second = 0.00
     time_second_interval = 0.01
     end_time_second = 80.00
     time_list = start_time_second:time_second_interval:end_time_second
     n_const = 17.95  # [rps]
     n_p_list = n_const * ones(Float64, length(time_list))
-    u_wind_list = rand(Normal(8,1),length(time_list))
-    ψ_wind_list = rand(Normal(0,0.1)length(time_list))
+    u_wind_list = rand(Normal(μ_u_wind,σ_u_wind),length(time_list))
+    ψ_wind_list = rand(Normal(μ_ψ_wind,σ_ψ_wind),length(time_list))
     u_list, v_list, r_list, x_list, y_list, ψ_list, δ_list = mmg_3dof_zigzag_test(
         basic_params,
         maneuvering_params,
@@ -58,17 +67,26 @@ end
     duration = 200  # [s]
     max_δ_rad = 35 * pi / 180.0  # [rad]
     n_const = 17.95  # [rps]
+    μ_u_wind = 8.0 # [m/s]
+    μ_ψ_wind = 0.0 # [deg]   
+    σ_u_wind = 1.0 # [m/s]
+    σ_ψ_wind = 0.1 # [deg]
 
     sampling = duration * 10 + 1
     time_list = range(0.00, stop=duration, length=sampling)
     δ_rad_list = max_δ_rad .* ones(Float64, sampling)
     n_p_list = n_const .* ones(Float64, sampling)
+    u_wind_list = rand(Normal(μ_u_wind,σ_u_wind),length(time_list))
+    ψ_wind_list = rand(Normal(μ_ψ_wind,σ_ψ_wind),length(time_list))
     mmg_results = mmg_3dof_simulate(
         basic_params,
         maneuvering_params,
+        structure_params,
         time_list,
         δ_rad_list,
         n_p_list,
+        u_wind_list,
+        ψ_wind_list,
         u0=2.29 * 0.512,
         v0=0.0,
         r0=0.0,
