@@ -14,6 +14,7 @@ export calc_position,
     get_KVLCC2_L7_maneuvering_params,
     get_structure_params,
     get_KVLCC2_L7_params,
+    get_example_ship_wind_force_moment_params,
     nuts_sampling_single_thread,
     nuts_sampling_multi_threads
 
