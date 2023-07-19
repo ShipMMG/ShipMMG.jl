@@ -1,4 +1,6 @@
 """
+get_wind_attack_of_angle(ψ_ship,ψ_wind)
+
 Wind angle of attack - 0 [rad] point out to North and rotating clockwise positive angle.
 """
 function get_wind_attack_of_angle(
@@ -19,85 +21,6 @@ function get_wind_attack_of_angle(
         ψ_A -= 2pi
     end
     ψ_A
-end
-
-"""
-    wind_force_and_moment_coefficients(ψ,ψ_wind,p)
-
-conpute the parameter C_X,C_Y,C_N
-
-# Arguments
--`ψ`:ship angle [rad]
--`ψ_wind`:wind direction[rad]
-- L_pp
-- B
-- A_OD
-- A_F
-- A_L
-- H_BR
-- H_C
-- C
-"""
-function wind_force_and_moment_coefficients(
-    ψ,
-    ψ_wind,
-    L_pp,
-    B,
-    A_OD,
-    A_F,
-    A_L,
-    H_BR,
-    H_C,
-    C,
-)
-    ψ_A = get_wind_attack_of_angle(ψ, ψ_wind)
-
-    #C_LF1の場合で調整
-    C_CF = 0.404 + 0.368 * A_F / (B * H_BR) + 0.902 * H_BR / L_pp
-
-    if deg2rad(0) <= ψ_A <= deg2rad(90)
-        C_LF = -0.992 + 0.507 * A_L / (L_pp * B) + 1.162 * C / L_pp
-        C_XLI = 0.458 + 3.245 * A_L / (L_pp * H_BR) - 2.313 * A_F / (B * H_BR)
-        C_ALF = -0.585 - 0.906 * A_OD / A_L + 3.239 * B / L_pp
-        C_YLI = pi * A_L / L_pp^2 + 0.116 + 3.345 * A_F / (L_pp * B)
-
-    elseif deg2rad(90) < ψ_A <= deg2rad(180)
-        C_LF =
-            0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp - 3.011 * A_OD / L_pp^2 -
-            0.341 * A_F / B^2
-        C_XLI =
-            -1.901 + 12.727 * A_L / (L_pp * H_BR) + 24.407 * A_F / A_L -
-            40.310 * B / L_pp - 0.341 * A_F / (B * H_BR)
-        C_ALF = -0.314 - 1.117 * A_OD / A_L
-        C_YLI = pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp^2
-
-    elseif deg2rad(180) < ψ_A <= deg2rad(270)
-        C_LF =
-            0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp - 3.011 * A_OD / L_pp^2 -
-            0.341 * A_F / B^2
-        C_XLI =
-            -1.901 + 12.727 * A_L / (L_pp * H_BR) + 24.407 * A_F / A_L -
-            40.310 * B / L_pp - 0.341 * A_F / (B * H_BR)
-        C_ALF = -(-0.314 - 1.117 * A_OD / A_L)
-        C_YLI = -(pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp^2)
-
-    elseif deg2rad(270) < ψ_A <= deg2rad(360)
-        C_LF = -0.992 + 0.507 * A_L / (L_pp * B) + 1.162 * C / L_pp
-        C_XLI = 0.458 + 3.245 * A_L / (L_pp * H_BR) - 2.313 * A_F / (B * H_BR)
-        C_ALF = -(-0.585 - 0.906 * A_OD / A_L + 3.239 * B / L_pp)
-        C_YLI = -(pi * A_L / L_pp^2 + 0.116 + 3.345 * A_F / (L_pp * B))
-    end
-
-    C_X =
-        C_LF * cos(ψ_A) +
-        C_XLI * (sin(ψ_A) - sin(ψ_A) * cos(ψ_A)^2 / 2) * sin(ψ_A) * cos(ψ_A) +
-        C_ALF * sin(ψ_A) * cos(ψ_A)^3
-    C_Y =
-        C_CF * sin(ψ_A)^2 +
-        C_YLI * (cos(ψ_A) + sin(ψ_A)^2 * cos(ψ_A) / 2) * sin(ψ_A) * cos(ψ_A)
-    C_N = C_Y * (0.297 * C / L_pp - 0.149 * (ψ_A - deg2rad(90)))
-
-    C_X, C_Y, C_N
 end
 
 """
@@ -135,12 +58,6 @@ MMG 3DOF model on DifferentialEquations.ODEProblem. Update `dX`.
     - t_P
     - w_P0
     - x_P
-    - A_OD
-    - A_F
-    - A_L
-    - H_BR
-    - H_C
-    - C
     - k_0
     - k_1
     - k_2
@@ -161,6 +78,11 @@ MMG 3DOF model on DifferentialEquations.ODEProblem. Update `dX`.
     - N_vvr_dash
     - N_vrr_dash
     - N_rrr_dash
+    - A_F
+    - A_L
+    - spl_C_X
+    - spl_C_Y
+    - spl_C_N
     - spl_δ
     - spl_n_p
     - u_wind_list
@@ -195,12 +117,6 @@ function mmg_3dof_model!(dX, X, p, t)
     t_P,
     w_P0,
     x_P,
-    A_OD,
-    A_F,
-    A_L,
-    H_BR,
-    H_C,
-    C,
     k_0,
     k_1,
     k_2,
@@ -221,6 +137,11 @@ function mmg_3dof_model!(dX, X, p, t)
     N_vvr_dash,
     N_vrr_dash,
     N_rrr_dash,
+    A_F,
+    A_L,
+    spl_C_X,
+    spl_C_Y,
+    spl_C_N,
     spl_δ,
     spl_n_p,
     spl_u_wind,
@@ -333,23 +254,11 @@ function mmg_3dof_model!(dX, X, p, t)
     )
     N_R = -(x_R + a_H * x_H) * F_N * cos(δ)
 
-    C_X_wind, C_Y_wind, C_N_wind = wind_force_and_moment_coefficients(
-        ψ,
-        ψ_wind,
-        L_pp,
-        B,
-        A_OD,
-        A_F,
-        A_L,
-        H_BR,
-        H_C,
-        C,
-    )
-
+    ψ_A = get_wind_attack_of_angle(ψ, ψ_wind)
     ρ_air = 1.225
-    X_wind = ρ_air * A_F * C_X_wind / 2 * u_wind^2
-    Y_wind = ρ_air * A_L * C_Y_wind / 2 * u_wind^2
-    N_wind = ρ_air * A_L * L_pp * C_N_wind / 2 * u_wind^2
+    X_wind = ρ_air * A_F * spl_C_X(ψ_A) / 2 * u_wind^2
+    Y_wind = ρ_air * A_L * spl_C_Y(ψ_A) / 2 * u_wind^2
+    N_wind = ρ_air * A_L * L_pp * spl_C_N(ψ_A) / 2 * u_wind^2
 
     dX[1] =
         du =
@@ -479,27 +388,25 @@ Maneuvering parameters of target ship for MMG 3DOF simulation.
 end
 
 """
-Sturucture parameters of target ship for MMG 3DOF simulation.
+Wind force and moment parameters of target ship for MMG 3DOF simulation.
 
 # Arguments
-- `A_OD::T`
 - `A_F::T`
 - `A_L::T`
-- `H_BR::T`
-- `H_C::T`
-- `C::T`
+- `spl_C_X::T`
+- `spl_C_Y::T`
+- `spl_C_N::T`
 """
-@with_kw mutable struct Mmg3DofStructureParams{T}
-    A_OD::T
+@with_kw mutable struct Mmg3DofWindForceMomentParams{T}
     A_F::T
     A_L::T
-    H_BR::T
-    H_C::T
-    C::T
+    spl_C_X::Dierckx.Spline1D
+    spl_C_Y::Dierckx.Spline1D
+    spl_C_N::Dierckx.Spline1D
 end
 
 """
-    mmg_3dof_simulate(time_list, n_p_list, δ_list, u_wind_list, ψ_wind_list basic_params, maneuvering_params,structure_params, [ u0, v0, r0, x0, y0, ψ0, ρ, algorithm, reltol, abstol]) -> u, v, r, x, y, ψ, δ, n_p
+    mmg_3dof_simulate(time_list, n_p_list, δ_list, u_wind_list, ψ_wind_list basic_params, maneuvering_params,wind_force_and_moment_params, [ u0, v0, r0, x0, y0, ψ0, ρ, algorithm, reltol, abstol]) -> u, v, r, x, y, ψ, δ, n_p
 
 Returns the MMG 3DOF simulation results including the lists of time, u, v, r, x, y, ψ, δ, n_p.
 This function has the same logic of `ShipMMG.simulate()`.
@@ -507,7 +414,7 @@ This function has the same logic of `ShipMMG.simulate()`.
 # Arguments
 - `basic_params::Mmg3DofBasicParams`: the basic parameters of target ship.
 - `maneuvering_params::Mmg3DofManeuveringParams`: the maneuvering parameters of target ship.
-- `structure_params::Mmg3DofStructureParams,` : the Structur parameters above the  taeget ship's draft
+- `wind_force_and_moment_params::Mmg3DofWindForceMomentParams,` : the wind force and moment parameters above the taeget ship.
 - `time_list`: the list of simulatino time.
 - `δ_list`: the list of rudder angle [rad].
 - `n_p_list`: the list of propeller rps.
@@ -555,7 +462,7 @@ julia> mmg_results = mmg_3dof_simulate(
 function mmg_3dof_simulate(
     basic_params::Mmg3DofBasicParams,
     maneuvering_params::Mmg3DofManeuveringParams,
-    structure_params::Mmg3DofStructureParams,
+    wind_force_and_moment_params::Mmg3DofWindForceMomentParams,
     time_list,
     δ_list,
     n_p_list,
@@ -619,12 +526,7 @@ function mmg_3dof_simulate(
     N_vrr_dash,
     N_rrr_dash = maneuvering_params
 
-    @unpack A_OD,
-    A_F,
-    A_L,
-    H_BR,
-    H_C,
-    C = structure_params
+    @unpack A_F, A_L, spl_C_X, spl_C_Y, spl_C_N = wind_force_and_moment_params
 
     simulate(
         L_pp,
@@ -652,12 +554,6 @@ function mmg_3dof_simulate(
         t_P,
         w_P0,
         x_P,
-        A_OD,
-        A_F,
-        A_L,
-        H_BR,
-        H_C,
-        C,
         k_0,
         k_1,
         k_2,
@@ -678,6 +574,11 @@ function mmg_3dof_simulate(
         N_vvr_dash,
         N_vrr_dash,
         N_rrr_dash,
+        A_F,
+        A_L,
+        spl_C_X,
+        spl_C_Y,
+        spl_C_N,
         time_list,
         δ_list,
         n_p_list,
@@ -697,7 +598,7 @@ function mmg_3dof_simulate(
 end
 
 """
-    simulate(time_list, n_p_list, δ_list, u_wind_list, ψ_wind_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, x_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, A_OD, A_F, A_L, H_BR, H_C, C, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, x, y, ψ, δ, n_p
+    simulate(time_list, n_p_list, δ_list, u_wind_list, ψ_wind_list, L_pp, B, d, x_G, D_p, m, I_zG, A_R, η, m_x, m_y, J_z, f_α, ϵ, t_R, x_R, a_H, x_H, γ_R_minus, γ_R_plus, l_R, κ, t_P, w_P0, x_P, A_OD, A_F, A_L, H_BR, H_C, C, k_0, k_1, k_2, R_0_dash, X_vv_dash, X_vr_dash, X_rr_dash, X_vvvv_dash, Y_v_dash, Y_r_dash, Y_vvv_dash, Y_vvr_dash, Y_vrr_dash, Y_rrr_dash, N_v_dash, N_r_dash, N_vvv_dash, N_vvr_dash, N_vrr_dash, N_rrr_dash, A_F, A_L, spl_C_X, spl_C_Y, spl_C_N, [, u0, v0, r0, ρ, algorithm, reltol, abstol]) -> u, v, r, x, y, ψ, δ, n_p
 
 Returns the MMG 3DOF simulation results including the lists of time, u, v, r, x, y, ψ, δ, n_p.
 This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
@@ -728,12 +629,6 @@ This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 - `t_P`: 
 - `w_P0`: 
 - `x_P`: 
-- `A_OD:`
-- `A_F:`
-- `A_L:`
-- `H_BR:`
-- `H_C:`
-- `C:`
 - `k_0`
 - `k_1`
 - `k_2`
@@ -754,6 +649,11 @@ This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 - `N_vvr_dash`
 - `N_vrr_dash`
 - `N_rrr_dash`
+- `A_F`
+- `A_L`
+- `spl_C_X`
+- `spl_C_Y`
+- `spl_C_N`
 - `time_list`: the list of simulatino time.
 - `δ_list`: the list of rudder angle [rad].
 - `n_p_list`: the list of propeller rps.
@@ -796,12 +696,6 @@ function simulate(
     t_P,
     w_P0,
     x_P,
-    A_OD,
-    A_F,
-    A_L,
-    H_BR,
-    H_C,
-    C,
     k_0,
     k_1,
     k_2,
@@ -822,6 +716,11 @@ function simulate(
     N_vvr_dash,
     N_vrr_dash,
     N_rrr_dash,
+    A_F,
+    A_L,
+    spl_C_X,
+    spl_C_Y,
+    spl_C_N,
     time_list,
     δ_list,
     n_p_list,
@@ -873,12 +772,6 @@ function simulate(
         t_P,
         w_P0,
         x_P,
-        A_OD,
-        A_F,
-        A_L,
-        H_BR,
-        H_C,
-        C,
         k_0,
         k_1,
         k_2,
@@ -899,6 +792,11 @@ function simulate(
         N_vvr_dash,
         N_vrr_dash,
         N_rrr_dash,
+        A_F,
+        A_L,
+        spl_C_X,
+        spl_C_Y,
+        spl_C_N,
         spl_δ,
         spl_n_p,
         spl_u_wind,
@@ -922,14 +820,14 @@ function simulate(
 end
 
 """
-    mmg_3dof_zigzag_test(basic_params, maneuvering_params,structure_params time_list, n_p_list, u_wind_list, Ψ_wind_list, target_δ_rad, target_Ψ_rad_deviation, [, u0, v0, r0, x0, y0, Ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> u, v, r, x, y, ψ, δ
+    mmg_3dof_zigzag_test(basic_params, maneuvering_params,wind_force_and_moment_params time_list, n_p_list, u_wind_list, Ψ_wind_list, target_δ_rad, target_Ψ_rad_deviation, [, u0, v0, r0, x0, y0, Ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> u, v, r, x, y, ψ, δ
 
 Returns the MMG 3DOF zigzag simulation results.
 
 # Arguments
 - `basic_params::Mmg3DofBasicParams`: the basic parameters of target ship.
 - `maneuvering_params::Mmg3DofManeuveringParams`: the maneuvering parameters of target ship.
-- `structure_params::Mmg3DofStructureParams,` : the Structur parameters above the  taeget ship's draft
+- `wind_force_and_moment_params::Mmg3DofWindForceMomentParams,` : the Structur parameters above the  taeget ship's draft
 - `time_list`: the list of simulatino time.
 - `δ_list`: the list of rudder angle [rad].
 - `n_p_list`: the list of propeller rps.
@@ -967,7 +865,8 @@ julia> ψ_wind_list = n_const .* ones(Float64, sampling);
 julia> δ_list, u_list, v_list, r_list, ψ_list = mmg_3dof_zigzag_test(
     basic_params,
     maneuvering_params,
-    time_list
+    wind_force_and_moment_params,
+    time_list,
     n_p_list,
     u_wind_list,
     ψ_wind_list,
@@ -979,7 +878,7 @@ julia> δ_list, u_list, v_list, r_list, ψ_list = mmg_3dof_zigzag_test(
 function mmg_3dof_zigzag_test(
     basic_params::Mmg3DofBasicParams,
     maneuvering_params::Mmg3DofManeuveringParams,
-    structure_params::Mmg3DofStructureParams,
+    wind_force_and_moment_params::Mmg3DofWindForceMomentParams,
     time_list,
     n_p_list,
     target_δ_rad,
@@ -1054,7 +953,7 @@ function mmg_3dof_zigzag_test(
         u, v, r, x, y, ψ_list, δ, n_p = mmg_3dof_simulate(
             basic_params,
             maneuvering_params,
-            structure_params,
+            wind_force_and_moment_params,
             time_list[start_index:end],
             δ_list,
             n_p_list[start_index:end],

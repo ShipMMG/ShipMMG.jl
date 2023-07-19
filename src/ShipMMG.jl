@@ -12,8 +12,8 @@ export calc_position,
     ShipData,
     get_KVLCC2_L7_basic_params,
     get_KVLCC2_L7_maneuvering_params,
-    get_structure_params,
     get_KVLCC2_L7_params,
+    get_example_ship_wind_force_moment_params,
     nuts_sampling_single_thread,
     nuts_sampling_multi_threads
 
@@ -28,7 +28,7 @@ export kt_simulate,
 include("mmg.jl")
 export Mmg3DofBasicParams,
     Mmg3DofManeuveringParams,
-    Mmg3DofStructureParams,
+    Mmg3DofWindForceMomentParams,
     mmg_3dof_simulate,
     mmg_3dof_model!,
     mmg_3dof_zigzag_test,

@@ -138,7 +138,88 @@ function get_KVLCC2_L7_maneuvering_params()
     maneuvering_params
 end
 
-function get_structure_params()
+function get_KVLCC2_L7_params()
+    basic_params = get_KVLCC2_L7_basic_params()
+    maneuvering_params = get_KVLCC2_L7_maneuvering_params()
+    basic_params, maneuvering_params
+end
+
+"""
+    wind_force_and_moment_coefficients(ψ_A,p)
+
+compute the parameter C_X,C_Y,C_N from Fujiwara's estimation method (1994).
+
+# Arguments
+-`ψ_A`: Wind attack of angle [rad]
+- L_pp
+- B
+- A_OD
+- A_F
+- A_L
+- H_BR
+- H_C
+- C
+"""
+function wind_force_and_moment_coefficients(
+    ψ_A,
+    L_pp,
+    B,
+    A_OD,
+    A_F,
+    A_L,
+    H_BR,
+    H_C,
+    C,
+)
+    #C_LF1の場合で調整
+    C_CF = 0.404 + 0.368 * A_F / (B * H_BR) + 0.902 * H_BR / L_pp
+
+    if deg2rad(0) <= ψ_A <= deg2rad(90)
+        C_LF = -0.992 + 0.507 * A_L / (L_pp * B) + 1.162 * C / L_pp
+        C_XLI = 0.458 + 3.245 * A_L / (L_pp * H_BR) - 2.313 * A_F / (B * H_BR)
+        C_ALF = -0.585 - 0.906 * A_OD / A_L + 3.239 * B / L_pp
+        C_YLI = pi * A_L / L_pp^2 + 0.116 + 3.345 * A_F / (L_pp * B)
+
+    elseif deg2rad(90) < ψ_A <= deg2rad(180)
+        C_LF =
+            0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp - 3.011 * A_OD / L_pp^2 -
+            0.341 * A_F / B^2
+        C_XLI =
+            -1.901 + 12.727 * A_L / (L_pp * H_BR) + 24.407 * A_F / A_L -
+            40.310 * B / L_pp - 0.341 * A_F / (B * H_BR)
+        C_ALF = -0.314 - 1.117 * A_OD / A_L
+        C_YLI = pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp^2
+
+    elseif deg2rad(180) < ψ_A <= deg2rad(270)
+        C_LF =
+            0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp - 3.011 * A_OD / L_pp^2 -
+            0.341 * A_F / B^2
+        C_XLI =
+            -1.901 + 12.727 * A_L / (L_pp * H_BR) + 24.407 * A_F / A_L -
+            40.310 * B / L_pp - 0.341 * A_F / (B * H_BR)
+        C_ALF = -(-0.314 - 1.117 * A_OD / A_L)
+        C_YLI = -(pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp^2)
+
+    elseif deg2rad(270) < ψ_A <= deg2rad(360)
+        C_LF = -0.992 + 0.507 * A_L / (L_pp * B) + 1.162 * C / L_pp
+        C_XLI = 0.458 + 3.245 * A_L / (L_pp * H_BR) - 2.313 * A_F / (B * H_BR)
+        C_ALF = -(-0.585 - 0.906 * A_OD / A_L + 3.239 * B / L_pp)
+        C_YLI = -(pi * A_L / L_pp^2 + 0.116 + 3.345 * A_F / (L_pp * B))
+    end
+
+    C_X =
+        C_LF * cos(ψ_A) +
+        C_XLI * (sin(ψ_A) - sin(ψ_A) * cos(ψ_A)^2 / 2) * sin(ψ_A) * cos(ψ_A) +
+        C_ALF * sin(ψ_A) * cos(ψ_A)^3
+    C_Y =
+        C_CF * sin(ψ_A)^2 +
+        C_YLI * (cos(ψ_A) + sin(ψ_A)^2 * cos(ψ_A) / 2) * sin(ψ_A) * cos(ψ_A)
+    C_N = C_Y * (0.297 * C / L_pp - 0.149 * (ψ_A - deg2rad(90)))
+
+    C_X, C_Y, C_N
+end
+
+function get_example_ship_wind_force_moment_params()
     L_pp = 7.00  # 船長Lpp[m]
     B = 1.27  # 船幅[m]
     d = 0.46  # 喫水[m]
@@ -155,21 +236,31 @@ function get_structure_params()
     H_C = H_C # 喫水から側面積中心までの高さ[m]
     C = C # 船体中心から側面積中心までの前後方向座標[m]
 
-    structure_params = Mmg3DofStructureParams(
-        A_OD,
-        A_F,
-        A_L,
-        H_BR,
-        H_C,
-        C,
-    )
-    structure_params
-end
+    ψ_A_vec = deg2rad.(collect(0:10:360))
+    C_X_vec = Array{Float64}(undef, length(ψ_A_vec))
+    C_Y_vec = Array{Float64}(undef, length(ψ_A_vec))
+    C_N_vec = Array{Float64}(undef, length(ψ_A_vec))
+    for (index, ψ_A) in enumerate(ψ_A_vec)
+        C_X, C_Y, C_N = wind_force_and_moment_coefficients(
+            ψ_A,
+            L_pp,
+            B,
+            A_OD,
+            A_F,
+            A_L,
+            H_BR,
+            H_C,
+            C,
+        )
+        C_X_vec[index] = C_X
+        C_Y_vec[index] = C_Y
+        C_N_vec[index] = C_N
+    end
+    spl_C_X = Spline1D(ψ_A_vec, C_X_vec)
+    spl_C_Y = Spline1D(ψ_A_vec, C_Y_vec)
+    spl_C_N = Spline1D(ψ_A_vec, C_N_vec)
 
-function get_KVLCC2_L7_params()
-    basic_params = get_KVLCC2_L7_basic_params()
-    maneuvering_params = get_KVLCC2_L7_maneuvering_params()
-    basic_params, maneuvering_params
+    Mmg3DofWindForceMomentParams(A_F, A_L, spl_C_X, spl_C_Y, spl_C_N)
 end
 
 function calc_position(time_vec, u_vec, v_vec, r_vec; x0=0.0, y0=0.0, ψ0=0.0)
@@ -180,11 +271,13 @@ function calc_position(time_vec, u_vec, v_vec, r_vec; x0=0.0, y0=0.0, ψ0=0.0)
     x_vec[1] = x0
     y_vec[1] = y0
     ψ_vec[1] = ψ0
-    for i = 2:dim
+    for i in 2:dim
         Δt = time_vec[i] - time_vec[i-1]
         ψ_vec[i] = ψ_vec[i-1] + r_vec[i] * Δt
-        x_vec[i] = x_vec[i-1] + (u_vec[i] * cos(ψ_vec[i]) - v_vec[i] * sin(ψ_vec[i])) * Δt
-        y_vec[i] = y_vec[i-1] + (u_vec[i] * sin(ψ_vec[i]) + v_vec[i] * cos(ψ_vec[i])) * Δt
+        x_vec[i] =
+            x_vec[i-1] + (u_vec[i] * cos(ψ_vec[i]) - v_vec[i] * sin(ψ_vec[i])) * Δt
+        y_vec[i] =
+            y_vec[i-1] + (u_vec[i] * sin(ψ_vec[i]) + v_vec[i] * cos(ψ_vec[i])) * Δt
     end
     x_vec, y_vec, ψ_vec
 end
@@ -194,7 +287,7 @@ function nuts_sampling_single_thread(
     n_samples::Int,
     n_chains::Int;
     target_acceptance::Float64=0.65,
-    progress=true
+    progress=true,
 )
     sampler = NUTS(target_acceptance)
     mapreduce(
@@ -209,7 +302,7 @@ function nuts_sampling_multi_threads(
     n_samples::Int,
     n_chains::Int;
     target_acceptance::Float64=0.65,
-    progress=false
+    progress=false,
 )
     sampler = NUTS(target_acceptance)
     sample(model, sampler, MCMCThreads(), n_samples, n_chains, progress=progress)
