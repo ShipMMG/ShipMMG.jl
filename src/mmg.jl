@@ -27,8 +27,7 @@ end
 conpute the parameter C_X,C_Y,C_N
 
 # Arguments
--`ψ`:ship angle [rad]
--`ψ_wind`:wind direction[rad]
+-`ψ_A`: Wind attack of angle [rad]
 - L_pp
 - B
 - A_OD
@@ -39,8 +38,7 @@ conpute the parameter C_X,C_Y,C_N
 - C
 """
 function wind_force_and_moment_coefficients(
-    ψ,
-    ψ_wind,
+    ψ_A,
     L_pp,
     B,
     A_OD,
@@ -50,8 +48,6 @@ function wind_force_and_moment_coefficients(
     H_C,
     C,
 )
-    ψ_A = get_wind_attack_of_angle(ψ, ψ_wind)
-
     #C_LF1の場合で調整
     C_CF = 0.404 + 0.368 * A_F / (B * H_BR) + 0.902 * H_BR / L_pp
 
@@ -333,9 +329,9 @@ function mmg_3dof_model!(dX, X, p, t)
     )
     N_R = -(x_R + a_H * x_H) * F_N * cos(δ)
 
+    ψ_A = get_wind_attack_of_angle(ψ, ψ_wind)
     C_X_wind, C_Y_wind, C_N_wind = wind_force_and_moment_coefficients(
-        ψ,
-        ψ_wind,
+        ψ_A,
         L_pp,
         B,
         A_OD,
