@@ -3,7 +3,6 @@ module ShipMMG
 using DifferentialEquations
 using ParameterizedFunctions
 using Dierckx
-using Plots
 using Parameters
 using Distributions
 using Turing
@@ -37,8 +36,5 @@ export Mmg3DofBasicParams,
     estimate_mmg_approx_lsm_time_window_sampling,
     create_model_for_mcmc_sample_mmg,
     wind_force_and_moment_coefficients
-
-include("draw.jl")
-export draw_gif_result, calc_position
 
 end
