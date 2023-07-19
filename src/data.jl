@@ -10,7 +10,7 @@
     n_p::Tn_p
 end
 
-function get_KVLCC2_L7_basic_params(ρ = 1025.0)
+function get_KVLCC2_L7_basic_params(ρ=1025.0)
     L_pp = 7.00  # 船長Lpp[m]
     B = 1.27  # 船幅[m]
     d = 0.46  # 喫水[m]
@@ -154,7 +154,7 @@ function get_structure_params()
     H_BR = H_BR # 喫水からブリッジ主要構造物の最高位[m]
     H_C = H_C # 喫水から側面積中心までの高さ[m]
     C = C # 船体中心から側面積中心までの前後方向座標[m]
-    
+
     structure_params = Mmg3DofStructureParams(
         A_OD,
         A_F,
@@ -172,7 +172,7 @@ function get_KVLCC2_L7_params()
     basic_params, maneuvering_params
 end
 
-function calc_position(time_vec, u_vec, v_vec, r_vec; x0 = 0.0, y0 = 0.0, ψ0 = 0.0)
+function calc_position(time_vec, u_vec, v_vec, r_vec; x0=0.0, y0=0.0, ψ0=0.0)
     dim = length(time_vec)
     x_vec = zeros(Float64, dim)
     y_vec = zeros(Float64, dim)
@@ -193,12 +193,12 @@ function nuts_sampling_single_thread(
     model,
     n_samples::Int,
     n_chains::Int;
-    target_acceptance::Float64 = 0.65,
-    progress = true,
+    target_acceptance::Float64=0.65,
+    progress=true
 )
     sampler = NUTS(target_acceptance)
     mapreduce(
-        c -> sample(model, sampler, n_samples, progress = progress),
+        c -> sample(model, sampler, n_samples, progress=progress),
         chainscat,
         1:n_chains,
     )
@@ -208,9 +208,9 @@ function nuts_sampling_multi_threads(
     model,
     n_samples::Int,
     n_chains::Int;
-    target_acceptance::Float64 = 0.65,
-    progress = false,
+    target_acceptance::Float64=0.65,
+    progress=false
 )
     sampler = NUTS(target_acceptance)
-    sample(model, sampler, MCMCThreads(), n_samples, n_chains, progress = progress)
+    sample(model, sampler, MCMCThreads(), n_samples, n_chains, progress=progress)
 end

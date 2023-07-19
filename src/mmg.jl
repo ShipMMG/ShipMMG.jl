@@ -26,7 +26,8 @@ function wind_force_and_moment_coefficients(
     A_L,
     H_BR,
     H_C,
-    C)
+    C
+)
 
 
     #ラジアンの調整
@@ -37,7 +38,7 @@ function wind_force_and_moment_coefficients(
     end
 
     #風の船体に対する流入角ψ_Aの計算
-    ψ_A = pi/2 + ψ - deg2rad(ψ_wind)
+    ψ_A = pi / 2 + ψ - deg2rad(ψ_wind)
 
     if ψ_A < 0
         ψ_A += 2pi
@@ -48,33 +49,33 @@ function wind_force_and_moment_coefficients(
     #C_LF1の場合で調整
     C_CF = 0.404 + 0.368 * A_F / (B * H_BR) + 0.902 * H_BR / L_pp
 
-    if deg2rad(0) <= ψ_A <= deg2rad(90) 
+    if deg2rad(0) <= ψ_A <= deg2rad(90)
 
         C_LF = -0.992 + 0.507 * A_L / (L_pp * B) + 1.162 * C / L_pp
         C_XLI = 0.458 + 3.245 * A_L / (L_pp * H_BR) - 2.313 * A_F / (B * H_BR)
         C_ALF = -0.585 - 0.906 * A_OD / A_L + 3.239 * B / L_pp
-        C_YLI = pi * A_L / L_pp^2 + 0.116 +3.345 * A_F / (L_pp * B)
+        C_YLI = pi * A_L / L_pp^2 + 0.116 + 3.345 * A_F / (L_pp * B)
 
     elseif deg2rad(90) < ψ_A <= deg2rad(180)
 
-        C_LF = 0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp -3.011 * A_OD / L_pp^2 - 0.341 * A_F / B^2 
+        C_LF = 0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp - 3.011 * A_OD / L_pp^2 - 0.341 * A_F / B^2
         C_XLI = -1.901 + 12.727 * A_L / (L_pp * H_BR) + 24.407 * A_F / A_L - 40.310 * B / L_pp - 0.341 * A_F / (B * H_BR)
         C_ALF = -0.314 - 1.117 * A_OD / A_L
-        C_YLI = pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp ^2
+        C_YLI = pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp^2
 
     elseif deg2rad(180) < ψ_A <= deg2rad(270)
 
-        C_LF = 0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp -3.011 * A_OD / L_pp^2 - 0.341 * A_F / B^2 
+        C_LF = 0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp - 3.011 * A_OD / L_pp^2 - 0.341 * A_F / B^2
         C_XLI = -1.901 + 12.727 * A_L / (L_pp * H_BR) + 24.407 * A_F / A_L - 40.310 * B / L_pp - 0.341 * A_F / (B * H_BR)
         C_ALF = -(-0.314 - 1.117 * A_OD / A_L)
-        C_YLI = -(pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp ^2)
+        C_YLI = -(pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp^2)
 
     elseif deg2rad(270) < ψ_A <= deg2rad(360)
-        
+
         C_LF = -0.992 + 0.507 * A_L / (L_pp * B) + 1.162 * C / L_pp
         C_XLI = 0.458 + 3.245 * A_L / (L_pp * H_BR) - 2.313 * A_F / (B * H_BR)
         C_ALF = -(-0.585 - 0.906 * A_OD / A_L + 3.239 * B / L_pp)
-        C_YLI = -(pi * A_L / L_pp^2 + 0.116 +3.345 * A_F / (L_pp * B))
+        C_YLI = -(pi * A_L / L_pp^2 + 0.116 + 3.345 * A_F / (L_pp * B))
 
     end
 
@@ -84,7 +85,7 @@ function wind_force_and_moment_coefficients(
     C_N = C_Y * (0.297 * C / L_pp - 0.149 * (ψ_A - deg2rad(90)))
 
 
-    C_X,C_Y,C_N
+    C_X, C_Y, C_N
 
 end
 
@@ -322,9 +323,9 @@ function mmg_3dof_model!(dX, X, p, t)
     )
     N_R = -(x_R + a_H * x_H) * F_N * cos(δ)
 
-    
 
-    C_X_wind,C_Y_wind,C_N_wind = wind_force_and_moment_coefficients(
+
+    C_X_wind, C_Y_wind, C_N_wind = wind_force_and_moment_coefficients(
         ψ,
         ψ_wind,
         L_pp,
@@ -338,19 +339,19 @@ function mmg_3dof_model!(dX, X, p, t)
     )
 
     ρ_air = 1.225
-    X_wind =  ρ_air * A_F * C_X_wind / 2 * u_wind^2
-    Y_wind = ρ_air * A_L * C_Y_wind / 2  * u_wind^2
+    X_wind = ρ_air * A_F * C_X_wind / 2 * u_wind^2
+    Y_wind = ρ_air * A_L * C_Y_wind / 2 * u_wind^2
     N_wind = ρ_air * A_L * L_pp * C_N_wind / 2 * u_wind^2
 
 
-    dX[1] = du = ((X_H + X_R + X_P + X_wind ) + (m + m_y) * v * r + x_G * m * (r^2)) / (m + m_x)
+    dX[1] = du = ((X_H + X_R + X_P + X_wind) + (m + m_y) * v * r + x_G * m * (r^2)) / (m + m_x)
     dX[2] =
         dv =
             (
-                (x_G^2) * (m^2) * u * r - (N_H + N_R + N_wind ) * x_G * m +
-                ((Y_H + Y_R + Y_wind ) - (m + m_x) * u * r) * (I_zG + J_z + (x_G^2) * m)
+                (x_G^2) * (m^2) * u * r - (N_H + N_R + N_wind) * x_G * m +
+                ((Y_H + Y_R + Y_wind) - (m + m_x) * u * r) * (I_zG + J_z + (x_G^2) * m)
             ) / ((I_zG + J_z + (x_G^2) * m) * (m + m_y) - (x_G^2) * (m^2))
-    dX[3] = dr = (N_H + N_R + N_wind  - x_G * m * (dv + u * r)) / (I_zG + J_z + (x_G^2) * m)
+    dX[3] = dr = (N_H + N_R + N_wind - x_G * m * (dv + u * r)) / (I_zG + J_z + (x_G^2) * m)
     dX[4] = dx = u * cos(ψ) - v * sin(ψ)
     dX[5] = dy = u * sin(ψ) + v * cos(ψ)
     dX[6] = dψ = r
@@ -828,7 +829,7 @@ function simulate(
 )
     spl_δ = Spline1D(time_list, δ_list)
     spl_n_p = Spline1D(time_list, n_p_list)
-    
+
     spl_u_wind = Spline1D(time_list, u_wind_list)
     spl_ψ_wind = Spline1D(time_list, ψ_wind_list)
 
@@ -1057,7 +1058,7 @@ function mmg_3dof_zigzag_test(
             ρ=ρ,
             algorithm=algorithm,
             reltol=reltol,
-            abstol=abstol,
+            abstol=abstol
         )
 
         # get finish index
@@ -1298,10 +1299,10 @@ function create_model_for_mcmc_sample_mmg(
 
         dX[1] = du = ((X_H + X_R + X_P) + (m + m_y) * v * r + x_G * m * (r^2)) / (m + m_x)
         dX[2] = dv =
-                (
-                    (x_G^2) * (m^2) * u * r - (N_H + N_R) * x_G * m +
-                    ((Y_H + Y_R) - (m + m_x) * u * r) * (I_zG + J_z + (x_G^2) * m)
-                ) / ((I_zG + J_z + (x_G^2) * m) * (m + m_y) - (x_G^2) * (m^2))
+            (
+                (x_G^2) * (m^2) * u * r - (N_H + N_R) * x_G * m +
+                ((Y_H + Y_R) - (m + m_x) * u * r) * (I_zG + J_z + (x_G^2) * m)
+            ) / ((I_zG + J_z + (x_G^2) * m) * (m + m_y) - (x_G^2) * (m^2))
         dX[3] = dr = (N_H + N_R - x_G * m * (dv + u * r)) / (I_zG + J_z + (x_G^2) * m)
         dX[4] = dδ = derivative(spl_δ, t)
         dX[5] = dn_p = derivative(spl_n_p, t)
@@ -1348,7 +1349,7 @@ function create_model_for_mcmc_sample_mmg(
     u0 = 2.29 * 0.512
     v0 = 0.0
     r0 = 0.0
-    X0 = [u_obs[1]; v_obs[1]; r_obs[1]; ψ_obs[1]; δ_obs[1]; n_p_obs[1];]
+    X0 = [u_obs[1]; v_obs[1]; r_obs[1]; ψ_obs[1]; δ_obs[1]; n_p_obs[1]]
     prob1 = ODEProblem(MMG!, X0, (time_obs[1], time_obs[end]), p)
 
     # create probabilistic model

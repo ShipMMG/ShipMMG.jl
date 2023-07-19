@@ -2,7 +2,6 @@ basic_params, maneuvering_params = get_KVLCC2_L7_params()
 structure_params = get_structure_params()
 
 @testset "mmg.jl KVLCC2_L7 turning" begin
-
     duration = 200  # [s]
     max_δ_rad = 35 * pi / 180.0  # [rad]
     n_const = 17.95  # [rps]
@@ -15,8 +14,8 @@ structure_params = get_structure_params()
     time_list = range(0.00, stop=duration, length=sampling)
     δ_rad_list = max_δ_rad .* ones(Float64, sampling)
     n_p_list = n_const .* ones(Float64, sampling)
-    u_wind_list = rand(Normal(μ_u_wind,σ_u_wind),length(time_list))
-    ψ_wind_list = rand(Normal(μ_ψ_wind,σ_ψ_wind),length(time_list))
+    u_wind_list = rand(Normal(μ_u_wind, σ_u_wind), length(time_list))
+    ψ_wind_list = rand(Normal(μ_ψ_wind, σ_ψ_wind), length(time_list))
 
     mmg_results = mmg_3dof_simulate(
         basic_params,
@@ -48,8 +47,8 @@ end
     time_list = start_time_second:time_second_interval:end_time_second
     n_const = 17.95  # [rps]
     n_p_list = n_const * ones(Float64, length(time_list))
-    u_wind_list = rand(Normal(μ_u_wind,σ_u_wind),length(time_list))
-    ψ_wind_list = rand(Normal(μ_ψ_wind,σ_ψ_wind),length(time_list))
+    u_wind_list = rand(Normal(μ_u_wind, σ_u_wind), length(time_list))
+    ψ_wind_list = rand(Normal(μ_ψ_wind, σ_ψ_wind), length(time_list))
     u_list, v_list, r_list, x_list, y_list, ψ_list, δ_list = mmg_3dof_zigzag_test(
         basic_params,
         maneuvering_params,
@@ -76,8 +75,8 @@ end
     time_list = range(0.00, stop=duration, length=sampling)
     δ_rad_list = max_δ_rad .* ones(Float64, sampling)
     n_p_list = n_const .* ones(Float64, sampling)
-    u_wind_list = rand(Normal(μ_u_wind,σ_u_wind),length(time_list))
-    ψ_wind_list = rand(Normal(μ_ψ_wind,σ_ψ_wind),length(time_list))
+    u_wind_list = rand(Normal(μ_u_wind, σ_u_wind), length(time_list))
+    ψ_wind_list = rand(Normal(μ_ψ_wind, σ_ψ_wind), length(time_list))
     mmg_results = mmg_3dof_simulate(
         basic_params,
         maneuvering_params,
@@ -128,19 +127,34 @@ end
         X_vv_dash_prior_dist=Uniform(-0.04 - parameter_width, -0.04 + parameter_width),
         X_vr_dash_prior_dist=Uniform(0.002 - parameter_width, 0.002 + parameter_width),
         X_rr_dash_prior_dist=Uniform(0.011 - parameter_width, 0.011 + parameter_width),
-        X_vvvv_dash_prior_dist=Uniform(0.771 - parameter_width, 0.771 + parameter_width),
+        X_vvvv_dash_prior_dist=Uniform(
+            0.771 - parameter_width,
+            0.771 + parameter_width,
+        ),
         Y_v_dash_prior_dist=Uniform(-0.315 - parameter_width, -0.315 + parameter_width),
         Y_r_dash_prior_dist=Uniform(0.083 - parameter_width, 0.083 + parameter_width),
-        Y_vvv_dash_prior_dist=Uniform(-1.607 - parameter_width, -1.607 + parameter_width),
+        Y_vvv_dash_prior_dist=Uniform(
+            -1.607 - parameter_width,
+            -1.607 + parameter_width,
+        ),
         Y_vvr_dash_prior_dist=Uniform(0.379 - parameter_width, 0.379 + parameter_width),
-        Y_vrr_dash_prior_dist=Uniform(-0.391 - parameter_width, -0.391 + parameter_width),
+        Y_vrr_dash_prior_dist=Uniform(
+            -0.391 - parameter_width,
+            -0.391 + parameter_width,
+        ),
         Y_rrr_dash_prior_dist=Uniform(0.008 - parameter_width, 0.008 + parameter_width),
         N_v_dash_prior_dist=Uniform(-0.137 - parameter_width, -0.137 + parameter_width),
         N_r_dash_prior_dist=Uniform(-0.049 - parameter_width, -0.049 + parameter_width),
         N_vvv_dash_prior_dist=Uniform(-0.03 - parameter_width, -0.03 + parameter_width),
-        N_vvr_dash_prior_dist=Uniform(-0.294 - parameter_width, -0.294 + parameter_width),
+        N_vvr_dash_prior_dist=Uniform(
+            -0.294 - parameter_width,
+            -0.294 + parameter_width,
+        ),
         N_vrr_dash_prior_dist=Uniform(0.055 - parameter_width, 0.055 + parameter_width),
-        N_rrr_dash_prior_dist=Uniform(-0.013 - parameter_width, -0.013 + parameter_width),
+        N_rrr_dash_prior_dist=Uniform(
+            -0.013 - parameter_width,
+            -0.013 + parameter_width,
+        ),
     )
     chain = nuts_sampling_single_thread(model, n_samples, n_chains)
 end
