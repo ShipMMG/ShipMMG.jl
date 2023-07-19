@@ -142,6 +142,9 @@ function mmg_3dof_model!(dX, X, p, t)
     N_vvr_dash,
     N_vrr_dash,
     N_rrr_dash,
+    spl_C_X,
+    spl_C_Y,
+    spl_C_N,
     spl_δ,
     spl_n_p,
     spl_u_wind,
@@ -255,22 +258,10 @@ function mmg_3dof_model!(dX, X, p, t)
     N_R = -(x_R + a_H * x_H) * F_N * cos(δ)
 
     ψ_A = get_wind_attack_of_angle(ψ, ψ_wind)
-    C_X_wind, C_Y_wind, C_N_wind = wind_force_and_moment_coefficients(
-        ψ_A,
-        L_pp,
-        B,
-        A_OD,
-        A_F,
-        A_L,
-        H_BR,
-        H_C,
-        C,
-    )
-
     ρ_air = 1.225
-    X_wind = ρ_air * A_F * C_X_wind / 2 * u_wind^2
-    Y_wind = ρ_air * A_L * C_Y_wind / 2 * u_wind^2
-    N_wind = ρ_air * A_L * L_pp * C_N_wind / 2 * u_wind^2
+    X_wind = ρ_air * A_F * spl_C_X(ψ_A) / 2 * u_wind^2
+    Y_wind = ρ_air * A_L * spl_C_Y(ψ_A) / 2 * u_wind^2
+    N_wind = ρ_air * A_L * L_pp * spl_C_N(ψ_A) / 2 * u_wind^2
 
     dX[1] =
         du =
@@ -420,6 +411,24 @@ Sturucture parameters of target ship for MMG 3DOF simulation.
 end
 
 """
+Wind force and moment parameters of target ship for MMG 3DOF simulation.
+
+# Arguments
+- `A_F::T`
+- `A_L::T`
+- `spl_C_X::T`
+- `spl_C_Y::T`
+- `spl_C_N::T`
+"""
+@with_kw mutable struct Mmg3DofWindForceMomentParams{T}
+    A_F::T
+    A_L::T
+    spl_C_X::Dierckx.Spline1D
+    spl_C_Y::Dierckx.Spline1D
+    spl_C_N::Dierckx.Spline1D
+end
+
+"""
     mmg_3dof_simulate(time_list, n_p_list, δ_list, u_wind_list, ψ_wind_list basic_params, maneuvering_params,structure_params, [ u0, v0, r0, x0, y0, ψ0, ρ, algorithm, reltol, abstol]) -> u, v, r, x, y, ψ, δ, n_p
 
 Returns the MMG 3DOF simulation results including the lists of time, u, v, r, x, y, ψ, δ, n_p.
@@ -477,6 +486,7 @@ function mmg_3dof_simulate(
     basic_params::Mmg3DofBasicParams,
     maneuvering_params::Mmg3DofManeuveringParams,
     structure_params::Mmg3DofStructureParams,
+    wind_force_and_moment_params::Mmg3DofWindForceMomentParams,
     time_list,
     δ_list,
     n_p_list,
@@ -547,6 +557,8 @@ function mmg_3dof_simulate(
     H_C,
     C = structure_params
 
+    @unpack A_F, A_L, spl_C_X, spl_C_Y, spl_C_N = wind_force_and_moment_params
+
     simulate(
         L_pp,
         B,
@@ -599,6 +611,9 @@ function mmg_3dof_simulate(
         N_vvr_dash,
         N_vrr_dash,
         N_rrr_dash,
+        spl_C_X,
+        spl_C_Y,
+        spl_C_N,
         time_list,
         δ_list,
         n_p_list,
@@ -743,6 +758,9 @@ function simulate(
     N_vvr_dash,
     N_vrr_dash,
     N_rrr_dash,
+    spl_C_X,
+    spl_C_Y,
+    spl_C_N,
     time_list,
     δ_list,
     n_p_list,
@@ -820,6 +838,9 @@ function simulate(
         N_vvr_dash,
         N_vrr_dash,
         N_rrr_dash,
+        spl_C_X,
+        spl_C_Y,
+        spl_C_N,
         spl_δ,
         spl_n_p,
         spl_u_wind,
@@ -901,6 +922,7 @@ function mmg_3dof_zigzag_test(
     basic_params::Mmg3DofBasicParams,
     maneuvering_params::Mmg3DofManeuveringParams,
     structure_params::Mmg3DofStructureParams,
+    wind_force_and_moment_params::Mmg3DofWindForceMomentParams,
     time_list,
     n_p_list,
     target_δ_rad,
@@ -976,6 +998,7 @@ function mmg_3dof_zigzag_test(
             basic_params,
             maneuvering_params,
             structure_params,
+            wind_force_and_moment_params,
             time_list[start_index:end],
             δ_list,
             n_p_list[start_index:end],

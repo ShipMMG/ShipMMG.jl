@@ -288,7 +288,7 @@ function get_example_ship_wind_force_moment_params()
     spl_C_Y = Spline1D(ψ_A_vec, C_Y_vec)
     spl_C_N = Spline1D(ψ_A_vec, C_N_vec)
 
-    spl_C_X, spl_C_Y, spl_C_N
+    Mmg3DofWindForceMomentParams(A_F, A_L, spl_C_X, spl_C_Y, spl_C_N)
 end
 
 function calc_position(time_vec, u_vec, v_vec, r_vec; x0=0.0, y0=0.0, ψ0=0.0)

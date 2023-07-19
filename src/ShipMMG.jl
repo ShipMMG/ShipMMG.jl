@@ -30,6 +30,7 @@ include("mmg.jl")
 export Mmg3DofBasicParams,
     Mmg3DofManeuveringParams,
     Mmg3DofStructureParams,
+    Mmg3DofWindForceMomentParams,
     mmg_3dof_simulate,
     mmg_3dof_model!,
     mmg_3dof_zigzag_test,
