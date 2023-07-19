@@ -6,9 +6,9 @@ structure_params = get_structure_params()
     max_δ_rad = 35 * pi / 180.0  # [rad]
     n_const = 17.95  # [rps]
     μ_u_wind = 8.0 # [m/s]
-    μ_ψ_wind = 0.0 # [deg]  
+    μ_ψ_wind = 0.0 # [rad]  
     σ_u_wind = 1.0 # [m/s]
-    σ_ψ_wind = 0.1 # [deg]
+    σ_ψ_wind = 0.1 # [rad]
 
     sampling = duration * 10
     time_list = range(0.00, stop=duration, length=sampling)
@@ -38,9 +38,9 @@ end
     target_δ_rad = 20.0 * π / 180.0
     target_ψ_rad_deviation = 20.0 * π / 180.0
     μ_u_wind = 8.0 # [m/s]
-    μ_ψ_wind = 0.0 # [deg]  
+    μ_ψ_wind = 0.0 # [rad]  
     σ_u_wind = 1.0 # [m/s]
-    σ_ψ_wind = 0.1 # [deg]
+    σ_ψ_wind = 0.1 # [rad]
     start_time_second = 0.00
     time_second_interval = 0.01
     end_time_second = 80.00
@@ -67,9 +67,9 @@ end
     max_δ_rad = 35 * pi / 180.0  # [rad]
     n_const = 17.95  # [rps]
     μ_u_wind = 8.0 # [m/s]
-    μ_ψ_wind = 0.0 # [deg]   
+    μ_ψ_wind = 0.0 # [rad]   
     σ_u_wind = 1.0 # [m/s]
-    σ_ψ_wind = 0.1 # [deg]
+    σ_ψ_wind = 0.1 # [rad]
 
     sampling = duration * 10 + 1
     time_list = range(0.00, stop=duration, length=sampling)

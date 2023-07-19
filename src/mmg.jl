@@ -1,11 +1,34 @@
 """
+Wind angle of attack - 0 [rad] point out to North and rotating clockwise positive angle.
+"""
+function get_wind_attack_of_angle(
+    ψ_ship,
+    ψ_wind,
+)
+    ψ_ship %= 2pi
+
+    if ψ_ship < 0
+        ψ_ship += 2pi
+    end
+
+    ψ_A = pi / 2 + ψ_ship - ψ_wind
+
+    if ψ_A < 0
+        ψ_A += 2pi
+    elseif ψ_A > 2pi
+        ψ_A -= 2pi
+    end
+    ψ_A
+end
+
+"""
     wind_force_and_moment_coefficients(ψ,ψ_wind,p)
 
 conpute the parameter C_X,C_Y,C_N
 
 # Arguments
--`ψ`:ship angle
--`ψ_wind`:wind direction[deg]
+-`ψ`:ship angle [rad]
+-`ψ_wind`:wind direction[rad]
 - L_pp
 - B
 - A_OD
@@ -15,7 +38,6 @@ conpute the parameter C_X,C_Y,C_N
 - H_C
 - C
 """
-
 function wind_force_and_moment_coefficients(
     ψ,
     ψ_wind,
@@ -26,69 +48,57 @@ function wind_force_and_moment_coefficients(
     A_L,
     H_BR,
     H_C,
-    C
+    C,
 )
-
-
-    #ラジアンの調整
-    ψ %= 2pi
-
-    if ψ < 0
-        ψ += 2pi
-    end
-
-    #風の船体に対する流入角ψ_Aの計算
-    ψ_A = pi / 2 + ψ - deg2rad(ψ_wind)
-
-    if ψ_A < 0
-        ψ_A += 2pi
-    elseif ψ_A > 2pi
-        ψ_A -= 2pi
-    end
+    ψ_A = get_wind_attack_of_angle(ψ, ψ_wind)
 
     #C_LF1の場合で調整
     C_CF = 0.404 + 0.368 * A_F / (B * H_BR) + 0.902 * H_BR / L_pp
 
     if deg2rad(0) <= ψ_A <= deg2rad(90)
-
         C_LF = -0.992 + 0.507 * A_L / (L_pp * B) + 1.162 * C / L_pp
         C_XLI = 0.458 + 3.245 * A_L / (L_pp * H_BR) - 2.313 * A_F / (B * H_BR)
         C_ALF = -0.585 - 0.906 * A_OD / A_L + 3.239 * B / L_pp
         C_YLI = pi * A_L / L_pp^2 + 0.116 + 3.345 * A_F / (L_pp * B)
 
     elseif deg2rad(90) < ψ_A <= deg2rad(180)
-
-        C_LF = 0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp - 3.011 * A_OD / L_pp^2 - 0.341 * A_F / B^2
-        C_XLI = -1.901 + 12.727 * A_L / (L_pp * H_BR) + 24.407 * A_F / A_L - 40.310 * B / L_pp - 0.341 * A_F / (B * H_BR)
+        C_LF =
+            0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp - 3.011 * A_OD / L_pp^2 -
+            0.341 * A_F / B^2
+        C_XLI =
+            -1.901 + 12.727 * A_L / (L_pp * H_BR) + 24.407 * A_F / A_L -
+            40.310 * B / L_pp - 0.341 * A_F / (B * H_BR)
         C_ALF = -0.314 - 1.117 * A_OD / A_L
         C_YLI = pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp^2
 
     elseif deg2rad(180) < ψ_A <= deg2rad(270)
-
-        C_LF = 0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp - 3.011 * A_OD / L_pp^2 - 0.341 * A_F / B^2
-        C_XLI = -1.901 + 12.727 * A_L / (L_pp * H_BR) + 24.407 * A_F / A_L - 40.310 * B / L_pp - 0.341 * A_F / (B * H_BR)
+        C_LF =
+            0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp - 3.011 * A_OD / L_pp^2 -
+            0.341 * A_F / B^2
+        C_XLI =
+            -1.901 + 12.727 * A_L / (L_pp * H_BR) + 24.407 * A_F / A_L -
+            40.310 * B / L_pp - 0.341 * A_F / (B * H_BR)
         C_ALF = -(-0.314 - 1.117 * A_OD / A_L)
         C_YLI = -(pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp^2)
 
     elseif deg2rad(270) < ψ_A <= deg2rad(360)
-
         C_LF = -0.992 + 0.507 * A_L / (L_pp * B) + 1.162 * C / L_pp
         C_XLI = 0.458 + 3.245 * A_L / (L_pp * H_BR) - 2.313 * A_F / (B * H_BR)
         C_ALF = -(-0.585 - 0.906 * A_OD / A_L + 3.239 * B / L_pp)
         C_YLI = -(pi * A_L / L_pp^2 + 0.116 + 3.345 * A_F / (L_pp * B))
-
     end
 
-
-    C_X = C_LF * cos(ψ_A) + C_XLI * (sin(ψ_A) - sin(ψ_A) * cos(ψ_A)^2 / 2) * sin(ψ_A) * cos(ψ_A) + C_ALF * sin(ψ_A) * cos(ψ_A)^3
-    C_Y = C_CF * sin(ψ_A)^2 + C_YLI * (cos(ψ_A) + sin(ψ_A)^2 * cos(ψ_A) / 2) * sin(ψ_A) * cos(ψ_A)
+    C_X =
+        C_LF * cos(ψ_A) +
+        C_XLI * (sin(ψ_A) - sin(ψ_A) * cos(ψ_A)^2 / 2) * sin(ψ_A) * cos(ψ_A) +
+        C_ALF * sin(ψ_A) * cos(ψ_A)^3
+    C_Y =
+        C_CF * sin(ψ_A)^2 +
+        C_YLI * (cos(ψ_A) + sin(ψ_A)^2 * cos(ψ_A) / 2) * sin(ψ_A) * cos(ψ_A)
     C_N = C_Y * (0.297 * C / L_pp - 0.149 * (ψ_A - deg2rad(90)))
 
-
     C_X, C_Y, C_N
-
 end
-
 
 """
     mmg_3dof_model!(dX, X, p, t)
@@ -323,8 +333,6 @@ function mmg_3dof_model!(dX, X, p, t)
     )
     N_R = -(x_R + a_H * x_H) * F_N * cos(δ)
 
-
-
     C_X_wind, C_Y_wind, C_N_wind = wind_force_and_moment_coefficients(
         ψ,
         ψ_wind,
@@ -335,7 +343,7 @@ function mmg_3dof_model!(dX, X, p, t)
         A_L,
         H_BR,
         H_C,
-        C
+        C,
     )
 
     ρ_air = 1.225
@@ -343,15 +351,18 @@ function mmg_3dof_model!(dX, X, p, t)
     Y_wind = ρ_air * A_L * C_Y_wind / 2 * u_wind^2
     N_wind = ρ_air * A_L * L_pp * C_N_wind / 2 * u_wind^2
 
-
-    dX[1] = du = ((X_H + X_R + X_P + X_wind) + (m + m_y) * v * r + x_G * m * (r^2)) / (m + m_x)
+    dX[1] =
+        du =
+            ((X_H + X_R + X_P + X_wind) + (m + m_y) * v * r + x_G * m * (r^2)) /
+            (m + m_x)
     dX[2] =
         dv =
             (
                 (x_G^2) * (m^2) * u * r - (N_H + N_R + N_wind) * x_G * m +
                 ((Y_H + Y_R + Y_wind) - (m + m_x) * u * r) * (I_zG + J_z + (x_G^2) * m)
             ) / ((I_zG + J_z + (x_G^2) * m) * (m + m_y) - (x_G^2) * (m^2))
-    dX[3] = dr = (N_H + N_R + N_wind - x_G * m * (dv + u * r)) / (I_zG + J_z + (x_G^2) * m)
+    dX[3] =
+        dr = (N_H + N_R + N_wind - x_G * m * (dv + u * r)) / (I_zG + J_z + (x_G^2) * m)
     dX[4] = dx = u * cos(ψ) - v * sin(ψ)
     dX[5] = dy = u * sin(ψ) + v * cos(ψ)
     dX[6] = dψ = r
@@ -501,7 +512,7 @@ This function has the same logic of `ShipMMG.simulate()`.
 - `δ_list`: the list of rudder angle [rad].
 - `n_p_list`: the list of propeller rps.
 - `u_wind_list` :the list of wind velocity [m/s].
-- `ψ_wind_list` :the list of wind direction [deg].
+- `ψ_wind_list` :the list of wind direction [rad].
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
@@ -559,7 +570,7 @@ function mmg_3dof_simulate(
     ρ=1025.0,
     algorithm=Tsit5(),
     reltol=1e-8,
-    abstol=1e-8
+    abstol=1e-8,
 )
     @unpack L_pp,
     B,
@@ -747,7 +758,7 @@ This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 - `δ_list`: the list of rudder angle [rad].
 - `n_p_list`: the list of propeller rps.
 - `u_wind_list` :the list of wind velocity [m/s].
-- `ψ_wind_list` :the list of wind direction [deg].
+- `ψ_wind_list` :the list of wind direction [rad].
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
@@ -825,7 +836,7 @@ function simulate(
     ρ=1025.0,
     algorithm=Tsit5(),
     reltol=1e-8,
-    abstol=1e-8
+    abstol=1e-8,
 )
     spl_δ = Spline1D(time_list, δ_list)
     spl_n_p = Spline1D(time_list, n_p_list)
@@ -833,8 +844,8 @@ function simulate(
     spl_u_wind = Spline1D(time_list, u_wind_list)
     spl_ψ_wind = Spline1D(time_list, ψ_wind_list)
 
-
-    X0 = [u0; v0; r0; x0; y0; ψ0; δ_list[1]; n_p_list[1]; u_wind_list[1]; ψ_wind_list[1]]
+    X0 =
+        [u0; v0; r0; x0; y0; ψ0; δ_list[1]; n_p_list[1]; u_wind_list[1]; ψ_wind_list[1]]
     p = [
         ρ,
         L_pp,
@@ -923,7 +934,7 @@ Returns the MMG 3DOF zigzag simulation results.
 - `δ_list`: the list of rudder angle [rad].
 - `n_p_list`: the list of propeller rps.
 - `u_wind_list` :the list of wind velocity [m/s].
-- `ψ_wind_list` :the list of wind direction [deg].
+- `ψ_wind_list` :the list of wind direction [rad].
 - `u0=0.0`: the initial x (surge) velocity.
 - `v0=0.0`: the initial y (sway) velocity.
 - `r0=0.0`: the initial rate of turn [rad/s].
@@ -986,7 +997,7 @@ function mmg_3dof_zigzag_test(
     ρ=1025.0,
     algorithm=Tsit5(),
     reltol=1e-8,
-    abstol=1e-8
+    abstol=1e-8,
 )
     target_ψ_rad_deviation = abs(target_ψ_rad_deviation)
 
@@ -1023,7 +1034,7 @@ function mmg_3dof_zigzag_test(
             y0 = final_y_list[start_index-1]
         end
 
-        for i = (start_index+1):length(time_list)
+        for i in (start_index+1):length(time_list)
             Δt = time_list[i] - time_list[i-1]
             if target_δ_rad > 0
                 δ = δ_list[i-start_index] + δ_rad_rate * Δt
@@ -1058,7 +1069,7 @@ function mmg_3dof_zigzag_test(
             ρ=ρ,
             algorithm=algorithm,
             reltol=reltol,
-            abstol=abstol
+            abstol=abstol,
         )
 
         # get finish index
@@ -1129,7 +1140,7 @@ function create_model_for_mcmc_sample_mmg(
     N_rrr_dash_prior_dist=Uniform(-0.060, 0.000),
     solver=Tsit5(),
     abstol=1e-6,
-    reltol=1e-3
+    reltol=1e-3,
 )
     time_obs = data.time
     u_obs = data.u
@@ -1239,7 +1250,10 @@ function create_model_for_mcmc_sample_mmg(
                 u *
                 (1.0 - w_P) *
                 ϵ *
-                sqrt(η * (1.0 + κ * (sqrt(1.0 + 8.0 * K_T / (pi * J^2)) - 1))^2 + (1 - η))
+                sqrt(
+                    η * (1.0 + κ * (sqrt(1.0 + 8.0 * K_T / (pi * J^2)) - 1))^2 +
+                    (1 - η),
+                )
         end
 
         U_R = sqrt(u_R^2 + v_R^2)
@@ -1297,12 +1311,14 @@ function create_model_for_mcmc_sample_mmg(
 
         ρ_air = 1.225
 
-        dX[1] = du = ((X_H + X_R + X_P) + (m + m_y) * v * r + x_G * m * (r^2)) / (m + m_x)
-        dX[2] = dv =
-            (
-                (x_G^2) * (m^2) * u * r - (N_H + N_R) * x_G * m +
-                ((Y_H + Y_R) - (m + m_x) * u * r) * (I_zG + J_z + (x_G^2) * m)
-            ) / ((I_zG + J_z + (x_G^2) * m) * (m + m_y) - (x_G^2) * (m^2))
+        dX[1] =
+            du = ((X_H + X_R + X_P) + (m + m_y) * v * r + x_G * m * (r^2)) / (m + m_x)
+        dX[2] =
+            dv =
+                (
+                    (x_G^2) * (m^2) * u * r - (N_H + N_R) * x_G * m +
+                    ((Y_H + Y_R) - (m + m_x) * u * r) * (I_zG + J_z + (x_G^2) * m)
+                ) / ((I_zG + J_z + (x_G^2) * m) * (m + m_y) - (x_G^2) * (m^2))
         dX[3] = dr = (N_H + N_R - x_G * m * (dv + u * r)) / (I_zG + J_z + (x_G^2) * m)
         dX[4] = dδ = derivative(spl_δ, t)
         dX[5] = dn_p = derivative(spl_n_p, t)
