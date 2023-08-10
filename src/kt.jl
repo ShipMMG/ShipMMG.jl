@@ -85,9 +85,8 @@ function kt_simulate(
     Ψ0=0.0,
     algorithm=Tsit5(),
     reltol=1e-8,
-    abstol=1e-8
+    abstol=1e-8,
 )
-
     spl_δ = Spline1D(time_list, δ_list)
 
     X0 = [u0; v0; r0; x0; y0; Ψ0; δ_list[1]]
@@ -168,7 +167,7 @@ function kt_zigzag_test(
     δ_rad_rate=10.0 * π / 180,
     algorithm=Tsit5(),
     reltol=1e-8,
-    abstol=1e-8
+    abstol=1e-8,
 )
     target_Ψ_rad_deviation = abs(target_Ψ_rad_deviation)
 
@@ -205,7 +204,7 @@ function kt_zigzag_test(
             y0 = final_y_list[start_index-1]
         end
 
-        for i = (start_index+1):length(time_list)
+        for i in (start_index+1):length(time_list)
             Δt = time_list[i] - time_list[i-1]
             if target_δ_rad > 0
                 δ = δ_list[i-start_index] + δ_rad_rate * Δt
@@ -306,7 +305,7 @@ function estimate_kt_lsm_time_window_sampling(data::ShipData, window_size::Int)
     n_samples = length(time_vec) - window_size
     K_samples = zeros(n_samples)
     T_samples = zeros(n_samples)
-    for i = 1:n_samples
+    for i in 1:n_samples
         K_samples[i], T_samples[i] =
             estimate_kt_lsm(r[i:i+window_size], dr[i:i+window_size], δ[i:i+window_size])
     end
@@ -317,7 +316,7 @@ function create_model_for_mcmc_sample_kt(
     data::ShipData;
     σ_r_prior_dist::Distribution=Chi(5),
     K_prior_dist::Distribution=Uniform(0.01, 10.0),
-    T_prior_dist::Distribution=truncated(Normal(100.0, 50.0), 10.0, 200.0)
+    T_prior_dist::Distribution=truncated(Normal(100.0, 50.0), 10.0, 200.0),
 )
     time_obs = data.time
     r_obs = data.r
@@ -347,7 +346,7 @@ function create_model_for_mcmc_sample_kt(
         prob = remake(prob1, p=p)
         sol = solve(prob, Tsit5())
         predicted = sol(time_obs)
-        for i = 1:length(predicted)
+        for i in 1:length(predicted)
             r_obs[i] ~ Normal(predicted[i][1], σ_r) # index number of r is 1
         end
     end
