@@ -1,4 +1,4 @@
-@with_kw struct ShipData{Tt,Tu,Tv,Tr,Tx,Ty,Tψ,Tδ,Tn_p}
+@with_kw struct ShipData{Tt,Tu,Tv,Tr,Tx,Ty,Tψ,Tδ,Tn_p,TU_w,Tψ_w}
     time::Tt
     u::Tu
     v::Tv
@@ -8,6 +8,8 @@
     ψ::Tψ
     δ::Tδ
     n_p::Tn_p
+    U_W::TU_w
+    ψ_W::Tψ_w
 end
 
 function get_KVLCC2_L7_basic_params(ρ = 1025.0)

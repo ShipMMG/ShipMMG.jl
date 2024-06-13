@@ -7,6 +7,7 @@ using Plots
 using Parameters
 using Distributions
 using Turing
+using ForwardDiff
 
 include("data.jl")
 export calc_position,
@@ -28,6 +29,8 @@ export kt_simulate,
 include("mmg.jl")
 export Mmg3DofBasicParams,
     Mmg3DofManeuveringParams,
+    Mmg3DofWindForceMomentParams,
+    apparent_wind_speed_and_angle,
     mmg_3dof_simulate,
     mmg_3dof_model!,
     mmg_3dof_zigzag_test,
