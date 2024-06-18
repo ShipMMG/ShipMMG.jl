@@ -72,12 +72,19 @@ MMG 3DOF model on DifferentialEquations.ODEProblem. Update `dX`.
     - N_vvr_dash
     - N_vrr_dash
     - N_rrr_dash
+    - A_F
+    - A_L
+    - spl_C_X
+    - spl_C_Y
+    - spl_C_N
     - spl_δ
     - spl_n_p
+    - u_wind_list
+    - ψ_wind_list
 - `t`: the time.
 """
 function mmg_3dof_model!(dX, X, p, t)
-    u, v, r, x, y, Ψ, δ, n_p = X
+    u, v, r, x, y, ψ, δ, n_p, u_wind, ψ_wind = X
     ρ,
     L_pp,
     B,
@@ -261,6 +268,8 @@ function mmg_3dof_model!(dX, X, p, t)
     dX[6] = dΨ = r
     dX[7] = dδ = derivative(spl_δ, t)
     dX[8] = dn_p = derivative(spl_n_p, t)
+    dX[9] = du_wind = derivative(spl_u_wind, t)
+    dX[10] = dψ_wind = derivative(spl_ψ_wind, t)
 end
 
 """
@@ -410,7 +419,7 @@ This function has the same logic of `ShipMMG.simulate()`.
 - `r0=0.0`: the initial rate of turn [rad/s].
 - `x0=0.0`: the initial x (surge) position.
 - `y0=0.0`: the initial y (sway) position.
-- `Ψ0=0.0`: the initial Ψ (yaw) azimuth [rad].
+- `ψ0=0.0`: the initial ψ (yaw) azimuth [rad].
 - `ρ=1025.0`: the seawater density [kg/m^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -458,11 +467,11 @@ function mmg_3dof_simulate(
     r0=0.0,
     x0=0.0,
     y0=0.0,
-    Ψ0=0.0,
+    ψ0=0.0,
     ρ=1025.0,
     algorithm=Tsit5(),
     reltol=1e-8,
-    abstol=1e-8
+    abstol=1e-8,
 )
     @unpack L_pp,
     B,
@@ -574,7 +583,7 @@ function mmg_3dof_simulate(
         r0=r0,
         x0=x0,
         y0=y0,
-        Ψ0=Ψ0,
+        ψ0=ψ0,
         ρ=ρ,
         algorithm=algorithm,
         reltol=reltol,
@@ -649,7 +658,7 @@ This function has the same logic of `ShipMMG.mmg_3dof_simulate()`.
 - `r0=0.0`: the initial rate of turn [rad/s].
 - `x0=0.0`: the initial x (surge) position.
 - `y0=0.0`: the initial y (sway) position.
-- `Ψ0=0.0`: the initial Ψ (yaw) azimuth [rad].
+- `ψ0=0.0`: the initial ψ (yaw) azimuth [rad].
 - `ρ=1025.0`: the seawater density [kg/m^3].
 - `algorithm=Tsit5()`: the parameter of DifferentialEquations.ODEProblem.solve()
 - `reltol=1e-8`: the parameter of DifferentialEquations.ODEProblem.solve()
@@ -716,7 +725,7 @@ function simulate(
     r0=0.0,
     x0=0.0,
     y0=0.0,
-    Ψ0=0.0,
+    ψ0=0.0,
     ρ=1025.0,
     algorithm=Tsit5(),
     reltol=1e-8,
@@ -794,21 +803,25 @@ function simulate(
     r = results[3, :]
     x = results[4, :]
     y = results[5, :]
-    Ψ = results[6, :]
+    ψ = results[6, :]
     δ = results[7, :]
     n_p = results[8, :]
-    u, v, r, x, y, Ψ, δ, n_p
+    u_wind = results[9, :]
+    ψ_wind = results[10, :]
+    u, v, r, x, y, ψ, δ, n_p, u_wind, ψ_wind
 end
 
 """
-    mmg_3dof_zigzag_test(basic_params, maneuvering_params, time_list, n_p_list, target_δ_rad, target_Ψ_rad_deviation, [, u0, v0, r0, x0, y0, Ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> u, v, r, x, y, Ψ, δ
+    mmg_3dof_zigzag_test(basic_params, maneuvering_params,wind_force_and_moment_params time_list, n_p_list, u_wind_list, Ψ_wind_list, target_δ_rad, target_Ψ_rad_deviation, [, u0, v0, r0, x0, y0, Ψ0, δ0, δ_rad_rate, algorithm, reltol, abstol]) -> u, v, r, x, y, ψ, δ
 
 Returns the MMG 3DOF zigzag simulation results.
 
 # Arguments
 - `basic_params::Mmg3DofBasicParams`: the basic parameters of target ship.
 - `maneuvering_params::Mmg3DofManeuveringParams`: the maneuvering parameters of target ship.
+- `wind_force_and_moment_params::Mmg3DofWindForceMomentParams,` : the Structur parameters above the  taeget ship's draft
 - `time_list`: the list of simulatino time.
+- `δ_list`: the list of rudder angle [rad].
 - `n_p_list`: the list of propeller rps.
 - `target_δ_rad`: target rudder angle of zigzag test.
 - `target_Ψ_rad_deviation`: target azimuth deviation of zigzag test.
@@ -820,7 +833,7 @@ Returns the MMG 3DOF zigzag simulation results.
 - `r0=0.0`: the initial rate of turn [rad/s].
 - `x0=0.0`: the initial x (surge) position.
 - `y0=0.0`: the initial y (sway) position.
-- `Ψ0=0.0`: the initial Ψ (yaw) azimuth [rad].
+- `ψ0=0.0`: the initial ψ (yaw) azimuth [rad].
 - `δ0=0.0`: the initial rudder angle.
 - `δ_rad_rate=10.0*π/180`: the change rate of rudder angle [rad/s]. 
 - `ρ=1025.0`: the seawater density [kg/m^3].
@@ -835,7 +848,7 @@ KVLCC2_L7 zigzag test.
 julia> ρ = 1025.0;
 julia> basic_params, maneuvering_params = get_KVLCC2_L7_params();
 julia> target_δ_rad = 20.0 * π / 180.0
-julia> target_Ψ_rad_deviation = 20.0 * π / 180.0
+julia> target_ψ_rad_deviation = 20.0 * π / 180.0
 julia> start_time_second = 0.00
 julia> time_second_interval = 0.01
 julia> end_time_second = 80.00
@@ -848,10 +861,13 @@ julia> N_EX_list = zeros(Float64, length(time_list))
 julia> δ_list, u_list, v_list, r_list, Ψ_list = mmg_3dof_zigzag_test(
     basic_params,
     maneuvering_params,
-    time_list
+    wind_force_and_moment_params,
+    time_list,
     n_p_list,
+    u_wind_list,
+    ψ_wind_list,
     target_δ_rad,
-    target_Ψ_rad_deviation,
+    target_ψ_rad_deviation,
 );
 ```
 """
@@ -870,7 +886,7 @@ function mmg_3dof_zigzag_test(
     r0=0.0,
     x0=0.0,
     y0=0.0,
-    Ψ0=0.0,
+    ψ0=0.0,
     δ0=0.0,
     δ_rad_rate=10.0 * π / 180,
     ρ=1025.0,
@@ -878,7 +894,7 @@ function mmg_3dof_zigzag_test(
     reltol=1e-8,
     abstol=1e-8,
 )
-    target_Ψ_rad_deviation = abs(target_Ψ_rad_deviation)
+    target_ψ_rad_deviation = abs(target_ψ_rad_deviation)
 
     final_δ_list = zeros(length(time_list))
     final_u_list = zeros(length(time_list))
@@ -886,11 +902,11 @@ function mmg_3dof_zigzag_test(
     final_r_list = zeros(length(time_list))
     final_x_list = zeros(length(time_list))
     final_y_list = zeros(length(time_list))
-    final_Ψ_list = zeros(length(time_list))
+    final_ψ_list = zeros(length(time_list))
 
     next_stage_index = 1
     target_δ_rad = -target_δ_rad  # for changing in while loop
-    Ψ = Ψ0
+    ψ = ψ0
     while next_stage_index < length(time_list)
         target_δ_rad = -target_δ_rad
         start_index = next_stage_index
@@ -944,7 +960,7 @@ function mmg_3dof_zigzag_test(
             r0=r0,
             x0=x0,
             y0=y0,
-            Ψ0=Ψ,
+            ψ0=ψ,
             ρ=ρ,
             algorithm=algorithm,
             reltol=reltol,
@@ -952,13 +968,13 @@ function mmg_3dof_zigzag_test(
         )
 
         # get finish index
-        target_Ψ_rad = Ψ0 + target_Ψ_rad_deviation
+        target_ψ_rad = ψ0 + target_ψ_rad_deviation
         if target_δ_rad < 0
-            target_Ψ_rad = Ψ0 - target_Ψ_rad_deviation
+            target_ψ_rad = ψ0 - target_ψ_rad_deviation
         end
-        over_index = findfirst(e -> e > target_Ψ_rad, Ψ_list)
+        over_index = findfirst(e -> e > target_ψ_rad, ψ_list)
         if target_δ_rad < 0
-            over_index = findfirst(e -> e < target_Ψ_rad, Ψ_list)
+            over_index = findfirst(e -> e < target_ψ_rad, ψ_list)
         end
         next_stage_index = length(time_list)
         if isnothing(over_index)
@@ -968,9 +984,9 @@ function mmg_3dof_zigzag_test(
             final_r_list[start_index:next_stage_index] = r
             final_x_list[start_index:next_stage_index] = x
             final_y_list[start_index:next_stage_index] = y
-            final_Ψ_list[start_index:next_stage_index] = Ψ_list
+            final_ψ_list[start_index:next_stage_index] = ψ_list
         else
-            Ψ = Ψ_list[over_index]
+            ψ = ψ_list[over_index]
             next_stage_index = over_index + start_index - 1
             final_δ_list[start_index:next_stage_index-1] = δ_list[begin:over_index-1]
             final_u_list[start_index:next_stage_index-1] = u[begin:over_index-1]
@@ -978,7 +994,7 @@ function mmg_3dof_zigzag_test(
             final_r_list[start_index:next_stage_index-1] = r[begin:over_index-1]
             final_x_list[start_index:next_stage_index-1] = x[begin:over_index-1]
             final_y_list[start_index:next_stage_index-1] = y[begin:over_index-1]
-            final_Ψ_list[start_index:next_stage_index-1] = Ψ_list[begin:over_index-1]
+            final_ψ_list[start_index:next_stage_index-1] = ψ_list[begin:over_index-1]
         end
     end
     final_u_list,
@@ -986,7 +1002,7 @@ function mmg_3dof_zigzag_test(
     final_r_list,
     final_x_list,
     final_y_list,
-    final_Ψ_list,
+    final_ψ_list,
     final_δ_list
 end
 
@@ -1020,7 +1036,7 @@ function create_model_for_mcmc_sample_mmg(
     N_rrr_dash_prior_dist=Uniform(-0.060, 0.000),
     solver=Tsit5(),
     abstol=1e-6,
-    reltol=1e-3
+    reltol=1e-3,
 )
     time_obs = data.time
     u_obs = data.u
@@ -1137,7 +1153,10 @@ function create_model_for_mcmc_sample_mmg(
                 u *
                 (1.0 - w_P) *
                 ϵ *
-                sqrt(η * (1.0 + κ * (sqrt(1.0 + 8.0 * K_T / (pi * J^2)) - 1))^2 + (1 - η))
+                sqrt(
+                    η * (1.0 + κ * (sqrt(1.0 + 8.0 * K_T / (pi * J^2)) - 1))^2 +
+                    (1 - η),
+                )
         end
 
         U_R = sqrt(u_R^2 + v_R^2)
@@ -1259,7 +1278,7 @@ function create_model_for_mcmc_sample_mmg(
     prob1 = ODEProblem(MMG!, X0, (time_obs[1], time_obs[end]), p)
 
     # create probabilistic model
-    @model function fitMMG(time_obs, obs, prob1)
+    Turing.@model function fitMMG(time_obs, obs, prob1)
         σ_u ~ σ_u_prior_dist
         σ_v ~ σ_v_prior_dist
         σ_r ~ σ_r_prior_dist
