@@ -6,10 +6,12 @@ using Dierckx
 using Parameters
 using Distributions
 using Turing
+using ForwardDiff
 
 include("data.jl")
 export calc_position,
     ShipData,
+    ShipDataAdvanced,
     get_KVLCC2_L7_basic_params,
     get_KVLCC2_L7_maneuvering_params,
     get_KVLCC2_L7_params,
@@ -28,9 +30,20 @@ export kt_simulate,
 include("mmg.jl")
 export Mmg3DofBasicParams,
     Mmg3DofManeuveringParams,
-    Mmg3DofWindForceMomentParams,
     mmg_3dof_simulate,
     mmg_3dof_model!,
+    mmg_3dof_zigzag_test,
+    estimate_mmg_approx_lsm,
+    estimate_mmg_approx_lsm_time_window_sampling,
+    create_model_for_mcmc_sample_mmg
+
+include("mmg_wind.jl")
+export Mmg3DofBasicParams,
+    Mmg3DofManeuveringParams,
+    Mmg3DofWindForceMomentParams,
+    apparent_wind_speed_and_angle,
+    mmg_3dof_simulate,
+    mmg_3dof_model_adbanced!,
     mmg_3dof_zigzag_test,
     estimate_mmg_approx_lsm,
     estimate_mmg_approx_lsm_time_window_sampling,

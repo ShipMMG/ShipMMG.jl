@@ -10,6 +10,20 @@
     n_p::Tn_p
 end
 
+@with_kw struct ShipDataAdvanced{Tt,Tu,Tv,Tr,Tx,Ty,Tψ,Tδ,Tn_p,TU_W,Tψ_W}
+    time::Tt
+    u::Tu
+    v::Tv
+    r::Tr
+    x::Tx
+    y::Ty
+    ψ::Tψ
+    δ::Tδ
+    n_p::Tn_p
+    U_W::TU_W
+    ψ_W::Tψ_W
+end
+
 function get_KVLCC2_L7_basic_params(ρ=1025.0)
     L_pp = 7.00  # 船長Lpp[m]
     B = 1.27  # 船幅[m]
