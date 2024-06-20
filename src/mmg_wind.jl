@@ -18,9 +18,9 @@ function apparent_wind_speed_and_angle(U_W, Ψ_W, u, v, Ψ)
 end
 
 """
-    mmg_3dof_model_adbanced!(dX, X, p, t)
+    mmg_3dof_wind_model!(dX, X, p, t)
 
-MMG 3DOF model on DifferentialEquations.ODEProblem. Update `dX`.
+MMG 3DOF wind model on DifferentialEquations.ODEProblem. Update `dX`.
 
 # Arguments
 - `dX`: [du, dv, dr, dx, dy, dΨ, dδ, dn_p]
@@ -83,7 +83,7 @@ MMG 3DOF model on DifferentialEquations.ODEProblem. Update `dX`.
     - Ψ_W_list
 - `t`: the time.
 """
-function mmg_3dof_model_adbanced!(dX, X, p, t)
+function mmg_3dof_wind_model!(dX, X, p, t)
     u, v, r, x, y, Ψ, δ, n_p = X
     ρ,
     L_pp,
@@ -685,7 +685,7 @@ function simulate(
         spl_U_W,
         spl_Ψ_W,
     )
-    prob = ODEProblem(mmg_3dof_model_adbanced!, X0, (time_list[1], time_list[end]), p)
+    prob = ODEProblem(mmg_3dof_wind_model!, X0, (time_list[1], time_list[end]), p)
     sol = solve(prob, algorithm, reltol=reltol, abstol=abstol)
     sol_timelist = sol(time_list)
     results = hcat(sol_timelist.u...)
@@ -896,7 +896,8 @@ function mmg_3dof_zigzag_test(
 end
 
 function create_model_for_mcmc_sample_mmg(
-    data::ShipDataAdvanced,
+    data::ShipData,
+    env_data::EnvironmentData,
     basic_params::Mmg3DofBasicParams,
     wind_force_and_moment_params::Mmg3DofWindForceMomentParams,
     k_0,
@@ -934,8 +935,9 @@ function create_model_for_mcmc_sample_mmg(
     Ψ_obs = data.ψ
     δ_obs = data.δ
     n_p_obs = data.n_p
-    U_W_obs = data.U_W
-    Ψ_W_obs = data.ψ_W
+    
+    U_W_obs = env_data.U_W
+    Ψ_W_obs = env_data.ψ_W
 
     @unpack L_pp,
     B,
