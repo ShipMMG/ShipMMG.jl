@@ -896,7 +896,8 @@ function mmg_3dof_zigzag_test(
 end
 
 function create_model_for_mcmc_sample_mmg(
-    data::ShipDataAdvanced,
+    data::ShipData,
+    env_data::EnvironmentData,
     basic_params::Mmg3DofBasicParams,
     wind_force_and_moment_params::Mmg3DofWindForceMomentParams,
     k_0,
@@ -934,8 +935,9 @@ function create_model_for_mcmc_sample_mmg(
     Ψ_obs = data.ψ
     δ_obs = data.δ
     n_p_obs = data.n_p
-    U_W_obs = data.U_W
-    Ψ_W_obs = data.ψ_W
+    
+    U_W_obs = env_data.U_W
+    Ψ_W_obs = env_data.ψ_W
 
     @unpack L_pp,
     B,

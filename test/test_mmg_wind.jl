@@ -98,7 +98,7 @@ end
     v_obs = v + rand(noize_dist, size(v))
     r_obs = r + rand(noize_dist, size(r))
     x, y, ψ = calc_position(time_obs, u_obs, v_obs, r_obs)
-    data = ShipDataAdvanced(
+    data = ShipData(
         time_obs,
         u_obs,
         v_obs,
@@ -108,6 +108,9 @@ end
         ψ,
         δ_rad_list[1:sampling_rate:end],
         n_p_list[1:sampling_rate:end],
+    )
+    env_data = EnvironmentData(
+        time_obs,
         U_W_list[1:sampling_rate:end],
         ψ_W_list[1:sampling_rate:end],
     )
@@ -117,6 +120,7 @@ end
     n_chains = 1
     model = create_model_for_mcmc_sample_mmg(
         data,
+        env_data,
         basic_params,
         wind_force_and_moment_params,
         maneuvering_params.k_0,

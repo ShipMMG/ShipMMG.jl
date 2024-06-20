@@ -10,16 +10,8 @@
     n_p::Tn_p
 end
 
-@with_kw struct ShipDataAdvanced{Tt,Tu,Tv,Tr,Tx,Ty,Tψ,Tδ,Tn_p,TU_W,Tψ_W}
+@with_kw struct EnvironmentData{Tt,TU_W,Tψ_W}
     time::Tt
-    u::Tu
-    v::Tv
-    r::Tr
-    x::Tx
-    y::Ty
-    ψ::Tψ
-    δ::Tδ
-    n_p::Tn_p
     U_W::TU_W
     ψ_W::Tψ_W
 end

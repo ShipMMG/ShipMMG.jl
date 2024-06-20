@@ -11,7 +11,7 @@ using ForwardDiff
 include("data.jl")
 export calc_position,
     ShipData,
-    ShipDataAdvanced,
+    EnvironmentData,
     get_KVLCC2_L7_basic_params,
     get_KVLCC2_L7_maneuvering_params,
     get_KVLCC2_L7_params,
