@@ -1423,46 +1423,7 @@ function create_model_for_mcmc_sample_mmg(
         σ_v ~ σ_v_prior_dist
         σ_r ~ σ_r_prior_dist
         p ~ multivariate_prior_dist;
-    
-        # パラメーターの分解
-        R_0_dash,
-        X_vv_dash,
-        X_vr_dash,
-        X_rr_dash,
-        X_vvvv_dash,
-        Y_v_dash,
-        Y_r_dash,
-        Y_vvv_dash,
-        Y_vvr_dash,
-        Y_vrr_dash,
-        Y_rrr_dash,
-        N_v_dash,
-        N_r_dash,
-        N_vvv_dash,
-        N_vvr_dash,
-        N_vrr_dash,
-        N_rrr_dash = p
-
-        p_array = [
-            R_0_dash,
-            X_vv_dash,
-            X_vr_dash,
-            X_rr_dash,
-            X_vvvv_dash,
-            Y_v_dash,
-            Y_r_dash,
-            Y_vvv_dash,
-            Y_vvr_dash,
-            Y_vrr_dash,
-            Y_rrr_dash,
-            N_v_dash,
-            N_r_dash,
-            N_vvv_dash,
-            N_vvr_dash,
-            N_vrr_dash,
-            N_rrr_dash
-        ]
-        prob = remake(prob1, p=p_array)
+        prob = remake(prob1, p=p)
         sol = solve(prob, solver, abstol=abstol, reltol=reltol)
         predicted = sol(time_obs)
         for i in eachindex(predicted)
