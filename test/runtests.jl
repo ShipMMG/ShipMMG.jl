@@ -1,6 +1,7 @@
 using ShipMMG
 using Test
 using Distributions
+using LinearAlgebra
 
 @testset "ShipMMG.jl" begin
     include("test_data.jl")

@@ -7,6 +7,7 @@ using Parameters
 using Distributions
 using Turing
 using ForwardDiff
+using LinearAlgebra
 
 include("data.jl")
 export calc_position,
