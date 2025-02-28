@@ -90,7 +90,7 @@ function kt_simulate(
     spl_δ = Spline1D(time_list, δ_list)
 
     X0 = [u0; v0; r0; x0; y0; Ψ0; δ_list[1]]
-    p = [K, T, spl_δ]
+    p = (K, T, spl_δ)
     prob = ODEProblem(kt_model!, X0, (time_list[1], time_list[end]), p)
     sol = solve(prob, algorithm, reltol=reltol, abstol=abstol)
     sol_timelist = sol(time_list)
@@ -333,7 +333,7 @@ function create_model_for_mcmc_sample_kt(
     u0 = [r_obs[1]; δ_obs[1]]
     K_start = 0.10
     T_start = 60.0
-    p = [K_start, T_start]
+    p = (K_start, T_start)
     prob1 = ODEProblem(KT!, u0, (time_obs[1], time_obs[end]), p)
 
     # create probabilistic model
@@ -342,7 +342,7 @@ function create_model_for_mcmc_sample_kt(
         K ~ K_prior_dist
         T ~ T_prior_dist
 
-        p = [K, T]
+        p = (K, T)
         prob = remake(prob1, p=p)
         sol = solve(prob, Tsit5())
         predicted = sol(time_obs)
