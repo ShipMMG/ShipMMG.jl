@@ -1,7 +1,7 @@
 name = "ShipMMG"
 uuid = "37f2b0bf-0c13-4883-8808-e75eb56597e7"
 authors = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
-version = "0.0.7"
+version = "0.0.8"
 
 [deps]
 AdvancedPS = "576499cb-2369-40b2-a588-c64705576edc"
