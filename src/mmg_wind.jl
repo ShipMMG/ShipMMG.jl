@@ -1142,7 +1142,7 @@ function create_model_for_mcmc_sample_mmg(
     N_vrr_dash_start = 0.055
     N_rrr_dash_start = -0.013
 
-    p = [
+    p = (
         R_0_dash_start,
         X_vv_dash_start,
         X_vr_dash_start,
@@ -1160,7 +1160,7 @@ function create_model_for_mcmc_sample_mmg(
         N_vvr_dash_start,
         N_vrr_dash_start,
         N_rrr_dash_start,
-    ]
+    )
 
     u0 = 2.29 * 0.512
     v0 = 0.0
@@ -1191,7 +1191,7 @@ function create_model_for_mcmc_sample_mmg(
         N_vrr_dash ~ N_vrr_dash_prior_dist
         N_rrr_dash ~ N_rrr_dash_prior_dist
 
-        p = [
+        p = (
             R_0_dash,
             X_vv_dash,
             X_vr_dash,
@@ -1209,7 +1209,7 @@ function create_model_for_mcmc_sample_mmg(
             N_vvr_dash,
             N_vrr_dash,
             N_rrr_dash,
-        ]
+        )
         prob = remake(prob1, p=p)
         sol = solve(prob, solver, abstol=abstol, reltol=reltol)
         predicted = sol(time_obs)
