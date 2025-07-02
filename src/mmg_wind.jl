@@ -693,7 +693,26 @@ function simulate(
     Ψ = results[6, :]
     δ = results[7, :]
     n_p = results[8, :]
-    u, v, r, x, y, Ψ, δ, n_p
+    
+    ρ_air = 1.225
+    n_data = length(time_list)
+    X_wind_list = zeros(n_data)
+    Y_wind_list = zeros(n_data)
+    N_wind_list = zeros(n_data)
+
+    for i in 1:n_data
+        U_A, Ψ_A = apparent_wind_speed_and_angle(
+            U_W_list[i],
+            Ψ_W_list[i],
+            u[i],
+            v[i],
+            Ψ[i],
+        )
+        X_wind_list[i] = ρ_air * A_F * spl_C_X(Ψ_A) / 2 * U_A^2
+        Y_wind_list[i] = ρ_air * A_L * spl_C_Y(Ψ_A) / 2 * U_A^2
+        N_wind_list[i] = ρ_air * A_L * L_pp * spl_C_N(Ψ_A) / 2 * U_A^2
+    end
+    u, v, r, x, y, Ψ, δ, n_p, X_wind_list, Y_wind_list, N_wind_list
 end
 
 """

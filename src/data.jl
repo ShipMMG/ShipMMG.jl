@@ -16,6 +16,14 @@ end
     ψ_W::Tψ_W
 end
 
+@with_kw struct BowSternCoords{Tt,Tx1,Ty1,Tx2,Ty2}
+    time::Tt
+    x1::Tx1
+    y1::Ty1 
+    x2::Tx2 
+    y2::Ty2  
+end
+
 function get_KVLCC2_L7_basic_params(ρ=1025.0)
     L_pp = 7.00  # 船長Lpp[m]
     B = 1.27  # 船幅[m]

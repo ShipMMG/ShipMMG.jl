@@ -1435,3 +1435,654 @@ function create_model_for_mcmc_sample_mmg(
 
     return fitMMG(time_obs, [u_obs, v_obs, r_obs], prob1)
 end
+
+function mpc_for_maneuvering_variables(
+    basic_params::Mmg3DofBasicParams,
+    maneuvering_params::Mmg3DofManeuveringParams,
+    ref_data::BowSternCoords;
+    u0=0.0,
+    v0=0.0,
+    r0=0.0,
+    x0=0.0,
+    y0=0.0,
+    Ψ0=0.0,
+    ρ=1025.0,
+    T_all=100.0,
+    T_step=1.0,
+    Np=1,
+    L_bow=3.0,
+    L_stern=3.0,
+    δ0=1e-5,
+    δ_step=5 / 180 * π,
+    δ_max=40 / 180 * π,
+    δ_min=-40 / 180 * π,
+    n_p0=1e-5,
+    n_p_step=5.0,
+    n_p_max=30.0,
+    n_p_min=0.0,
+    Q=[1e-3, 1e-3]
+    )
+
+    @unpack L_pp,
+    B,
+    d,
+    x_G,
+    D_p,
+    m,
+    I_zG,
+    A_R,
+    η,
+    m_x,
+    m_y,
+    J_z,
+    f_α,
+    ϵ,
+    t_R,
+    x_R,
+    a_H,
+    x_H,
+    γ_R_minus,
+    γ_R_plus,
+    l_R,
+    κ,
+    t_P,
+    w_P0,
+    x_P = basic_params
+
+    @unpack k_0,
+    k_1,
+    k_2,
+    R_0_dash,
+    X_vv_dash,
+    X_vr_dash,
+    X_rr_dash,
+    X_vvvv_dash,
+    Y_v_dash,
+    Y_r_dash,
+    Y_vvv_dash,
+    Y_vvr_dash,
+    Y_vrr_dash,
+    Y_rrr_dash,
+    N_v_dash,
+    N_r_dash,
+    N_vvv_dash,
+    N_vvr_dash,
+    N_vrr_dash,
+    N_rrr_dash = maneuvering_params
+
+    function MMG!(dX, X, δ, n_p)
+        u, v, r, x, y, Ψ = X
+
+        U = sqrt(u^2 + (v - r * x_G)^2)
+
+        β = 0.0
+        if U == 0.0
+            β = 0.0
+        else
+            β = asin(-(v - r * x_G) / U)
+        end
+
+        v_dash = 0.0
+        if U == 0.0
+            v_dash = 0.0
+        else
+            v_dash = v / U
+        end
+
+        r_dash = 0.0
+        if U == 0.0
+            r_dash = 0.0
+        else
+            r_dash = r * L_pp / U
+        end
+
+        w_P = w_P0 * exp(-4.0 * (β - x_P * r_dash)^2)
+
+        J = 0.0
+        if n_p == 0.0
+            J = 0.0
+        else
+            J = (1 - w_P) * u / (n_p * D_p)
+        end
+        K_T = k_0 + k_1 * J + k_2 * J^2
+        β_R = β - l_R * r_dash
+        γ_R = γ_R_minus
+
+        γ_R = 0.5 * (γ_R_plus + γ_R_minus) + 0.5 * (γ_R_plus - γ_R_minus) * tanh(100.0 * β_R)
+
+        v_R = U * γ_R * β_R
+
+        u_R = 0.0
+        if J == 0.0
+            u_R = sqrt(η * (κ * ϵ * 8.0 * k_0 * n_p^2 * D_p^4 / pi)^2)
+        else
+            u_R =
+                u *
+                (1.0 - w_P) *
+                ϵ *
+                sqrt(η * (1.0 + κ * (sqrt(1.0 + 8.0 * K_T / (pi * J^2)) - 1))^2 + (1 - η))
+        end
+
+        U_R = sqrt(u_R^2 + v_R^2)
+        α_R = δ - atan(v_R, u_R)
+        F_N = 0.5 * A_R * ρ * f_α * (U_R^2) * sin(α_R)
+
+        X_H = (
+            0.5 *
+            ρ *
+            L_pp *
+            d *
+            (U^2) *
+            (
+                -R_0_dash +
+                X_vv_dash * (v_dash^2) +
+                X_vr_dash * v_dash * r_dash +
+                X_rr_dash * (r_dash^2) +
+                X_vvvv_dash * (v_dash^4)
+            )
+        )
+        X_R = -(1.0 - t_R) * F_N * sin(δ)
+        X_P = (1.0 - t_P) * ρ * K_T * n_p^2 * D_p^4
+        Y_H = (
+            0.5 *
+            ρ *
+            L_pp *
+            d *
+            (U^2) *
+            (
+                Y_v_dash * v_dash +
+                Y_r_dash * r_dash +
+                Y_vvv_dash * (v_dash^3) +
+                Y_vvr_dash * (v_dash^2) * r_dash +
+                Y_vrr_dash * v_dash * (r_dash^2) +
+                Y_rrr_dash * (r_dash^3)
+            )
+        )
+        Y_R = -(1 + a_H) * F_N * cos(δ)
+        N_H = (
+            0.5 *
+            ρ *
+            (L_pp^2) *
+            d *
+            (U^2) *
+            (
+                N_v_dash * v_dash +
+                N_r_dash * r_dash +
+                N_vvv_dash * (v_dash^3) +
+                N_vvr_dash * (v_dash^2) * r_dash +
+                N_vrr_dash * v_dash * (r_dash^2) +
+                N_rrr_dash * (r_dash^3)
+            )
+        )
+        N_R = -(x_R + a_H * x_H) * F_N * cos(δ)
+        dX[1] = du = ((X_H + X_R + X_P) + (m + m_y) * v * r + x_G * m * (r^2)) / (m + m_x)
+        dX[2] =
+            dv =
+                (
+                    (x_G^2) * (m^2) * u * r - (N_H + N_R) * x_G * m +
+                    ((Y_H + Y_R) - (m + m_x) * u * r) * (I_zG + J_z + (x_G^2) * m)
+                ) / ((I_zG + J_z + (x_G^2) * m) * (m + m_y) - (x_G^2) * (m^2))
+        dX[3] = dr = (N_H + N_R - x_G * m * (dv + u * r)) / (I_zG + J_z + (x_G^2) * m)
+        dX[4] = dx = u * cos(Ψ) - v * sin(Ψ)
+        dX[5] = dy = u * sin(Ψ) + v * cos(Ψ)
+        dX[6] = dΨ = r
+    end
+
+    function rk4_step(X_in, δ, n_p)
+        k1 = Vector{Any}(undef, 6)
+        MMG!(k1, X_in, δ, n_p)
+        X_k2 = X_in + 0.5 * T_step * k1
+        k2 = Vector{Any}(undef, 6)
+        MMG!(k2, X_k2, δ, n_p)
+        X_k3 = X_in + 0.5 * T_step * k2
+        k3 = Vector{Any}(undef, 6)
+        MMG!(k3, X_k3, δ, n_p)
+        X_k4 = X_in + T_step * k3
+        k4 = Vector{Any}(undef, 6)
+        MMG!(k4, X_k4, δ, n_p)
+        X_out = X_in + (T_step / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+        return X_out
+    end
+    function discrete_u(u, v, r, x, y, Ψ, δ, n_p)
+        X_in = [u, v, r, x, y, Ψ]
+        X_out = rk4_step(X_in, δ, n_p)
+        return X_out[1]
+    end
+    function discrete_v(u, v, r, x, y, Ψ, δ, n_p)
+        X_in = [u, v, r, x, y, Ψ]
+        X_out = rk4_step(X_in, δ, n_p)
+        return X_out[2]
+    end
+    function discrete_r(u, v, r, x, y, Ψ, δ, n_p)
+        X_in = [u, v, r, x, y, Ψ]
+        X_out = rk4_step(X_in, δ, n_p)
+        return X_out[3]
+    end
+    function discrete_x(u, v, r, x, y, Ψ, δ, n_p)
+        X_in = [u, v, r, x, y, Ψ]
+        X_out = rk4_step(X_in, δ, n_p)
+        return X_out[4]
+    end
+    function discrete_y(u, v, r, x, y, Ψ, δ, n_p)
+        X_in = [u, v, r, x, y, Ψ]
+        X_out = rk4_step(X_in, δ, n_p)
+        return X_out[5]
+    end
+    function discrete_Ψ(u, v, r, x, y, Ψ, δ, n_p)
+        X_in = [u, v, r, x, y, Ψ]
+        X_out = rk4_step(X_in, δ, n_p)
+        return X_out[6]
+    end
+    
+    total_steps = Int(T_all / T_step)
+    X0_mpc = [u0, v0, r0, x0, y0, Ψ0, x0 + L_bow * cos(Ψ0), y0 + L_bow * sin(Ψ0), x0 + L_stern * cos(Ψ0 + pi), y0 + L_stern * sin(Ψ0 + pi)]
+    U0_mpc = [δ0, n_p0]
+    
+    results_list = []
+
+    @showprogress for k in 1:total_steps
+        model = Model(Ipopt.Optimizer)
+        set_silent(model)
+        register(model, :discrete_u, 8, discrete_u; autodiff = true)
+        register(model, :discrete_v, 8, discrete_v; autodiff = true)
+        register(model, :discrete_r, 8, discrete_r; autodiff = true)
+        register(model, :discrete_x, 8, discrete_x; autodiff = true)
+        register(model, :discrete_y, 8, discrete_y; autodiff = true)
+        register(model, :discrete_Ψ, 8, discrete_Ψ; autodiff = true)
+
+        @variable(model, X_mpc[1:Np+1, 1:10])
+        @variable(model, U_mpc[1:Np, 1:2])
+        @constraint(model, X_mpc[1, 1:10] .== X0_mpc[1:10])
+        @constraint(model, δ_min .<= U_mpc[1:Np, 1] .<= δ_max)
+        @constraint(model, n_p_min .<= U_mpc[1:Np, 2] .<= n_p_max)        
+        @constraint(model, -δ_step .<= U_mpc[1, 1] - U0_mpc[1] .<= δ_step)
+        @constraint(model, -n_p_step .<= U_mpc[1, 2] - U0_mpc[2] .<= n_p_step)
+        for i in 1:Np-1
+            @constraint(model, -δ_step .<= U_mpc[i+1, 1] - U_mpc[i, 1] .<= δ_step)
+            @constraint(model, -n_p_step .<= U_mpc[i+1, 2] - U_mpc[i, 2] .<= n_p_step)
+        end
+
+        for i in 1:Np+1
+            set_start_value.(X_mpc[i, 1:10], X0_mpc[1:10])
+        end
+        for i in 1:Np
+            set_start_value.(U_mpc[i, 1:2], U0_mpc[1:2])
+        end  
+
+        for i in 1:Np
+            @NLconstraint(model, X_mpc[i+1, 1] == discrete_u(X_mpc[i, 1], X_mpc[i, 2], X_mpc[i, 3], X_mpc[i, 4], X_mpc[i, 5], X_mpc[i, 6], U_mpc[i, 1], U_mpc[i, 2]))
+            @NLconstraint(model, X_mpc[i+1, 2] == discrete_v(X_mpc[i, 1], X_mpc[i, 2], X_mpc[i, 3], X_mpc[i, 4], X_mpc[i, 5], X_mpc[i, 6], U_mpc[i, 1], U_mpc[i, 2]))
+            @NLconstraint(model, X_mpc[i+1, 3] == discrete_r(X_mpc[i, 1], X_mpc[i, 2], X_mpc[i, 3], X_mpc[i, 4], X_mpc[i, 5], X_mpc[i, 6], U_mpc[i, 1], U_mpc[i, 2]))
+            @NLconstraint(model, X_mpc[i+1, 4] == discrete_x(X_mpc[i, 1], X_mpc[i, 2], X_mpc[i, 3], X_mpc[i, 4], X_mpc[i, 5], X_mpc[i, 6], U_mpc[i, 1], U_mpc[i, 2]))
+            @NLconstraint(model, X_mpc[i+1, 5] == discrete_y(X_mpc[i, 1], X_mpc[i, 2], X_mpc[i, 3], X_mpc[i, 4], X_mpc[i, 5], X_mpc[i, 6], U_mpc[i, 1], U_mpc[i, 2]))
+            @NLconstraint(model, X_mpc[i+1, 6] == discrete_Ψ(X_mpc[i, 1], X_mpc[i, 2], X_mpc[i, 3], X_mpc[i, 4], X_mpc[i, 5], X_mpc[i, 6], U_mpc[i, 1], U_mpc[i, 2]))
+            @NLconstraint(model, X_mpc[i+1, 7] == X_mpc[i+1, 4] + L_bow * cos(X_mpc[i+1, 6]))
+            @NLconstraint(model, X_mpc[i+1, 8] == X_mpc[i+1, 5] + L_bow * sin(X_mpc[i+1, 6]))
+            @NLconstraint(model, X_mpc[i+1, 9] == X_mpc[i+1, 4] + L_stern * cos(X_mpc[i+1, 6] + pi))
+            @NLconstraint(model, X_mpc[i+1, 10] == X_mpc[i+1, 5] + L_stern * sin(X_mpc[i+1, 6]+ pi))
+        end
+
+        @NLobjective(model, Min, 
+            sum((X_mpc[i, 7]-ref_data.x1[k+i-1])^2 + (X_mpc[i, 8]-ref_data.y1[k+i-1])^2 + (X_mpc[i, 9]-ref_data.x2[k+i-1])^2 + (X_mpc[i, 10]-ref_data.y2[k+i-1])^2  for i in 2:Np+1) 
+            + sum(Q[1] * (U_mpc[i, 1]-U_mpc[i-1, 1])^2 + Q[2] * (U_mpc[i, 2]-U_mpc[i-1, 2])^2 for i in 2:Np))
+            + (Q[1] * (U_mpc[1, 1]-U0_mpc[1])^2 + Q[2] * (U_mpc[1, 2]-U0_mpc[2])^2)
+        
+        optimize!(model)
+        
+        U0_mpc = JuMP.value.(U_mpc[1, 1:2])
+        push!(results_list, (
+            time = (k - 1) * T_step,
+            state = X0_mpc,
+            control = U0_mpc
+        ))
+        X0_mpc = JuMP.value.(X_mpc[2, 1:10])
+    end
+
+    push!(results_list, (
+        time = total_steps * T_step,
+        state = X0_mpc,
+        control = [NaN, NaN]
+    ))
+
+    time = [res.time for res in results_list]
+    u = [res.state[1] for res in results_list]
+    v = [res.state[2] for res in results_list]
+    r = [res.state[3] for res in results_list]
+    x = [res.state[4] for res in results_list]
+    y = [res.state[5] for res in results_list]
+    Ψ = [res.state[6] for res in results_list]
+    x1 = [res.state[7] for res in results_list]
+    y1 = [res.state[8] for res in results_list]
+    x2 = [res.state[9] for res in results_list]
+    y2 = [res.state[10] for res in results_list]
+    δ = [res.control[1] for res in results_list]
+    n_p = [res.control[2] for res in results_list]
+
+    return time, u, v, r, x, y, Ψ, x1, y1, x2, y2, δ, n_p
+end
+
+function mpc_for_external_force(
+    basic_params::Mmg3DofBasicParams,
+    maneuvering_params::Mmg3DofManeuveringParams,
+    ref_data::BowSternCoords,
+    δ_ref::Vector{Float64},
+    n_p_ref::Vector{Float64};
+    u0=0.0,
+    v0=0.0,
+    r0=0.0,
+    x0=0.0,
+    y0=0.0,
+    Ψ0=0.0,
+    ρ=1025.0,
+    T_all=100.0,
+    T_step=1.0,
+    Np=1,
+    L_bow=3.0,
+    L_stern=3.0,
+    X_F0=1e-5,
+    X_F_max=1e2,
+    X_F_min=-1e2,
+    Y_F0=1e-5,
+    Y_F_max=1e2,
+    Y_F_min=-1e2,
+    N_F0=1e-5,
+    N_F_max=1e2,
+    N_F_min=-1e2,
+    Q=[1e-6, 1e-6, 1e-6]
+    )
+
+    @unpack L_pp,
+    B,
+    d,
+    x_G,
+    D_p,
+    m,
+    I_zG,
+    A_R,
+    η,
+    m_x,
+    m_y,
+    J_z,
+    f_α,
+    ϵ,
+    t_R,
+    x_R,
+    a_H,
+    x_H,
+    γ_R_minus,
+    γ_R_plus,
+    l_R,
+    κ,
+    t_P,
+    w_P0,
+    x_P = basic_params
+
+    @unpack k_0,
+    k_1,
+    k_2,
+    R_0_dash,
+    X_vv_dash,
+    X_vr_dash,
+    X_rr_dash,
+    X_vvvv_dash,
+    Y_v_dash,
+    Y_r_dash,
+    Y_vvv_dash,
+    Y_vvr_dash,
+    Y_vrr_dash,
+    Y_rrr_dash,
+    N_v_dash,
+    N_r_dash,
+    N_vvv_dash,
+    N_vvr_dash,
+    N_vrr_dash,
+    N_rrr_dash = maneuvering_params
+
+    function MMG!(dX, X, δ, n_p, X_F, Y_F, N_F)
+        u, v, r, x, y, Ψ = X
+
+        U = sqrt(u^2 + (v - r * x_G)^2)
+
+        β = 0.0
+        if U == 0.0
+            β = 0.0
+        else
+            β = asin(-(v - r * x_G) / U)
+        end
+
+        v_dash = 0.0
+        if U == 0.0
+            v_dash = 0.0
+        else
+            v_dash = v / U
+        end
+
+        r_dash = 0.0
+        if U == 0.0
+            r_dash = 0.0
+        else
+            r_dash = r * L_pp / U
+        end
+
+        w_P = w_P0 * exp(-4.0 * (β - x_P * r_dash)^2)
+
+        J = 0.0
+        if n_p == 0.0
+            J = 0.0
+        else
+            J = (1 - w_P) * u / (n_p * D_p)
+        end
+        K_T = k_0 + k_1 * J + k_2 * J^2
+        β_R = β - l_R * r_dash
+        γ_R = γ_R_minus
+
+        γ_R = 0.5 * (γ_R_plus + γ_R_minus) + 0.5 * (γ_R_plus - γ_R_minus) * tanh(100.0 * β_R)
+
+        v_R = U * γ_R * β_R
+
+        u_R = 0.0
+        if J == 0.0
+            u_R = sqrt(η * (κ * ϵ * 8.0 * k_0 * n_p^2 * D_p^4 / pi)^2)
+        else
+            u_R =
+                u *
+                (1.0 - w_P) *
+                ϵ *
+                sqrt(η * (1.0 + κ * (sqrt(1.0 + 8.0 * K_T / (pi * J^2)) - 1))^2 + (1 - η))
+        end
+
+        U_R = sqrt(u_R^2 + v_R^2)
+        α_R = δ - atan(v_R, u_R)
+        F_N = 0.5 * A_R * ρ * f_α * (U_R^2) * sin(α_R)
+
+        X_H = (
+            0.5 *
+            ρ *
+            L_pp *
+            d *
+            (U^2) *
+            (
+                -R_0_dash +
+                X_vv_dash * (v_dash^2) +
+                X_vr_dash * v_dash * r_dash +
+                X_rr_dash * (r_dash^2) +
+                X_vvvv_dash * (v_dash^4)
+            )
+        )
+        X_R = -(1.0 - t_R) * F_N * sin(δ)
+        X_P = (1.0 - t_P) * ρ * K_T * n_p^2 * D_p^4
+        Y_H = (
+            0.5 *
+            ρ *
+            L_pp *
+            d *
+            (U^2) *
+            (
+                Y_v_dash * v_dash +
+                Y_r_dash * r_dash +
+                Y_vvv_dash * (v_dash^3) +
+                Y_vvr_dash * (v_dash^2) * r_dash +
+                Y_vrr_dash * v_dash * (r_dash^2) +
+                Y_rrr_dash * (r_dash^3)
+            )
+        )
+        Y_R = -(1 + a_H) * F_N * cos(δ)
+        N_H = (
+            0.5 *
+            ρ *
+            (L_pp^2) *
+            d *
+            (U^2) *
+            (
+                N_v_dash * v_dash +
+                N_r_dash * r_dash +
+                N_vvv_dash * (v_dash^3) +
+                N_vvr_dash * (v_dash^2) * r_dash +
+                N_vrr_dash * v_dash * (r_dash^2) +
+                N_rrr_dash * (r_dash^3)
+            )
+        )
+        N_R = -(x_R + a_H * x_H) * F_N * cos(δ)
+        dX[1] = du = ((X_H + X_R + X_P + X_F) + (m + m_y) * v * r + x_G * m * (r^2)) / (m + m_x)
+        dX[2] =
+            dv =
+                (
+                    (x_G^2) * (m^2) * u * r - (N_H + N_R + N_F) * x_G * m +
+                    ((Y_H + Y_R + Y_F) - (m + m_x) * u * r) * (I_zG + J_z + (x_G^2) * m)
+                ) / ((I_zG + J_z + (x_G^2) * m) * (m + m_y) - (x_G^2) * (m^2))
+        dX[3] = dr = (N_H + N_R + N_F - x_G * m * (dv + u * r)) / (I_zG + J_z + (x_G^2) * m)
+        dX[4] = dx = u * cos(Ψ) - v * sin(Ψ)
+        dX[5] = dy = u * sin(Ψ) + v * cos(Ψ)
+        dX[6] = dΨ = r
+    end
+
+    function rk4_step(X_in, δ, n_p, X_F, Y_F, N_F)
+        k1 = Vector{Any}(undef, 6)
+        MMG!(k1, X_in, δ, n_p, X_F, Y_F, N_F)
+        X_k2 = X_in + 0.5 * T_step * k1
+        k2 = Vector{Any}(undef, 6)
+        MMG!(k2, X_k2, δ, n_p, X_F, Y_F, N_F)
+        X_k3 = X_in + 0.5 * T_step * k2
+        k3 = Vector{Any}(undef, 6)
+        MMG!(k3, X_k3, δ, n_p, X_F, Y_F, N_F)
+        X_k4 = X_in + T_step * k3
+        k4 = Vector{Any}(undef, 6)
+        MMG!(k4, X_k4, δ, n_p, X_F, Y_F, N_F)
+        X_out = X_in + (T_step / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+        return X_out
+    end
+    function discrete_u(u, v, r, x, y, Ψ, δ, n_p, X_F, Y_F, N_F)
+        X_in = [u, v, r, x, y, Ψ]
+        X_out = rk4_step(X_in, δ, n_p, X_F, Y_F, N_F)
+        return X_out[1]
+    end
+    function discrete_v(u, v, r, x, y, Ψ, δ, n_p, X_F, Y_F, N_F)
+        X_in = [u, v, r, x, y, Ψ]
+        X_out = rk4_step(X_in, δ, n_p, X_F, Y_F, N_F)
+        return X_out[2]
+    end
+    function discrete_r(u, v, r, x, y, Ψ, δ, n_p, X_F, Y_F, N_F)
+        X_in = [u, v, r, x, y, Ψ]
+        X_out = rk4_step(X_in, δ, n_p, X_F, Y_F, N_F)
+        return X_out[3]
+    end
+    function discrete_x(u, v, r, x, y, Ψ, δ, n_p, X_F, Y_F, N_F)
+        X_in = [u, v, r, x, y, Ψ]
+        X_out = rk4_step(X_in, δ, n_p, X_F, Y_F, N_F)
+        return X_out[4]
+    end
+    function discrete_y(u, v, r, x, y, Ψ, δ, n_p, X_F, Y_F, N_F)
+        X_in = [u, v, r, x, y, Ψ]
+        X_out = rk4_step(X_in, δ, n_p, X_F, Y_F, N_F)
+        return X_out[5]
+    end
+    function discrete_Ψ(u, v, r, x, y, Ψ, δ, n_p, X_F, Y_F, N_F)
+        X_in = [u, v, r, x, y, Ψ]
+        X_out = rk4_step(X_in, δ, n_p, X_F, Y_F, N_F)
+        return X_out[6]
+    end
+
+    total_steps = Int(T_all / T_step)
+    X0_mpc = [u0, v0, r0, x0, y0, Ψ0, x0 + L_bow * cos(Ψ0), y0 + L_bow * sin(Ψ0), x0 + L_stern * cos(Ψ0 + pi), y0 + L_stern * sin(Ψ0 + pi)]
+    U0_mpc = [X_F0, Y_F0, N_F0]
+
+    results_list = []
+
+    @showprogress for k in 1:total_steps
+        model = Model(Ipopt.Optimizer)
+        set_silent(model)
+        register(model, :discrete_u, 11, discrete_u; autodiff = true)
+        register(model, :discrete_v, 11, discrete_v; autodiff = true)
+        register(model, :discrete_r, 11, discrete_r; autodiff = true)
+        register(model, :discrete_x, 11, discrete_x; autodiff = true)
+        register(model, :discrete_y, 11, discrete_y; autodiff = true)
+        register(model, :discrete_Ψ, 11, discrete_Ψ; autodiff = true)
+
+        @variable(model, X_mpc[1:Np+1, 1:10])
+        @variable(model, U_mpc[1:Np, 1:3])
+        @constraint(model, X_mpc[1, 1:10] .== X0_mpc[1:10])
+        @constraint(model, X_F_min .<= U_mpc[1:Np, 1] .<= X_F_max)
+        @constraint(model, Y_F_min .<= U_mpc[1:Np, 2] .<= Y_F_max)
+        @constraint(model, N_F_min .<= U_mpc[1:Np, 3] .<= N_F_max)
+
+        for i in 1:Np+1
+            set_start_value.(X_mpc[i, 1:10], X0_mpc[1:10])
+        end
+        for i in 1:Np
+            set_start_value.(U_mpc[i, 1:3], U0_mpc[1:3])
+        end  
+
+        for i in 1:Np
+            @NLconstraint(model, X_mpc[i+1, 1] == discrete_u(X_mpc[i, 1], X_mpc[i, 2], X_mpc[i, 3], X_mpc[i, 4], X_mpc[i, 5], X_mpc[i, 6], δ_ref[k+i-1], n_p_ref[k+i-1], U_mpc[i, 1], U_mpc[i, 2], U_mpc[i, 3]))
+            @NLconstraint(model, X_mpc[i+1, 2] == discrete_v(X_mpc[i, 1], X_mpc[i, 2], X_mpc[i, 3], X_mpc[i, 4], X_mpc[i, 5], X_mpc[i, 6], δ_ref[k+i-1], n_p_ref[k+i-1], U_mpc[i, 1], U_mpc[i, 2], U_mpc[i, 3]))
+            @NLconstraint(model, X_mpc[i+1, 3] == discrete_r(X_mpc[i, 1], X_mpc[i, 2], X_mpc[i, 3], X_mpc[i, 4], X_mpc[i, 5], X_mpc[i, 6], δ_ref[k+i-1], n_p_ref[k+i-1], U_mpc[i, 1], U_mpc[i, 2], U_mpc[i, 3]))
+            @NLconstraint(model, X_mpc[i+1, 4] == discrete_x(X_mpc[i, 1], X_mpc[i, 2], X_mpc[i, 3], X_mpc[i, 4], X_mpc[i, 5], X_mpc[i, 6], δ_ref[k+i-1], n_p_ref[k+i-1], U_mpc[i, 1], U_mpc[i, 2], U_mpc[i, 3]))
+            @NLconstraint(model, X_mpc[i+1, 5] == discrete_y(X_mpc[i, 1], X_mpc[i, 2], X_mpc[i, 3], X_mpc[i, 4], X_mpc[i, 5], X_mpc[i, 6], δ_ref[k+i-1], n_p_ref[k+i-1], U_mpc[i, 1], U_mpc[i, 2], U_mpc[i, 3]))
+            @NLconstraint(model, X_mpc[i+1, 6] == discrete_Ψ(X_mpc[i, 1], X_mpc[i, 2], X_mpc[i, 3], X_mpc[i, 4], X_mpc[i, 5], X_mpc[i, 6], δ_ref[k+i-1], n_p_ref[k+i-1], U_mpc[i, 1], U_mpc[i, 2], U_mpc[i, 3]))
+            @NLconstraint(model, X_mpc[i+1, 7] == X_mpc[i+1, 4] + L_bow * cos(X_mpc[i+1, 6]))
+            @NLconstraint(model, X_mpc[i+1, 8] == X_mpc[i+1, 5] + L_bow * sin(X_mpc[i+1, 6]))
+            @NLconstraint(model, X_mpc[i+1, 9] == X_mpc[i+1, 4] + L_stern * cos(X_mpc[i+1, 6] + pi))
+            @NLconstraint(model, X_mpc[i+1, 10] == X_mpc[i+1, 5] + L_stern * sin(X_mpc[i+1, 6]+ pi))
+        end
+
+        @NLobjective(model, Min, 
+            sum((X_mpc[i, 7]-ref_data.x1[k+i-1])^2 + (X_mpc[i, 8]-ref_data.y1[k+i-1])^2 + (X_mpc[i, 9]-ref_data.x2[k+i-1])^2 + (X_mpc[i, 10]-ref_data.y2[k+i-1])^2  for i in 2:Np+1)  
+            + sum(Q[1]*(U_mpc[i, 1]-U_mpc[i-1, 1])^2 + Q[2]*(U_mpc[i, 2]-U_mpc[i-1, 2])^2 + Q[3]*(U_mpc[i, 3]-U_mpc[i-1, 3])^2 for i in 2:Np))
+            + (Q[1]*(U_mpc[1, 1]-U0_mpc[1])^2 + Q[2]*(U_mpc[1, 2]-U0_mpc[2])^2 + Q[3]*(U_mpc[1, 3]-U0_mpc[3])^2)
+        
+        optimize!(model)
+
+        U0_mpc = JuMP.value.(U_mpc[1, 1:3])
+        push!(results_list, (
+            time = (k - 1) * T_step,
+            state = [X0_mpc..., δ_ref[k], n_p_ref[k]],
+            control = U0_mpc
+        ))
+        X0_mpc = JuMP.value.(X_mpc[2, 1:10])
+    end
+
+    push!(results_list, (
+        time = total_steps * T_step,
+        state = [X0_mpc..., δ_ref[total_steps+1], n_p_ref[total_steps+1]],
+        control = [NaN, NaN, NaN]
+    ))
+
+    time = [res.time for res in results_list]
+    u = [res.state[1] for res in results_list]
+    v = [res.state[2] for res in results_list]
+    r = [res.state[3] for res in results_list]
+    x = [res.state[4] for res in results_list]
+    y = [res.state[5] for res in results_list]
+    Ψ = [res.state[6] for res in results_list]
+    x1 = [res.state[7] for res in results_list]
+    y1 = [res.state[8] for res in results_list]
+    x2 = [res.state[9] for res in results_list]
+    y2 = [res.state[10] for res in results_list]
+    δ = [res.state[11] for res in results_list]
+    n_p = [res.state[12] for res in results_list]
+    X_F = [res.control[1] for res in results_list]
+    Y_F = [res.control[2] for res in results_list]
+    N_F = [res.control[3] for res in results_list]
+    
+    return time, u, v, r, x, y, Ψ, x1, y1, x2, y2, δ, n_p, X_F, Y_F, N_F
+end
