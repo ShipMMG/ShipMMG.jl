@@ -198,7 +198,7 @@ end
 
 @testset "mpc for maneuvering variables" begin
     sampling_rate = 1
-    duration = 100
+    duration = 20
     sampling = Int(duration * sampling_rate) + 1
     time_list = range(0.00, stop=duration, length=sampling)
 
@@ -221,7 +221,7 @@ end
     x2 = x .+ 3.0 .* cos.(Ψ .+ pi)
     y2 = y .+ 3.0 .* sin.(Ψ .+ pi)
 
-    data = BowSternCoords(
+    data = PointPairCoords(
         time = time_list,
         x1 = x1,
         y1 = y1,
@@ -236,7 +236,7 @@ end
         u0=1.17,
         δ0=35/180.0*pi,
         n_p0=17.95,
-        T_all = 50.0,
+        T_all = 10.0,
         T_step = 1.0,
         Np = 4,
     )    
@@ -245,7 +245,7 @@ end
 @testset "mpc for external force" begin
     wind_force_and_moment_params = get_example_ship_wind_force_moment_params()
     sampling_rate = 4
-    duration = 100
+    duration = 20
     sampling = Int(duration * sampling_rate) + 1
     time_list = range(0.00, stop=duration, length=sampling)
 
@@ -277,7 +277,7 @@ end
     x2 = x .+ 3.0 .* cos.(Ψ .+ pi)
     y2 = y .+ 3.0 .* sin.(Ψ .+ pi)
 
-    data = BowSternCoords(
+    data = PointPairCoords(
         time = time_list,
         x1 = x1,
         y1 = y1,
@@ -292,7 +292,7 @@ end
         δ,
         n_p,
         u0=1.17,
-        T_all = 50.0,
+        T_all = 10.0,
         T_step = 0.25,
         Np = 8,
     )

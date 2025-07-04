@@ -1439,7 +1439,7 @@ end
 function mpc_for_maneuvering_variables(
     basic_params::Mmg3DofBasicParams,
     maneuvering_params::Mmg3DofManeuveringParams,
-    ref_data::BowSternCoords;
+    ref_data::PointPairCoords;
     u0=0.0,
     v0=0.0,
     r0=0.0,
@@ -1680,7 +1680,7 @@ function mpc_for_maneuvering_variables(
     
     results_list = []
 
-    @showprogress for k in 1:total_steps
+    for k in 1:total_steps
         model = Model(Ipopt.Optimizer)
         set_silent(model)
         register(model, :discrete_u, 8, discrete_u; autodiff = true)
@@ -1764,7 +1764,7 @@ end
 function mpc_for_external_force(
     basic_params::Mmg3DofBasicParams,
     maneuvering_params::Mmg3DofManeuveringParams,
-    ref_data::BowSternCoords,
+    ref_data::PointPairCoords,
     δ_ref::Vector{Float64},
     n_p_ref::Vector{Float64};
     u0=0.0,
@@ -2008,7 +2008,7 @@ function mpc_for_external_force(
 
     results_list = []
 
-    @showprogress for k in 1:total_steps
+    for k in 1:total_steps
         model = Model(Ipopt.Optimizer)
         set_silent(model)
         register(model, :discrete_u, 11, discrete_u; autodiff = true)

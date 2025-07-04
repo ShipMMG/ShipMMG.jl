@@ -10,13 +10,12 @@ using ForwardDiff
 using LinearAlgebra
 using JuMP
 using Ipopt
-using ProgressMeter
 
 include("data.jl")
 export calc_position,
     ShipData,
     EnvironmentData,
-    BowSternCoords,
+    PointPairCoords,
     get_KVLCC2_L7_basic_params,
     get_KVLCC2_L7_maneuvering_params,
     get_KVLCC2_L7_params,

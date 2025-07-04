@@ -472,6 +472,7 @@ function mmg_3dof_simulate(
         y0=y0,
         Ψ0=Ψ0,
         ρ=ρ,
+        ρ_air=1.225,
         algorithm=algorithm,
         reltol=reltol,
         abstol=abstol,
@@ -614,6 +615,7 @@ function simulate(
     y0=0.0,
     Ψ0=0.0,
     ρ=1025.0,
+    ρ_air = 1.225,
     algorithm=Tsit5(),
     reltol=1e-8,
     abstol=1e-8,
@@ -694,7 +696,6 @@ function simulate(
     δ = results[7, :]
     n_p = results[8, :]
     
-    ρ_air = 1.225
     n_data = length(time_list)
     X_wind_list = zeros(n_data)
     Y_wind_list = zeros(n_data)

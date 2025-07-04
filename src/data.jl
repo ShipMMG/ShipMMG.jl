@@ -16,7 +16,7 @@ end
     ψ_W::Tψ_W
 end
 
-@with_kw struct BowSternCoords{Tt,Tx1,Ty1,Tx2,Ty2}
+@with_kw struct PointPairCoords{Tt,Tx1,Ty1,Tx2,Ty2}
     time::Tt
     x1::Tx1
     y1::Ty1 
