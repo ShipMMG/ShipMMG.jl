@@ -5,15 +5,11 @@
     Ψ_A  is the wind coming from the direction of the bow of the ship, with 0 degrees measured clockwise.
 """
 function apparent_wind_speed_and_angle(U_W, Ψ_W, u, v, Ψ)
-    
-    u_A = -U_W * cos(Ψ_W) - u * cos(Ψ) + v * sin(Ψ)
-    v_A = -U_W * sin(Ψ_W) - u * sin(Ψ) - v * cos(Ψ)
-
+    u_A = u + U_W*cos(Ψ_W-Ψ)
+    v_A = v + U_W*sin(Ψ_W-Ψ)
     U_A = sqrt(u_A^2 + v_A^2)
-
-    Ψ_A = π + atan(v_A, u_A) - Ψ_W
-    Ψ_A = (Ψ_A < 0 ? Ψ_A + 2π : Ψ_A) % (2π)
-    
+    Ψ_A = -atan(v_A, u_A)
+    Ψ_A = mod(Ψ_A, 2 * π)
     return U_A, Ψ_A
 end
 
@@ -476,6 +472,7 @@ function mmg_3dof_simulate(
         y0=y0,
         Ψ0=Ψ0,
         ρ=ρ,
+        ρ_air=1.225,
         algorithm=algorithm,
         reltol=reltol,
         abstol=abstol,
@@ -618,6 +615,7 @@ function simulate(
     y0=0.0,
     Ψ0=0.0,
     ρ=1025.0,
+    ρ_air = 1.225,
     algorithm=Tsit5(),
     reltol=1e-8,
     abstol=1e-8,
@@ -697,7 +695,25 @@ function simulate(
     Ψ = results[6, :]
     δ = results[7, :]
     n_p = results[8, :]
-    u, v, r, x, y, Ψ, δ, n_p
+    
+    n_data = length(time_list)
+    X_wind_list = zeros(n_data)
+    Y_wind_list = zeros(n_data)
+    N_wind_list = zeros(n_data)
+
+    for i in 1:n_data
+        U_A, Ψ_A = apparent_wind_speed_and_angle(
+            U_W_list[i],
+            Ψ_W_list[i],
+            u[i],
+            v[i],
+            Ψ[i],
+        )
+        X_wind_list[i] = ρ_air * A_F * spl_C_X(Ψ_A) / 2 * U_A^2
+        Y_wind_list[i] = ρ_air * A_L * spl_C_Y(Ψ_A) / 2 * U_A^2
+        N_wind_list[i] = ρ_air * A_L * L_pp * spl_C_N(Ψ_A) / 2 * U_A^2
+    end
+    u, v, r, x, y, Ψ, δ, n_p, X_wind_list, Y_wind_list, N_wind_list
 end
 
 """

@@ -16,6 +16,14 @@ end
     ψ_W::Tψ_W
 end
 
+@with_kw struct PointPairCoords{Tt,Tx1,Ty1,Tx2,Ty2}
+    time::Tt
+    x1::Tx1
+    y1::Ty1 
+    x2::Tx2 
+    y2::Ty2  
+end
+
 function get_KVLCC2_L7_basic_params(ρ=1025.0)
     L_pp = 7.00  # 船長Lpp[m]
     B = 1.27  # 船幅[m]
@@ -186,6 +194,10 @@ function wind_force_and_moment_coefficients(
         C_ALF = -0.585 - 0.906 * A_OD / A_L + 3.239 * B / L_pp
         C_YLI = pi * A_L / L_pp^2 + 0.116 + 3.345 * A_F / (L_pp * B)
 
+        C_X = C_LF * cos(ψ_A) + C_XLI * (sin(ψ_A) - sin(ψ_A) * cos(ψ_A)^2 / 2) * sin(ψ_A) * cos(ψ_A) + C_ALF * sin(ψ_A) * cos(ψ_A)^3
+        C_Y = C_CF * sin(ψ_A)^2 + C_YLI * (cos(ψ_A) + sin(ψ_A)^2 * cos(ψ_A) / 2) * sin(ψ_A) * cos(ψ_A)
+        C_N = C_Y * (0.297 * C / L_pp - 0.149 * (ψ_A - deg2rad(90)))
+
     elseif deg2rad(90) < ψ_A <= deg2rad(180)
         C_LF =
             0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp - 3.011 * A_OD / L_pp^2 -
@@ -196,6 +208,10 @@ function wind_force_and_moment_coefficients(
         C_ALF = -0.314 - 1.117 * A_OD / A_L
         C_YLI = pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp^2
 
+        C_X = C_LF * cos(ψ_A) + C_XLI * (sin(ψ_A) - sin(ψ_A) * cos(ψ_A)^2 / 2) * sin(ψ_A) * cos(ψ_A) + C_ALF * sin(ψ_A) * cos(ψ_A)^3
+        C_Y = C_CF * sin(ψ_A)^2 + C_YLI * (cos(ψ_A) + sin(ψ_A)^2 * cos(ψ_A) / 2) * sin(ψ_A) * cos(ψ_A)
+        C_N = C_Y * (0.297 * C / L_pp - 0.149 * (ψ_A - deg2rad(90)))
+
     elseif deg2rad(180) < ψ_A <= deg2rad(270)
         C_LF =
             0.018 - 5.091 * B / L_pp + 10.367 * H_C / L_pp - 3.011 * A_OD / L_pp^2 -
@@ -203,25 +219,25 @@ function wind_force_and_moment_coefficients(
         C_XLI =
             -1.901 + 12.727 * A_L / (L_pp * H_BR) + 24.407 * A_F / A_L -
             40.310 * B / L_pp - 0.341 * A_F / (B * H_BR)
-        C_ALF = -(-0.314 - 1.117 * A_OD / A_L)
-        C_YLI = -(pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp^2)
-
+        C_ALF = -0.314 - 1.117 * A_OD / A_L
+        C_YLI = pi * A_L / L_pp^2 + 0.446 + 2.192 * A_F / L_pp^2
+        ψ_A = 2*pi - ψ_A
+        C_X = (C_LF * cos(ψ_A) + C_XLI * (sin(ψ_A) - sin(ψ_A) * cos(ψ_A)^2 / 2) * sin(ψ_A) * cos(ψ_A) + C_ALF * sin(ψ_A) * cos(ψ_A)^3)
+        C_Y = -(C_CF * sin(ψ_A)^2 + C_YLI * (cos(ψ_A) + sin(ψ_A)^2 * cos(ψ_A) / 2) * sin(ψ_A) * cos(ψ_A))
+        C_N = (C_Y * (0.297 * C / L_pp - 0.149 * (ψ_A - deg2rad(90))))
+    
     elseif deg2rad(270) < ψ_A <= deg2rad(360)
         C_LF = -0.992 + 0.507 * A_L / (L_pp * B) + 1.162 * C / L_pp
         C_XLI = 0.458 + 3.245 * A_L / (L_pp * H_BR) - 2.313 * A_F / (B * H_BR)
-        C_ALF = -(-0.585 - 0.906 * A_OD / A_L + 3.239 * B / L_pp)
-        C_YLI = -(pi * A_L / L_pp^2 + 0.116 + 3.345 * A_F / (L_pp * B))
+        C_ALF = -0.585 - 0.906 * A_OD / A_L + 3.239 * B / L_pp
+        C_YLI = pi * A_L / L_pp^2 + 0.116 + 3.345 * A_F / (L_pp * B)
+
+        ψ_A = 2*pi - ψ_A
+        C_X = (C_LF * cos(ψ_A) + C_XLI * (sin(ψ_A) - sin(ψ_A) * cos(ψ_A)^2 / 2) * sin(ψ_A) * cos(ψ_A) + C_ALF * sin(ψ_A) * cos(ψ_A)^3)
+        C_Y = -(C_CF * sin(ψ_A)^2 + C_YLI * (cos(ψ_A) + sin(ψ_A)^2 * cos(ψ_A) / 2) * sin(ψ_A) * cos(ψ_A))
+        C_N = (C_Y * (0.297 * C / L_pp - 0.149 * (ψ_A - deg2rad(90))))
     end
-
-    C_X =
-        C_LF * cos(ψ_A) +
-        C_XLI * (sin(ψ_A) - sin(ψ_A) * cos(ψ_A)^2 / 2) * sin(ψ_A) * cos(ψ_A) +
-        C_ALF * sin(ψ_A) * cos(ψ_A)^3
-    C_Y =
-        C_CF * sin(ψ_A)^2 +
-        C_YLI * (cos(ψ_A) + sin(ψ_A)^2 * cos(ψ_A) / 2) * sin(ψ_A) * cos(ψ_A)
-    C_N = C_Y * (0.297 * C / L_pp - 0.149 * (ψ_A - deg2rad(90)))
-
+    
     C_X, C_Y, C_N
 end
 

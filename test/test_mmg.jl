@@ -195,3 +195,105 @@ end
     )
     chain = nuts_sampling_single_thread(model, n_samples, n_chains)
 end
+
+@testset "mpc for maneuvering variables" begin
+    sampling_rate = 1
+    duration = 20
+    sampling = Int(duration * sampling_rate) + 1
+    time_list = range(0.00, stop=duration, length=sampling)
+
+    δ_list = 35 ./ 180.0 .* pi .* ones(Float64, sampling)
+    n_p_list = 17.95 .* ones(Float64, sampling)
+
+    mmg_results = mmg_3dof_simulate(
+        basic_params,
+        maneuvering_params,
+        time_list,
+        δ_list,
+        n_p_list,
+        u0=1.17,
+        v0=0.0,
+        r0=0.0,
+    )
+    u, v, r, x, y, Ψ, δ, n_p = mmg_results
+    x1 = x .+ 3.0 .* cos.(Ψ)
+    y1 = y .+ 3.0 .* sin.(Ψ)
+    x2 = x .+ 3.0 .* cos.(Ψ .+ pi)
+    y2 = y .+ 3.0 .* sin.(Ψ .+ pi)
+
+    data = PointPairCoords(
+        time = time_list,
+        x1 = x1,
+        y1 = y1,
+        x2 = x2,
+        y2 = y2,
+    )
+
+    t, u, v, r, x, y, Ψ, x1, y1, x2, y2, δ, n_p = mpc_for_maneuvering_variables(
+        basic_params,
+        maneuvering_params,
+        data,
+        u0=1.17,
+        δ0=35/180.0*pi,
+        n_p0=17.95,
+        T_all = 10.0,
+        T_step = 1.0,
+        Np = 4,
+    )    
+end
+
+@testset "mpc for external force" begin
+    wind_force_and_moment_params = get_example_ship_wind_force_moment_params()
+    sampling_rate = 4
+    duration = 20
+    sampling = Int(duration * sampling_rate) + 1
+    time_list = range(0.00, stop=duration, length=sampling)
+
+    δ_list = 35 ./ 180.0 .* pi .* ones(Float64, sampling)
+    n_p_list = 17.95 .* ones(Float64, sampling)
+    μ_U_W = 5.0
+    μ_ψ_W = 1.0 * pi
+    σ_U_W = 0.0
+    σ_ψ_W = 0.0
+    U_W_list = rand(Normal(μ_U_W, σ_U_W), length(time_list))
+    ψ_W_list = rand(Normal(μ_ψ_W, σ_ψ_W), length(time_list))
+
+    mmg_results = mmg_3dof_simulate(
+        basic_params,
+        maneuvering_params,
+        wind_force_and_moment_params,
+        time_list,
+        δ_list,
+        n_p_list,
+        U_W_list,
+        ψ_W_list,
+        u0=1.17,
+        v0=0.0,
+        r0=0.0,
+    )
+    u, v, r, x, y, Ψ, δ, n_p, X_wind, Y_wind, N_wind = mmg_results
+    x1 = x .+ 3.0 .* cos.(Ψ)
+    y1 = y .+ 3.0 .* sin.(Ψ)
+    x2 = x .+ 3.0 .* cos.(Ψ .+ pi)
+    y2 = y .+ 3.0 .* sin.(Ψ .+ pi)
+
+    data = PointPairCoords(
+        time = time_list,
+        x1 = x1,
+        y1 = y1,
+        x2 = x2,
+        y2 = y2,
+    )
+
+    t, u, v, r, x, y, Ψ, x1, y1, x2, y2, δ, n_p, X_F, Y_F, N_F= mpc_for_external_force(
+        basic_params,
+        maneuvering_params,
+        data,
+        δ,
+        n_p,
+        u0=1.17,
+        T_all = 10.0,
+        T_step = 0.25,
+        Np = 8,
+    )
+end
